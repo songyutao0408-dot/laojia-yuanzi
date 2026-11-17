@@ -30,8 +30,8 @@
 - `npm run build` → `dist/`（base = `/laojia-yuanzi/`，用于 GitHub Pages）
 - `npm run build:single` → `dist-single/index.html`（vite-plugin-singlefile，所有资源内联，可双击打开）
 - `npm run plan` → 重新生成 `docs/plan.svg`
-- `npm run build && npm run shots` → Playwright 无头浏览器截 俯视/环绕/门口 三张图到 `screenshots/`（已 gitignore），并检查黑屏和页面报错。Playwright 用本机全局安装的版本，不在 package.json 里
-- 页面支持 `?view=top|orbit|walk` 直接打开指定视角；`window.__app` 暴露 engine / views 方便调试
+- `npm run build && npm run shots` → Playwright 无头浏览器截图到 `screenshots/`（已 gitignore），并检查黑屏和页面报错。机位列表在 `scripts/screenshot.mjs` 的 `SHOTS`（俯视、环绕、门口、北屋两间室内、厨房室内、院内看大门、台阶看院子）。Playwright 用本机全局安装的版本，不在 package.json 里
+- 页面支持 `?view=top|orbit|walk` 直接打开指定视角，`&cam=x,y,z,tx,ty,tz` 指定相机位置/注视点；`window.__app` 暴露 engine / views 方便调试
 - 部署：`.github/workflows/deploy.yml`，push 到 `main` 自动构建并发布到 GitHub Pages
   （线上地址：https://songyutao0408-dot.github.io/laojia-yuanzi/ ）
 
@@ -45,9 +45,11 @@ src/
   layout.js             ★ 唯一的尺寸/位置数据源（纯数据，不 import three）
   core/engine.js        渲染器、场景、相机、主循环（onUpdate 注册每帧回调；setRenderFn 留给后期）
   core/geom.js          矩形小工具
+  core/whitebox.js      白模纯色材质（按材质类别分色）+ box() 盒子工具；第 3 步逐类替换为 PBR
   textures/             canvas 程序生成的 PBR 贴图（颜色/法线/粗糙度）
   ground/               黄土地面、院外地面、红砖小路
   buildings/            北屋、厨房、土墙、大门、影背墙、茅厕（一个建筑一个文件）
+    wall.js             通用构件：wallWithOpenings（带门窗洞的厚墙）、brickBox（四墙+地坪+平顶+檐口）
   trees/                梧桐、石榴、枣树（一种树一个文件）
   well/                 压水井（建模 + 压水交互）
   garden/               菜地（菜畦、竹竿架、黄瓜豆角）
@@ -55,7 +57,6 @@ src/
   controls/             俯视/环绕/走进去 三种浏览模式、碰撞、手机摇杆
   interiors/            室内细节（以后补），见 interiors/README.md
   ui/                   样式、HUD（时间滑块、指北针等）
-  debug/footprints.js   第 1 步临时用的占地色块，第 2 步白模完成后删除
 scripts/
   gen-plan.mjs          由 layout.js 生成 docs/plan.svg
   screenshot.mjs        自检截图
@@ -63,6 +64,13 @@ docs/
   scene-spec.md         场景权威描述
   plan.svg              俯视平面图
 ```
+
+## 实现约定
+
+- **碰撞**：参与第一人称碰撞的 Mesh 设 `userData.solid = true`（墙、树干、泵身、玻璃等；地坪、台阶、屋顶为 false）。第 6 步从场景里收集这些 Mesh 生成碰撞体
+- **室内锚点**：北屋每间、厨房各有一个 `interior-anchor-<west|east|kitchen>` 节点，位于室内西北角墙内侧、地坪面，`userData.size = { w, d, h }` 为室内净空
+- 北屋室内地坪 0.45 m，门洞底 = 地坪；台阶 3 级在门外
+- 白模阶段树冠是半透明椭球体积，仅用于核对比例；第 4 步必须换成枝叶（不能用球体当树冠）
 
 ## 工作流程（用户要求）
 
@@ -72,7 +80,7 @@ docs/
 ## 进度
 
 - [x] **第 1 步**：项目骨架、CLAUDE.md、docs/scene-spec.md、GitHub Pages 部署、俯视平面图 `docs/plan.svg`（v4：按父亲确认的 15 m × 18 m 重新布局，门窗/茅厕已核对）
-- [ ] **第 2 步**：纯色方块白模（北屋、厨房含真实室内空间和门洞；各树的比例、间距）
+- [x] **第 2 步**：纯色方块白模（北屋、厨房含真实室内空间和门洞；各树的比例、间距）
 - [ ] **第 3 步**：材质与建筑细节（红砖、土墙、门窗、台阶、灶台、影背墙瓷砖画、铁门）
 - [ ] **第 4 步**：植物（梧桐、石榴、枣树、菜地）和压水井
 - [ ] **第 5 步**：光影、Sky 天空、GTAO/SSAO、时间切换、星空、炊烟、雾
@@ -87,4 +95,4 @@ docs/
 
 另已确认（v3）：西北屋窗只在门西侧、东北屋窗只在门东侧；空当西端有土墙；影背墙距大门三四米；茅厕东西约 2 m。
 
-另已确认（v4）：大门无红砖门垛；菜地种丝瓜、豆角。目前 spec 中没有待确认项。
+另已确认（v4）：大门无红砖门垛；菜地种丝瓜、豆角。目前 spec 中的待确认项：北屋两间之间的隔墙上有没有门（白模暂按无门）。
