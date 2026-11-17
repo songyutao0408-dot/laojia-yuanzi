@@ -15,12 +15,12 @@ export function createViewModes(camera, domElement) {
     top() {
       // 正上方俯视：屏幕上方 = 北（-Z）
       camera.up.set(0, 0, -1);
-      camera.position.set(0, 24, 0.001);
+      camera.position.set(0, 30, 0.001);
       orbit.target.set(0, 0, 0);
       orbit.enableRotate = false;
       orbit.screenSpacePanning = true;
       orbit.minDistance = 4;
-      orbit.maxDistance = 45;
+      orbit.maxDistance = 60;
     },
     orbit() {
       camera.up.set(0, 1, 0);

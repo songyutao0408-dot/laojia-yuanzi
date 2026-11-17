@@ -10,11 +10,11 @@ export function createLighting(scene) {
 
   const sun = new THREE.DirectionalLight(0xffd9a8, 2.4);
   // 傍晚西南方斜阳（+X 东、-Z 北，所以西南 = (-x, +z)）
-  sun.position.set(-14, 9, 8);
+  sun.position.set(-18, 11, 10);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   const s = sun.shadow.camera;
-  s.left = -12; s.right = 12; s.top = 12; s.bottom = -12; s.near = 1; s.far = 60;
+  s.left = -15; s.right = 15; s.top = 15; s.bottom = -15; s.near = 1; s.far = 60;
   sun.shadow.bias = -0.0005;
   scene.add(sun);
   return { hemi, sun };

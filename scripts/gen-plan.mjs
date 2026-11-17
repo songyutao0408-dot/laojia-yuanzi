@@ -39,9 +39,9 @@ const C = {
 rect(L.LOT, `fill="${C.ground}" stroke="${C.ink}" stroke-width="1"`);
 
 // 1 m 网格
-for (let x = L.LOT.x0; x <= L.LOT.x1; x++)
+for (let x = Math.ceil(L.LOT.x0); x <= L.LOT.x1; x++)
   line(x, L.LOT.z0, x, L.LOT.z1, `stroke="#000" stroke-opacity="${x === 0 ? 0.35 : 0.08}" stroke-width="${x === 0 ? 1.2 : 1}"`);
-for (let z = L.LOT.z0; z <= L.LOT.z1; z++)
+for (let z = Math.ceil(L.LOT.z0); z <= L.LOT.z1; z++)
   line(L.LOT.x0, z, L.LOT.x1, z, `stroke="#000" stroke-opacity="${z === 0 ? 0.35 : 0.08}" stroke-width="${z === 0 ? 1.2 : 1}"`);
 
 // 红砖小路
@@ -117,7 +117,7 @@ for (const room of NH.rooms) {
     { side: 's', kind: 'door', a: room.door.x - room.door.width / 2, b: room.door.x + room.door.width / 2 },
     ...room.windows.map((w) => ({ side: 's', kind: 'window', a: w.x - w.width / 2, b: w.x + w.width / 2 })),
   ];
-  brickBox(r, NH.wall, ops, room.name, `室内 ${(room.x1 - room.x0 - NH.wall).toFixed(1)}×${(NH.rect.z1 - NH.rect.z0 - 2 * NH.wall).toFixed(1)} m · 高 ${NH.height} m`);
+  brickBox(r, NH.wall, ops, room.name, `室内 ${(room.x1 - room.x0 - 1.5 * NH.wall).toFixed(1)}×${(NH.rect.z1 - NH.rect.z0 - 2 * NH.wall).toFixed(1)} m · 高 ${NH.height} m`);
   // 台阶
   const st = NH.steps;
   for (let i = 0; i < st.count; i++) {
@@ -145,6 +145,13 @@ text((K.stove.x0 + K.stove.x1) / 2, K.stove.z1 + 0.35, '灶台', 'class="s" text
 const ch = K.chimney;
 rect({ x0: ch.x - ch.size / 2, x1: ch.x + ch.size / 2, z0: ch.z - ch.size / 2, z1: ch.z + ch.size / 2 }, `fill="none" stroke="#111" stroke-width="2" stroke-dasharray="4 2"`);
 text(ch.x + 0.4, ch.z - 0.35, '烟囱', 'class="s"');
+
+// 厨房与西北屋之间的空当
+{
+  const g = L.KITCHEN_GAP;
+  rect(g, `fill="none" stroke="#7a5a3a" stroke-width="1" stroke-dasharray="3 3"`);
+  text((g.x0 + g.x1) / 2, (g.z0 + g.z1) / 2 + 0.1, `空当 约 ${(g.z1 - g.z0).toFixed(0)} m`, 'class="s" text-anchor="middle"');
+}
 
 const T = L.TOILET;
 brickBox(T.rect, T.wall, [{ side: 'w', kind: 'gap', a: T.door.z - T.door.width / 2, b: T.door.z + T.door.width / 2 }], T.name, `无顶 · 墙高 ${T.height} m`);
@@ -216,8 +223,8 @@ out.push(`<line x1="${dimX}" y1="${Y(L.LOT.z0)}" x2="${dimX}" y2="${Y(L.LOT.z1)}
 out.push(`<text x="${dimX + 8}" y="${Y(0)}" class="s" transform="rotate(90 ${dimX + 8} ${Y(0)})" text-anchor="middle">南北 ${L.LOT.z1 - L.LOT.z0} m（含北屋）</text>`);
 
 // 坐标轴刻度
-for (let x = L.LOT.x0; x <= L.LOT.x1; x++) out.push(`<text x="${X(x)}" y="${Y(L.LOT.z1) + 14}" class="xs" text-anchor="middle">${x}</text>`);
-for (let z = L.LOT.z0; z <= L.LOT.z1; z++) out.push(`<text x="${X(L.LOT.x0) - 6}" y="${Y(z) + 3}" class="xs" text-anchor="end">${z}</text>`);
+for (let x = Math.ceil(L.LOT.x0); x <= L.LOT.x1; x++) out.push(`<text x="${X(x)}" y="${Y(L.LOT.z1) + 14}" class="xs" text-anchor="middle">${x}</text>`);
+for (let z = Math.ceil(L.LOT.z0); z <= L.LOT.z1; z++) out.push(`<text x="${X(L.LOT.x0) - 6}" y="${Y(z) + 3}" class="xs" text-anchor="end">${z}</text>`);
 
 // 指北针
 {
