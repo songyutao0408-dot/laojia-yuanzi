@@ -239,7 +239,7 @@ export function tileMural({ cols = 11, rows = 8 } = {}) {
         const v = 0.96 + hash(tx, ty, 9) * 0.08;
         d[i] = Math.min(255, d[i] * v); d[i + 1] = Math.min(255, d[i + 1] * v); d[i + 2] = Math.min(255, d[i + 2] * v);
         hv = 0.6 + Math.min(1, (e - grout / 2) / (4 * k)) * 0.3;
-        rv = 0.12 + hash(tx, ty, 3) * 0.06;
+        rv = 0.42 + hash(tx, ty, 3) * 0.08;
       }
       hi.data[i] = hi.data[i + 1] = hi.data[i + 2] = hv * 255; hi.data[i + 3] = 255;
       ri.data[i] = ri.data[i + 1] = ri.data[i + 2] = rv * 255; ri.data[i + 3] = 255;

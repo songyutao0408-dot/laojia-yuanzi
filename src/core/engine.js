@@ -1,12 +1,15 @@
 import * as THREE from 'three';
+import { QUALITY_SETTINGS } from './quality.js';
 
 /**
  * 渲染器 / 场景 / 相机 / 主循环。
- * 其他模块通过 engine.onUpdate(fn) 注册每帧回调：fn(dt, elapsed)
+ * 其他模块通过 engine.onUpdate(fn) 注册每帧回调：fn(dt, elapsed)；onResize(fn) 注册尺寸变化回调：fn(w, h)
+ * 后期处理（GTAO）接入后用 setRenderFn 替换默认渲染函数。
  */
-export function createEngine(container) {
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+export function createEngine(container, quality = 'high') {
+  const qs = QUALITY_SETTINGS[quality];
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, qs.maxPixelRatio));
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -16,11 +19,10 @@ export function createEngine(container) {
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xcfd9e0);
-
   const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.05, 500);
 
   const updaters = [];
+  const resizers = [];
   const clock = new THREE.Clock();
   let frames = 0;
 
@@ -30,6 +32,7 @@ export function createEngine(container) {
     renderer.setSize(w, h);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    for (const fn of resizers) fn(w, h);
   }
   window.addEventListener('resize', resize);
 
@@ -49,8 +52,11 @@ export function createEngine(container) {
     renderer,
     scene,
     camera,
+    quality,
     onUpdate: (fn) => updaters.push(fn),
-    /** 第 5 步接入后期（SSAO/GTAO）时替换默认渲染函数 */
+    onResize: (fn) => resizers.push(fn),
     setRenderFn: (fn) => (render = fn),
+    /** 立刻渲染一帧（截图自检读像素用） */
+    renderNow: () => render(),
   };
 }
