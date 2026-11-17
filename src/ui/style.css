@@ -1,0 +1,11 @@
+html, body { margin: 0; height: 100%; overflow: hidden; background: #d9c8a4; font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif; }
+#app { position: fixed; inset: 0; }
+#app canvas { display: block; touch-action: none; }
+#hud { position: fixed; top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; pointer-events: none; }
+#hud > * { pointer-events: auto; }
+#title { color: #3a2a18; font-size: 15px; font-weight: 600; background: rgba(255, 248, 235, 0.8); padding: 6px 10px; border-radius: 6px; }
+#stage { font-weight: 400; font-size: 12px; color: #7a5a3a; margin-left: 6px; }
+#view-buttons { display: flex; gap: 6px; }
+#view-buttons button { font: inherit; font-size: 14px; padding: 6px 14px; border: 1px solid #8a6a4a; border-radius: 6px; background: rgba(255, 248, 235, 0.85); color: #3a2a18; cursor: pointer; }
+#view-buttons button.active { background: #8a3b26; color: #fff; border-color: #8a3b26; }
+#view-buttons button:disabled { opacity: 0.45; cursor: not-allowed; }
