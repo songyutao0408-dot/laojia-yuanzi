@@ -171,10 +171,10 @@
 <circle cx="585" cy="495" r="4" fill="#5a3e22"/>
 <text x="585" y="485" class="b" text-anchor="middle" fill="#a33a2a">石榴</text>
 <text x="585" y="505" class="s" text-anchor="middle">高 3 m</text>
-<circle cx="705" cy="810" r="100" fill="#7b6a2a" fill-opacity="0.12" stroke="#7b6a2a" stroke-width="1.5" stroke-dasharray="6 4"/>
-<circle cx="705" cy="810" r="6" fill="#5a3e22"/>
+<circle cx="705" cy="810" r="150" fill="#7b6a2a" fill-opacity="0.12" stroke="#7b6a2a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<circle cx="705" cy="810" r="8.5" fill="#5a3e22"/>
 <text x="705" y="837.5" class="b" text-anchor="middle" fill="#7b6a2a">枣树</text>
-<text x="705" y="857.5" class="s" text-anchor="middle">高 4.6 m</text>
+<text x="705" y="857.5" class="s" text-anchor="middle">高 5.8 m</text>
 <circle cx="170" cy="905" r="5" fill="#d23"/>
 <path d="M170,905 L210,905" stroke="#d23" stroke-width="2" marker-end="url(#arrR)"/>
 <text x="175" y="892.5" class="s" fill="#d23">起点</text>

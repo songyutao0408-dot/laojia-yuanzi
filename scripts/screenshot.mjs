@@ -39,6 +39,7 @@ const SHOTS = [
   ['north-door', 'view=orbit&cam=-3.5,1.3,-0.9,-4.7,1.6,-4'],
   ['well-pomegranate', 'view=orbit&cam=3.2,1.3,0.6,1.6,0.9,-1.1'],
   ['jujube-garden', 'view=orbit&cam=1.2,1.4,6.8,5,1.6,1.5'],
+  ['jujube', 'view=orbit&cam=-0.2,1.5,2.2,4,2.4,4.8'],
   ['paulownia-under', 'view=orbit&cam=-0.5,1.2,2.5,-2.9,5.5,-1.4'],
   ['gate-from-yard', 'view=orbit&cam=-2.5,1.6,2.5,-7.3,1,6.5'],
   ['yard-from-steps', 'view=orbit&cam=0.5,1.8,-3.3,1,1.2,4'],

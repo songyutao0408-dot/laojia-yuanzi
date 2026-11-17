@@ -28,11 +28,19 @@ export function growSkeleton(p, seed) {
     const pts = [start.clone()];
     const d = dir.clone();
     const bend = level === 0 ? p.trunk.bend ?? 0.08 : p.levels[level - 1].bend ?? 0.25;
+    // 主干弯曲：trunk.wiggle > 0 时沿一个水平方向做 S 形弯（老树主干不直溜）
+    const wiggle = level === 0 ? p.trunk.wiggle ?? 0 : 0;
+    const wAxis = new THREE.Vector3(Math.cos(seed * 1.3), 0, Math.sin(seed * 1.3));
+    const wAxis2 = new THREE.Vector3(-wAxis.z, 0, wAxis.x);
     const droop = level === 0 ? 0 : p.levels[level - 1].droop ?? 0;
     for (let i = 1; i <= n; i++) {
       d.x += rand(-bend, bend);
       d.z += rand(-bend, bend);
       d.y += rand(-bend, bend) * 0.5 - droop / n;
+      if (wiggle) {
+        d.addScaledVector(wAxis, wiggle * Math.cos((i / n) * Math.PI * 1.6));
+        d.addScaledVector(wAxis2, wiggle * 0.5 * Math.sin((i / n) * Math.PI * 2.2));
+      }
       d.normalize();
       pts.push(pts[i - 1].clone().addScaledVector(d, length / n));
     }
@@ -62,6 +70,11 @@ export function growSkeleton(p, seed) {
       const cd = parentDir.clone().multiplyScalar(Math.cos(ang)).addScaledVector(perp, Math.sin(ang));
       cd.y += L.upBias ?? 0;
       cd.normalize();
+      // 不让粗枝朝下长（主干弯的时候容易出现）
+      if (L.minY != null && cd.y < L.minY) {
+        cd.y = L.minY;
+        cd.normalize();
+      }
       const rr = radius + (r1 - radius) * t;
       branch(pos, cd, length * L.lengthK * rand(0.8, 1.15), rr * L.radiusK, level + 1, L.endRadiusK ?? 0.5);
     }
