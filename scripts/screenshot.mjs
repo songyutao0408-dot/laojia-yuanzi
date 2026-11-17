@@ -35,12 +35,15 @@ const SHOTS = [
   ['inside-northwest', 'view=orbit&cam=-0.5,2.2,-4.45,-6,0.6,-8.5'],
   ['inside-northeast', 'view=orbit&cam=7.1,2.2,-4.45,1,0.6,-8.5'],
   ['inside-kitchen', 'view=orbit&cam=-4.9,1.7,2.6,-7,0.5,-1.6'],
+  ['north-door', 'view=orbit&cam=-3.5,1.3,-0.9,-4.7,1.6,-4'],
   ['gate-from-yard', 'view=orbit&cam=-2.5,1.6,2.5,-7.3,1,6.5'],
   ['yard-from-steps', 'view=orbit&cam=0.5,1.8,-3.3,1,1.2,4'],
 ];
-for (const [view, query] of SHOTS) {
+// 可只截部分：npm run shots -- walk orbit
+const only = process.argv.slice(2);
+for (const [view, query] of SHOTS.filter(([n]) => !only.length || only.includes(n))) {
   await page.goto(`${base}?${query}`);
-  await page.waitForFunction(() => window.__sceneReady === true, null, { timeout: 30000 }).catch((e) => {
+  await page.waitForFunction(() => window.__sceneReady === true, null, { timeout: 120000 }).catch((e) => {
     console.log(problems.join('\n'));
     throw e;
   });
@@ -61,7 +64,8 @@ for (const [view, query] of SHOTS) {
     for (let i = 0; i < d.length; i += 4) s += d[i] + d[i + 1] + d[i + 2];
     return s / (d.length / 4) / 3;
   });
-  console.log(`${file}  平均亮度 ${avg.toFixed(1)}${avg < 10 ? '  ⚠ 疑似黑屏' : ''}`);
+  const ms = await page.evaluate(() => window.__app.buildMs);
+  console.log(`${file}  平均亮度 ${avg.toFixed(1)}${avg < 10 ? '  ⚠ 疑似黑屏' : ''}  场景生成 ${ms} ms`);
 }
 
 await browser.close();

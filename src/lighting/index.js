@@ -14,7 +14,7 @@ export function createLighting(scene) {
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   const s = sun.shadow.camera;
-  s.left = -15; s.right = 15; s.top = 15; s.bottom = -15; s.near = 1; s.far = 60;
+  s.left = -18; s.right = 18; s.top = 18; s.bottom = -18; s.near = 1; s.far = 60;
   sun.shadow.bias = -0.0003;
   sun.shadow.normalBias = 0.03;
   scene.add(sun);

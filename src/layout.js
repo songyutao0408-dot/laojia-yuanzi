@@ -8,6 +8,7 @@
  *   +Y = 上，地面 y = 0
  *   原点 = 整个宅院（院墙围合范围）的中心
  *
+ * 院子地面是裸露的黄土，没有砖铺的路。
  * 矩形一律用 { x0, x1, z0, z1 } 表示（x0 < x1，z0 < z1，即 z0 是北边、z1 是南边）。
  * 这个文件只放纯数据，不 import three，因此 Node 脚本（scripts/gen-plan.mjs）也能直接读取。
  * 修改尺寸：先改 docs/scene-spec.md，再改这里，然后 `npm run plan` 重新生成平面图。
@@ -27,6 +28,7 @@ export const NORTH_HOUSE = {
   rect: { x0: -7.5, x1: 7.5, z0: -9, z1: -4 }, // 外轮廓，进深 5 m
   height: 3.5, // 地面到屋顶面
   parapet: 0.35, // 屋顶边沿砖砌檐口（女儿墙）高度
+  plinth: 0.35, // 外墙根一圈抹水泥的勒脚高度（约三四十厘米）
   wall: WALL.brick,
   floor: 0.45, // 室内地坪 = 3 级台阶 × 0.15
   partitionX: 0, // 两间之间的隔墙中心线
@@ -66,7 +68,7 @@ export const KITCHEN = {
   door: { z: -0.8, width: 0.9, height: 1.8 },
   windows: [{ z: 1.6, width: 0.8, height: 0.7, sill: 1.0 }],
   chimney: { x: -7.05, z: -1.55, size: 0.5, top: 3.4 }, // 西北角，烟囱顶高 3.4 m
-  stove: { x0: -7.26, x1: -6.1, z0: -1.76, z1: -0.6, height: 0.8 }, // 室内西北角灶台
+  stove: { x0: -7.26, x1: -6.0, z0: -1.76, z1: -0.3, height: 0.8, wokFromSouth: 0.58 }, // 室内西北角灶台；烟囱在灶后，锅在灶前
 };
 
 /** 厨房与西北屋之间的空当（露天，约 2 m 宽） */
@@ -115,8 +117,8 @@ export const TOILET = {
 
 /** 树：trunk 为树干中心，height 为总高，crown 为树冠半径（俯视） */
 export const TREES = [
-  { id: 'wutong-west', name: '梧桐（西）', kind: 'wutong', x: -2.9, z: -1.4, height: 4.6, crown: 3.2, trunkRadius: 0.22 },
-  { id: 'wutong-east', name: '梧桐（东）', kind: 'wutong', x: 4.3, z: -1.4, height: 4.6, crown: 3.2, trunkRadius: 0.22 },
+  { id: 'wutong-west', name: '梧桐（西）', kind: 'wutong', x: -2.9, z: -1.4, height: 10, crown: 5, trunkRadius: 0.3 },
+  { id: 'wutong-east', name: '梧桐（东）', kind: 'wutong', x: 4.3, z: -1.4, height: 10, crown: 5, trunkRadius: 0.3 },
   { id: 'pomegranate', name: '石榴', kind: 'pomegranate', x: 1.6, z: -1.7, height: 3.0, crown: 1.4, trunkRadius: 0.08 },
   { id: 'jujube', name: '枣树', kind: 'jujube', x: 4.0, z: 4.6, height: 4.6, crown: 2.0, trunkRadius: 0.12 },
 ];
@@ -143,32 +145,9 @@ export const GARDEN = {
   ],
 };
 
-/** 红砖小路：中心线折线 + 宽度 */
-export const BRICK_PATHS = [
-  {
-    id: 'main',
-    width: 0.8,
-    points: [
-      [-7.1, 6.5], // 大门内
-      [-4.4, 6.5], // 影背墙前左转
-      [-4.4, 3.8],
-      [0.0, 3.8],
-      [0.0, -2.9], // 到北屋台阶前
-    ],
-  },
-  {
-    id: 'steps',
-    width: 0.8,
-    points: [
-      [-3.75, -2.9],
-      [3.75, -2.9],
-    ],
-  },
-];
-
 /** 默认视角 */
 export const VIEWS = {
   eyeHeight: 1.2, // 七八岁小孩视线高度
   walkStart: { x: -6.7, z: 6.5, look: [1, 0] }, // 站在大门口；look 为水平朝向 [dx, dz]，[1,0] = 面朝东（影背墙）
-  orbitStart: { position: [14, 13, 17], target: [0, 0.5, 0] }, // 东南方斜上方
+  orbitStart: { position: [17, 15, 21], target: [0, 1.5, 0] }, // 东南方斜上方
 };
