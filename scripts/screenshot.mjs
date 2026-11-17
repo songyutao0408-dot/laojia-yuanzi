@@ -22,6 +22,7 @@ mkdirSync('screenshots', { recursive: true });
 
 const browser = await playwright.chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+page.setDefaultTimeout(180000);
 const problems = [];
 page.on('console', (m) => m.type() === 'error' && problems.push(`console: ${m.text()}`));
 page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
@@ -36,17 +37,28 @@ const SHOTS = [
   ['inside-northeast', 'view=orbit&cam=7.1,2.2,-4.45,1,0.6,-8.5'],
   ['inside-kitchen', 'view=orbit&cam=-4.9,1.7,2.6,-7,0.5,-1.6'],
   ['north-door', 'view=orbit&cam=-3.5,1.3,-0.9,-4.7,1.6,-4'],
+  ['well-pomegranate', 'view=orbit&cam=3.2,1.3,0.6,1.6,0.9,-1.1'],
+  ['jujube-garden', 'view=orbit&cam=1.2,1.4,6.8,5,1.6,1.5'],
+  ['jujube', 'view=orbit&cam=-0.2,1.5,2.2,4,2.4,4.8'],
+  ['paulownia-under', 'view=orbit&cam=-0.5,1.2,2.5,-2.9,5.5,-1.4'],
   ['gate-from-yard', 'view=orbit&cam=-2.5,1.6,2.5,-7.3,1,6.5'],
   ['yard-from-steps', 'view=orbit&cam=0.5,1.8,-3.3,1,1.2,4'],
 ];
 // 可只截部分：npm run shots -- walk orbit
 const only = process.argv.slice(2);
 for (const [view, query] of SHOTS.filter(([n]) => !only.length || only.includes(n))) {
-  await page.goto(`${base}?${query}`);
-  await page.waitForFunction(() => window.__sceneReady === true, null, { timeout: 120000 }).catch((e) => {
-    console.log(problems.join('\n'));
-    throw e;
-  });
+  // 无头浏览器用软件渲染，偶尔导航超时：失败就重试一次
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await page.goto(`${base}?${query}`, { waitUntil: 'commit', timeout: 120000 });
+      await page.waitForFunction(() => window.__sceneReady === true, null, { timeout: 300000 });
+      break;
+    } catch (e) {
+      if (attempt >= 1) throw e;
+      console.log(`${view} 超时，重试一次`);
+    }
+  }
+
   await page.waitForTimeout(500);
   const file = `screenshots/${view}.png`;
   await page.screenshot({ path: file });

@@ -120,7 +120,7 @@ export const TREES = [
   { id: 'wutong-west', name: '梧桐（西）', kind: 'wutong', x: -2.9, z: -1.4, height: 10, crown: 5, trunkRadius: 0.3 },
   { id: 'wutong-east', name: '梧桐（东）', kind: 'wutong', x: 4.3, z: -1.4, height: 10, crown: 5, trunkRadius: 0.3 },
   { id: 'pomegranate', name: '石榴', kind: 'pomegranate', x: 1.6, z: -1.7, height: 3.0, crown: 1.4, trunkRadius: 0.08 },
-  { id: 'jujube', name: '枣树', kind: 'jujube', x: 4.0, z: 4.6, height: 4.6, crown: 2.0, trunkRadius: 0.12 },
+  { id: 'jujube', name: '枣树', kind: 'jujube', x: 4.0, z: 4.6, height: 5.8, crown: 3.0, trunkRadius: 0.17 }, // 比较大，主干弯
 ];
 
 /** 压水井：石榴树下，出水嘴朝南（+Z） */
@@ -130,7 +130,7 @@ export const WELL = {
   z: -0.8,
   platform: { width: 1.0, depth: 0.9, height: 0.2 }, // 水泥/砖井台
   spoutDir: 'south',
-  bucket: { x: 1.6, z: -0.2 },
+  bucket: { x: 1.6, z: -0.6 }, // 铁桶放在井台上、出水嘴正下方
   wetRadius: 1.3,
 };
 

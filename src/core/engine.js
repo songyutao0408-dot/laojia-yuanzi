@@ -42,7 +42,7 @@ export function createEngine(container) {
     render();
     frames++;
     // 供 Playwright 自检脚本判断“已经画出几帧”
-    if (frames === 5) window.__sceneReady = true;
+    if (frames === 2) window.__sceneReady = true;
   });
 
   return {
