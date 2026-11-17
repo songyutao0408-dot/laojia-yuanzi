@@ -26,8 +26,20 @@ const problems = [];
 page.on('console', (m) => m.type() === 'error' && problems.push(`console: ${m.text()}`));
 page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
 
-for (const view of ['top', 'orbit', 'walk']) {
-  await page.goto(`${base}?view=${view}`);
+// [文件名, 查询参数]
+const SHOTS = [
+  ['top', 'view=top'],
+  ['orbit', 'view=orbit'],
+  ['walk', 'view=walk'],
+  // 额外视角：从西北屋门口看进室内、从厨房门口看进室内、北屋门前看梧桐和压水井
+  ['inside-northwest', 'view=orbit&cam=-0.5,2.2,-4.45,-6,0.6,-8.5'],
+  ['inside-northeast', 'view=orbit&cam=7.1,2.2,-4.45,1,0.6,-8.5'],
+  ['inside-kitchen', 'view=orbit&cam=-4.9,1.7,2.6,-7,0.5,-1.6'],
+  ['gate-from-yard', 'view=orbit&cam=-2.5,1.6,2.5,-7.3,1,6.5'],
+  ['yard-from-steps', 'view=orbit&cam=0.5,1.8,-3.3,1,1.2,4'],
+];
+for (const [view, query] of SHOTS) {
+  await page.goto(`${base}?${query}`);
   await page.waitForFunction(() => window.__sceneReady === true, null, { timeout: 30000 }).catch((e) => {
     console.log(problems.join('\n'));
     throw e;

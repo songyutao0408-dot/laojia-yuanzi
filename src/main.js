@@ -6,7 +6,6 @@ import { createTrees } from './trees/index.js';
 import { createWell } from './well/index.js';
 import { createGarden } from './garden/index.js';
 import { createViewModes } from './controls/viewModes.js';
-import { createFootprints } from './debug/footprints.js';
 
 const engine = createEngine(document.getElementById('app'));
 const { scene, camera, renderer } = engine;
@@ -17,8 +16,6 @@ scene.add(createBuildings());
 scene.add(createTrees());
 scene.add(createWell());
 scene.add(createGarden());
-// 第 1 步：用占地色块核对方位；第 2 步白模完成后删除
-scene.add(createFootprints());
 
 const views = createViewModes(camera, renderer.domElement);
 engine.onUpdate(() => views.update());
@@ -31,7 +28,10 @@ function setView(name) {
 buttons.forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
 
 // ?view=top|orbit|walk —— 方便截图自检和分享指定视角
-const initial = new URLSearchParams(location.search).get('view') || 'orbit';
-setView(initial);
+const params = new URLSearchParams(location.search);
+setView(params.get('view') || 'orbit');
+// ?cam=x,y,z,tx,ty,tz —— 指定相机位置和注视点（自检截图看室内用）
+const cam = params.get('cam')?.split(',').map(Number);
+if (cam?.length === 6) views.lookAt(cam.slice(0, 3), cam.slice(3));
 
 window.__app = { engine, views, setView };

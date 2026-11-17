@@ -59,5 +59,15 @@ export function createViewModes(camera, domElement) {
       return current;
     },
     update: () => orbit.update(),
+    /** 直接把相机放到 pos、看向 target（保持当前模式的交互） */
+    lookAt(pos, target) {
+      camera.up.set(0, 1, 0);
+      camera.position.set(...pos);
+      orbit.target.set(...target);
+      orbit.enableRotate = true;
+      orbit.minDistance = 0.01;
+      orbit.maxPolarAngle = Math.PI;
+      orbit.update();
+    },
   };
 }
