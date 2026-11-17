@@ -39,10 +39,8 @@ export const NORTH_HOUSE = {
       x1: 0,
       // 门、窗都开在南墙（z = -4）上；x 为洞口中心，sill 从室内地坪算起
       door: { x: -3.75, width: 0.9, height: 2.0 },
-      windows: [
-        { x: -5.8, width: 1.2, height: 1.2, sill: 0.8 },
-        { x: -1.7, width: 1.2, height: 1.2, sill: 0.8 },
-      ],
+      // 只在门西侧有窗，门东侧没有窗
+      windows: [{ x: -5.8, width: 1.2, height: 1.2, sill: 0.8 }],
     },
     {
       id: 'east',
@@ -50,10 +48,8 @@ export const NORTH_HOUSE = {
       x0: 0,
       x1: 7.5,
       door: { x: 3.75, width: 0.9, height: 2.0 },
-      windows: [
-        { x: 1.7, width: 1.2, height: 1.2, sill: 0.8 },
-        { x: 5.8, width: 1.2, height: 1.2, sill: 0.8 },
-      ],
+      // 只在门东侧有窗，门西侧没有窗
+      windows: [{ x: 5.8, width: 1.2, height: 1.2, sill: 0.8 }],
     },
   ],
 };
@@ -114,7 +110,7 @@ export const SCREEN_WALL = {
 /** 茅厕：东南角，紧贴东土墙，无顶，门朝西 */
 export const TOILET = {
   name: '茅厕',
-  rect: { x0: 4.6, x1: 7.1, z0: 5.6, z1: 8.6 },
+  rect: { x0: 5.1, x1: 7.1, z0: 5.6, z1: 8.6 }, // 东西约 2 m
   height: 1.3, // 半人多高
   wall: WALL.brick,
   door: { side: 'west', z: 6.3, width: 0.7 },
@@ -125,7 +121,7 @@ export const TREES = [
   { id: 'wutong-west', name: '梧桐（西）', kind: 'wutong', x: -2.9, z: -1.4, height: 4.6, crown: 3.2, trunkRadius: 0.22 },
   { id: 'wutong-east', name: '梧桐（东）', kind: 'wutong', x: 4.3, z: -1.4, height: 4.6, crown: 3.2, trunkRadius: 0.22 },
   { id: 'pomegranate', name: '石榴', kind: 'pomegranate', x: 1.6, z: -1.7, height: 3.0, crown: 1.4, trunkRadius: 0.08 },
-  { id: 'jujube', name: '枣树', kind: 'jujube', x: 3.6, z: 4.6, height: 4.6, crown: 2.0, trunkRadius: 0.12 },
+  { id: 'jujube', name: '枣树', kind: 'jujube', x: 4.0, z: 4.6, height: 4.6, crown: 2.0, trunkRadius: 0.12 },
 ];
 
 /** 压水井：石榴树下，出水嘴朝南（+Z） */
