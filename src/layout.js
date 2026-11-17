@@ -130,7 +130,7 @@ export const WELL = {
   z: -0.8,
   platform: { width: 1.0, depth: 0.9, height: 0.2 }, // 水泥/砖井台
   spoutDir: 'south',
-  bucket: { x: 1.6, z: -0.2 },
+  bucket: { x: 1.6, z: -0.6 }, // 铁桶放在井台上、出水嘴正下方
   wetRadius: 1.3,
 };
 

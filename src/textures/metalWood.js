@@ -67,3 +67,25 @@ export function bark({ base = [96, 84, 70], seed = 91 } = {}) {
   });
   return textureSet({ ...set, normalStrength: 5 }, 1);
 }
+
+/**
+ * 较光滑的树皮（泡桐、石榴）：灰褐底色、浅色皮孔斑点、细小横纹。一张 = 1 m × 1 m
+ */
+export function smoothBark({ base = [118, 108, 96], seed = 97, lenticels = 1 } = {}) {
+  const W = 256;
+  const f = makeFbm(seed, 8, 4);
+  const fine = makeFbm(seed + 1, 32, 3);
+  const dots = makeNoise(seed + 2, 64);
+  const set = fillMulti(W, W, (u, v) => {
+    const a = f(u, v);
+    const b = fine(u, v * 0.3);
+    let c = mixRGB([base[0] * 0.7, base[1] * 0.7, base[2] * 0.7], base, a);
+    c = mixRGB(c, [base[0] * 1.2, base[1] * 1.18, base[2] * 1.12], clamp01((b - 0.55) * 2));
+    // 皮孔：横向的小浅色斑
+    const d = dots(u * 64, v * 128);
+    const len = clamp01((d - 0.82) * 8) * lenticels;
+    c = mixRGB(c, [200, 190, 170], len * 0.7);
+    return { c, h: 0.5 + a * 0.2 + b * 0.2 + len * 0.15, r: 0.85 };
+  });
+  return textureSet({ ...set, normalStrength: 2 }, 1);
+}

@@ -2,7 +2,7 @@ import { createEngine } from './core/engine.js';
 import { createLighting } from './lighting/index.js';
 import { createGround } from './ground/index.js';
 import { createBuildings } from './buildings/index.js';
-import { createTrees } from './trees/index.js';
+import { createTrees, updateWind } from './trees/index.js';
 import { createWell } from './well/index.js';
 import { createGarden } from './garden/index.js';
 import { createViewModes } from './controls/viewModes.js';
@@ -25,6 +25,7 @@ document.getElementById('loading')?.classList.add('done');
 
 const views = createViewModes(camera, renderer.domElement);
 engine.onUpdate(() => views.update());
+engine.onUpdate((dt, t) => updateWind(t));
 
 const buttons = document.querySelectorAll('#view-buttons button');
 function setView(name) {

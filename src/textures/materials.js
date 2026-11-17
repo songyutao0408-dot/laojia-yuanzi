@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { redBrick, brickPaving } from './brick.js';
 import { rammedEarth, loessGround, concrete, mudPlaster } from './earth.js';
-import { rustyIron, paintedWood, bark } from './metalWood.js';
+import { rustyIron, paintedWood, bark, smoothBark } from './metalWood.js';
 import { coupletTexture, fuTexture, grassCard, wallBaseStain, wetPatch } from './decals.js';
 
 /**
@@ -22,11 +22,16 @@ const DEFS = {
   roof: () => ({ ...concrete({ tint: [0.82, 0.8, 0.78], seed: 57, size: 256 }), roughness: 1 }),
   stove: () => ({ ...mudPlaster({ soot: 0.55 }), roughness: 1 }),
   gateIron: () => ({ ...rustyIron({ paint: [44, 70, 58], rustAmount: 0.6, seed: 71 }), roughness: 1, metalness: 0.25 }),
-  pumpIron: () => ({ ...rustyIron({ paint: [34, 48, 40], rustAmount: 0.5, seed: 73 }), roughness: 1, metalness: 0.3 }),
+  pumpIron: () => ({ ...rustyIron({ paint: [38, 58, 46], rustAmount: 0.25, seed: 73 }), roughness: 1, metalness: 0.3 }),
   wok: () => ({ ...rustyIron({ paint: [28, 26, 24], rustAmount: 0.25, seed: 75 }), roughness: 1, metalness: 0.4 }),
   wood: () => ({ ...paintedWood({ paint: [110, 42, 32] }), roughness: 1 }),
   oldWood: () => ({ ...paintedWood({ paint: [118, 100, 80], seed: 85, peelAmount: 0 }), roughness: 1 }),
   rawWood: () => ({ ...bark({ base: [120, 100, 80], seed: 95 }), roughness: 1 }),
+  // 树皮
+  barkPaulownia: () => ({ ...smoothBark({ base: [122, 114, 102], seed: 97 }), roughness: 1 }),
+  barkPomegranate: () => ({ ...smoothBark({ base: [112, 96, 82], seed: 98, lenticels: 0.3 }), roughness: 1 }),
+  barkJujube: () => ({ ...bark({ base: [92, 76, 62], seed: 99 }), roughness: 1 }),
+  galvanized: () => ({ ...rustyIron({ paint: [150, 154, 156], rustAmount: 0.25, seed: 79 }), roughness: 1, metalness: 0.5 }),
   // 北屋墙根的水泥勒脚：旧水泥、略发黄发黑
   cementPlinth: () => ({ ...concrete({ tint: [0.92, 0.9, 0.85], seed: 53 }), roughness: 1 }),
   limeWash: () => ({ ...concrete({ tint: [1.55, 1.52, 1.45], seed: 59, size: 256 }), roughness: 1 }),
