@@ -77,9 +77,9 @@ export const EARTH_WALLS = [
   // 西侧：厨房与北屋之间空当的西端，封住院子
   { id: 'west-north', rect: { x0: -7.5, x1: -7.1, z0: -4, z1: -2 }, height: 2.2 },
   // 西侧：厨房南边约 2 m 的土墙，尽头接大门
-  { id: 'west', rect: { x0: -7.5, x1: -7.1, z0: 3, z1: 5 }, height: 2.2 },
+  { id: 'west', rect: { x0: -7.5, x1: -7.1, z0: 3, z1: 5.4 }, height: 2.2 },
   // 西侧：大门南边的一小段，接南墙
-  { id: 'west-south', rect: { x0: -7.5, x1: -7.1, z0: 8, z1: 9 }, height: 2.2 },
+  { id: 'west-south', rect: { x0: -7.5, x1: -7.1, z0: 7.6, z1: 9 }, height: 2.2 },
   // 南墙（实际是南邻居家的房子，为方便做成土墙）
   { id: 'south', rect: { x0: -7.5, x1: 7.5, z0: 8.6, z1: 9 }, height: 2.2 },
   // 东墙：从东南角一直连到北屋东头
@@ -93,10 +93,7 @@ export const GATE = {
   z0: 5.4,
   z1: 7.6, // 门洞宽 2.2 m
   height: 2.0,
-  posts: [
-    { x0: -7.5, x1: -7.1, z0: 5.0, z1: 5.4, height: 2.4 },
-    { x0: -7.5, x1: -7.1, z0: 7.6, z1: 8.0, height: 2.4 },
-  ],
+  posts: [], // 没有红砖门垛，铁门直接装在土墙门洞里（已确认）
 };
 
 /** 影背墙（照壁）：进门迎面，墙面朝西贴瓷砖画 */
@@ -141,9 +138,8 @@ export const GARDEN = {
   rect: { x0: 5.0, x1: 7.1, z0: -3.4, z1: 5.2 },
   // 菜畦（南北向分畦），trellis = 竹竿架子
   beds: [
-    { crop: '黄瓜', z0: -3.4, z1: -0.4, trellis: true },
-    { crop: '豆角', z0: -0.2, z1: 2.6, trellis: true },
-    { crop: '时令菜（茄子/辣椒/小白菜）', z0: 2.8, z1: 5.2, trellis: false },
+    { crop: '丝瓜', z0: -3.4, z1: 0.8, trellis: true },
+    { crop: '豆角', z0: 1.0, z1: 5.2, trellis: true },
   ],
 };
 

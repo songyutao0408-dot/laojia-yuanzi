@@ -46,7 +46,7 @@
 <path d="M150,905 L285,905 L285,770 L505,770 L505,435" fill="none" stroke="#c76a4f" stroke-opacity="0.55" stroke-width="40" stroke-linejoin="miter" stroke-linecap="square"/>
 <path d="M317.5,435 L692.5,435" fill="none" stroke="#c76a4f" stroke-opacity="0.55" stroke-width="40" stroke-linejoin="miter" stroke-linecap="square"/>
 <rect x="755" y="410" width="105" height="430" fill="#7a9a4a" fill-opacity="0.35" stroke="#7a9a4a" stroke-width="1.5"/>
-<rect x="760" y="412.5" width="95" height="145" fill="#7a9a4a" fill-opacity="0.45" stroke="none"/>
+<rect x="760" y="412.5" width="95" height="205" fill="#7a9a4a" fill-opacity="0.45" stroke="none"/>
 <circle cx="770" cy="422.5" r="2" fill="#6b5a2a"/>
 <circle cx="845" cy="422.5" r="2" fill="#6b5a2a"/>
 <circle cx="770" cy="447.5" r="2" fill="#6b5a2a"/>
@@ -59,26 +59,32 @@
 <circle cx="845" cy="522.5" r="2" fill="#6b5a2a"/>
 <circle cx="770" cy="547.5" r="2" fill="#6b5a2a"/>
 <circle cx="845" cy="547.5" r="2" fill="#6b5a2a"/>
-<text x="807.5" y="490" class="s" text-anchor="middle">黄瓜</text>
-<rect x="760" y="572.5" width="95" height="135" fill="#7a9a4a" fill-opacity="0.45" stroke="none"/>
-<circle cx="770" cy="582.5" r="2" fill="#6b5a2a"/>
-<circle cx="845" cy="582.5" r="2" fill="#6b5a2a"/>
-<circle cx="770" cy="607.5" r="2" fill="#6b5a2a"/>
-<circle cx="845" cy="607.5" r="2" fill="#6b5a2a"/>
-<circle cx="770" cy="632.5" r="2" fill="#6b5a2a"/>
-<circle cx="845" cy="632.5" r="2" fill="#6b5a2a"/>
-<circle cx="770" cy="657.5" r="2" fill="#6b5a2a"/>
-<circle cx="845" cy="657.5" r="2" fill="#6b5a2a"/>
-<circle cx="770" cy="682.5" r="2" fill="#6b5a2a"/>
-<circle cx="845" cy="682.5" r="2" fill="#6b5a2a"/>
-<circle cx="770" cy="707.5" r="2" fill="#6b5a2a"/>
-<circle cx="845" cy="707.5" r="2" fill="#6b5a2a"/>
-<text x="807.5" y="645" class="s" text-anchor="middle">豆角</text>
-<rect x="760" y="722.5" width="95" height="115" fill="#7a9a4a" fill-opacity="0.45" stroke="none"/>
-<text x="807.5" y="785" class="s" text-anchor="middle">时令菜</text>
+<circle cx="770" cy="572.5" r="2" fill="#6b5a2a"/>
+<circle cx="845" cy="572.5" r="2" fill="#6b5a2a"/>
+<circle cx="770" cy="597.5" r="2" fill="#6b5a2a"/>
+<circle cx="845" cy="597.5" r="2" fill="#6b5a2a"/>
+<text x="807.5" y="520" class="s" text-anchor="middle">丝瓜</text>
+<rect x="760" y="632.5" width="95" height="205" fill="#7a9a4a" fill-opacity="0.45" stroke="none"/>
+<circle cx="770" cy="642.5" r="2" fill="#6b5a2a"/>
+<circle cx="845" cy="642.5" r="2" fill="#6b5a2a"/>
+<circle cx="770" cy="667.5" r="2" fill="#6b5a2a"/>
+<circle cx="845" cy="667.5" r="2" fill="#6b5a2a"/>
+<circle cx="770" cy="692.5" r="2" fill="#6b5a2a"/>
+<circle cx="845" cy="692.5" r="2" fill="#6b5a2a"/>
+<circle cx="770" cy="717.5" r="2" fill="#6b5a2a"/>
+<circle cx="845" cy="717.5" r="2" fill="#6b5a2a"/>
+<circle cx="770" cy="742.5" r="2" fill="#6b5a2a"/>
+<circle cx="845" cy="742.5" r="2" fill="#6b5a2a"/>
+<circle cx="770" cy="767.5" r="2" fill="#6b5a2a"/>
+<circle cx="845" cy="767.5" r="2" fill="#6b5a2a"/>
+<circle cx="770" cy="792.5" r="2" fill="#6b5a2a"/>
+<circle cx="845" cy="792.5" r="2" fill="#6b5a2a"/>
+<circle cx="770" cy="817.5" r="2" fill="#6b5a2a"/>
+<circle cx="845" cy="817.5" r="2" fill="#6b5a2a"/>
+<text x="807.5" y="740" class="s" text-anchor="middle">豆角</text>
 <rect x="130" y="380" width="20" height="100" fill="#a68a5b" stroke="#6e5a37" stroke-width="1"/>
-<rect x="130" y="730" width="20" height="100" fill="#a68a5b" stroke="#6e5a37" stroke-width="1"/>
-<rect x="130" y="980" width="20" height="50" fill="#a68a5b" stroke="#6e5a37" stroke-width="1"/>
+<rect x="130" y="730" width="20" height="120" fill="#a68a5b" stroke="#6e5a37" stroke-width="1"/>
+<rect x="130" y="960" width="20" height="70" fill="#a68a5b" stroke="#6e5a37" stroke-width="1"/>
 <rect x="130" y="1010" width="750" height="20" fill="#a68a5b" stroke="#6e5a37" stroke-width="1"/>
 <rect x="860" y="380" width="20" height="650" fill="#a68a5b" stroke="#6e5a37" stroke-width="1"/>
 <rect x="130" y="130" width="375" height="250" fill="#d98a6c" fill-opacity="0.25" stroke="none"/>
@@ -138,8 +144,6 @@
 <rect x="848" y="860" width="12" height="150" fill="#b5523b" stroke="none"/>
 <text x="810" y="935" class="b" text-anchor="middle">茅厕</text>
 <text x="810" y="960" class="s" text-anchor="middle">无顶 · 墙高 1.3 m</text>
-<rect x="130" y="830" width="20" height="20" fill="#b5523b" stroke="#2b2b2b" stroke-width="0.8"/>
-<rect x="130" y="960" width="20" height="20" fill="#b5523b" stroke="#2b2b2b" stroke-width="0.8"/>
 <line x1="140" y1="850" x2="178.5" y2="888.5" stroke="#4a4a4a" stroke-width="4"/>
 <line x1="140" y1="960" x2="178.5" y2="921.5" stroke="#4a4a4a" stroke-width="4"/>
 <text x="127.5" y="897.5" class="b" text-anchor="end">大门</text>
