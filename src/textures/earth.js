@@ -83,7 +83,7 @@ export function rammedEarth() {
     }
     return { c, h, r: 0.95 };
   });
-  return textureSet({ ...set, normalStrength: 4 }, 2);
+  return textureSet({ ...set, normalStrength: 1.2 }, 2);
 }
 
 /**

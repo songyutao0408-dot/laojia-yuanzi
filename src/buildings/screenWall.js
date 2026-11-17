@@ -27,6 +27,7 @@ export function createScreenWall() {
   const h = tilesY * tile;
   const muralMat = new THREE.MeshStandardMaterial({ ...set, roughness: 1, metalness: 0 });
   muralMat.name = 'tile-mural';
+  muralMat.envMapIntensity = 0.2; // 釉面反光但不要把画面冲白
   const mural = new THREE.Mesh(new THREE.BoxGeometry(0.012, h, w), [muralMat, muralMat, mat('concrete'), mat('concrete'), mat('concrete'), mat('concrete')]);
   // BoxGeometry 的 -X 面（朝西）是第 2 个材质槽，这里两个都用瓷砖画；+X 面贴在墙里看不见
   mural.position.set(r.x0 - 0.006, 0.36 + (S.height - 0.36) / 2, (r.z0 + r.z1) / 2);

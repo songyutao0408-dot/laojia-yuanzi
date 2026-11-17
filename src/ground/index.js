@@ -12,7 +12,7 @@ export function createGround() {
   group.name = 'ground';
 
   // 院外地面（大一圈，第 5 步淡出到雾里）
-  const outGeo = new THREE.PlaneGeometry(200, 200).rotateX(-Math.PI / 2);
+  const outGeo = new THREE.PlaneGeometry(400, 400).rotateX(-Math.PI / 2);
   worldUV(outGeo);
   const outside = new THREE.Mesh(outGeo, mat('groundOutside'));
   outside.position.y = -0.01;

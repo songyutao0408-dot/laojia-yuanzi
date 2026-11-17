@@ -28,6 +28,8 @@ page.on('console', (m) => m.type() === 'error' && problems.push(`console: ${m.te
 page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
 
 // [文件名, 查询参数]
+// 画质默认按 high 截（可用环境变量 SHOT_QUALITY=low 改）
+const QUALITY = process.env.SHOT_QUALITY || 'high';
 const SHOTS = [
   ['top', 'view=top'],
   ['orbit', 'view=orbit'],
@@ -43,6 +45,12 @@ const SHOTS = [
   ['paulownia-under', 'view=orbit&cam=-0.5,1.2,2.5,-2.9,5.5,-1.4'],
   ['gate-from-yard', 'view=orbit&cam=-2.5,1.6,2.5,-7.3,1,6.5'],
   ['yard-from-steps', 'view=orbit&cam=0.5,1.8,-3.3,1,1.2,4'],
+  // 时间
+  ['orbit-dawn', 'view=orbit&time=dawn'],
+  ['orbit-noon', 'view=orbit&time=noon'],
+  ['orbit-night', 'view=orbit&time=night'],
+  ['north-night', 'view=orbit&time=night&cam=1,1.4,1.5,0,2,-6'],
+  ['smoke', 'view=orbit&cam=-1,1.3,4.5,-6.5,3.5,-1.5'],
 ];
 // 可只截部分：npm run shots -- walk orbit
 const only = process.argv.slice(2);
@@ -50,7 +58,7 @@ for (const [view, query] of SHOTS.filter(([n]) => !only.length || only.includes(
   // 无头浏览器用软件渲染，偶尔导航超时：失败就重试一次
   for (let attempt = 0; ; attempt++) {
     try {
-      await page.goto(`${base}?${query}`, { waitUntil: 'commit', timeout: 120000 });
+      await page.goto(`${base}?${query}&quality=${QUALITY}`, { waitUntil: 'commit', timeout: 120000 });
       await page.waitForFunction(() => window.__sceneReady === true, null, { timeout: 300000 });
       break;
     } catch (e) {
@@ -59,13 +67,13 @@ for (const [view, query] of SHOTS.filter(([n]) => !only.length || only.includes(
     }
   }
 
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(4000); // 软件渲染很慢，多等几帧让阴影、环境光就绪
   const file = `screenshots/${view}.png`;
   await page.screenshot({ path: file });
   // 简单黑屏检测：抽样像素亮度
   const avg = await page.evaluate(() => {
-    const { renderer, scene, camera } = window.__app.engine;
-    renderer.render(scene, camera); // 同一任务内重画一次，保证能读到画布像素
+    const { renderer, renderNow } = window.__app.engine;
+    renderNow(); // 同一任务内重画一次，保证能读到画布像素
     const c = renderer.domElement;
     const g = document.createElement('canvas');
     g.width = 64; g.height = 40;
