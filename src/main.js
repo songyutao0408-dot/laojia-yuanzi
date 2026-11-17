@@ -10,12 +10,18 @@ import { createViewModes } from './controls/viewModes.js';
 const engine = createEngine(document.getElementById('app'));
 const { scene, camera, renderer } = engine;
 
+// 先让“正在生成”的提示画出来，再开始（同步的）贴图生成
+await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+const t0 = performance.now();
 createLighting(scene);
 scene.add(createGround());
 scene.add(createBuildings());
 scene.add(createTrees());
 scene.add(createWell());
 scene.add(createGarden());
+const buildMs = Math.round(performance.now() - t0);
+console.info(`场景生成用时 ${buildMs} ms`);
+document.getElementById('loading')?.classList.add('done');
 
 const views = createViewModes(camera, renderer.domElement);
 engine.onUpdate(() => views.update());
@@ -34,4 +40,4 @@ setView(params.get('view') || 'orbit');
 const cam = params.get('cam')?.split(',').map(Number);
 if (cam?.length === 6) views.lookAt(cam.slice(0, 3), cam.slice(3));
 
-window.__app = { engine, views, setView };
+window.__app = { engine, views, setView, buildMs };

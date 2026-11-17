@@ -66,7 +66,7 @@ export const KITCHEN = {
   door: { z: -0.8, width: 0.9, height: 1.8 },
   windows: [{ z: 1.6, width: 0.8, height: 0.7, sill: 1.0 }],
   chimney: { x: -7.05, z: -1.55, size: 0.5, top: 3.4 }, // 西北角，烟囱顶高 3.4 m
-  stove: { x0: -7.26, x1: -6.1, z0: -1.76, z1: -0.6, height: 0.8 }, // 室内西北角灶台
+  stove: { x0: -7.26, x1: -6.0, z0: -1.76, z1: -0.3, height: 0.8, wokFromSouth: 0.58 }, // 室内西北角灶台；烟囱在灶后，锅在灶前
 };
 
 /** 厨房与西北屋之间的空当（露天，约 2 m 宽） */
@@ -115,8 +115,8 @@ export const TOILET = {
 
 /** 树：trunk 为树干中心，height 为总高，crown 为树冠半径（俯视） */
 export const TREES = [
-  { id: 'wutong-west', name: '梧桐（西）', kind: 'wutong', x: -2.9, z: -1.4, height: 4.6, crown: 3.2, trunkRadius: 0.22 },
-  { id: 'wutong-east', name: '梧桐（东）', kind: 'wutong', x: 4.3, z: -1.4, height: 4.6, crown: 3.2, trunkRadius: 0.22 },
+  { id: 'wutong-west', name: '梧桐（西）', kind: 'wutong', x: -2.9, z: -1.4, height: 10, crown: 5, trunkRadius: 0.3 },
+  { id: 'wutong-east', name: '梧桐（东）', kind: 'wutong', x: 4.3, z: -1.4, height: 10, crown: 5, trunkRadius: 0.3 },
   { id: 'pomegranate', name: '石榴', kind: 'pomegranate', x: 1.6, z: -1.7, height: 3.0, crown: 1.4, trunkRadius: 0.08 },
   { id: 'jujube', name: '枣树', kind: 'jujube', x: 4.0, z: 4.6, height: 4.6, crown: 2.0, trunkRadius: 0.12 },
 ];
@@ -170,5 +170,5 @@ export const BRICK_PATHS = [
 export const VIEWS = {
   eyeHeight: 1.2, // 七八岁小孩视线高度
   walkStart: { x: -6.7, z: 6.5, look: [1, 0] }, // 站在大门口；look 为水平朝向 [dx, dz]，[1,0] = 面朝东（影背墙）
-  orbitStart: { position: [14, 13, 17], target: [0, 0.5, 0] }, // 东南方斜上方
+  orbitStart: { position: [17, 15, 21], target: [0, 1.5, 0] }, // 东南方斜上方
 };

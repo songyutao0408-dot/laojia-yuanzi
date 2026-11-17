@@ -8,7 +8,7 @@ import { wb, crownGhost } from '../core/whitebox.js';
  */
 const SHAPE = {
   // trunkFrac：主干到分叉处占树高的比例；crownBottom：树冠下沿占树高比例
-  wutong: { trunkFrac: 0.45, crownBottom: 0.35, color: 0x4f7d3a },
+  wutong: { trunkFrac: 0.4, crownBottom: 0.3, color: 0x4f7d3a },
   pomegranate: { trunkFrac: 0.3, crownBottom: 0.2, color: 0x5d7f35 },
   jujube: { trunkFrac: 0.4, crownBottom: 0.35, color: 0x6c8a3a },
 };

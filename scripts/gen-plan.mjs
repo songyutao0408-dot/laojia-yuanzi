@@ -140,7 +140,7 @@ brickBox(
   `高 ${K.height} m`,
 );
 rect(K.stove, `fill="#8a8a8a" stroke="${C.ink}" stroke-width="0.8"`);
-out.push(`<circle cx="${f(X((K.stove.x0 + K.stove.x1) / 2))}" cy="${f(Y((K.stove.z0 + K.stove.z1) / 2))}" r="${0.35 * S}" fill="#333"/>`);
+out.push(`<circle cx="${f(X((K.stove.x0 + K.stove.x1) / 2))}" cy="${f(Y(K.stove.z1 - K.stove.wokFromSouth))}" r="${0.35 * S}" fill="#333"/>`);
 text((K.stove.x0 + K.stove.x1) / 2, K.stove.z1 + 0.35, '灶台', 'class="s" text-anchor="middle"');
 const ch = K.chimney;
 rect({ x0: ch.x - ch.size / 2, x1: ch.x + ch.size / 2, z0: ch.z - ch.size / 2, z1: ch.z + ch.size / 2 }, `fill="none" stroke="#111" stroke-width="2" stroke-dasharray="4 2"`);

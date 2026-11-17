@@ -43,12 +43,5 @@ export const glass = new THREE.MeshStandardMaterial({
 export const crownGhost = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, transparent: true, opacity: 0.35, depthWrite: false });
 
-/** 盒子工具：按 [x0,x1] [y0,y1] [z0,z1] 生成 Mesh；solid=true 表示参与第一人称碰撞 */
-export function box(x0, x1, y0, y1, z0, z1, material, { solid = true, shadow = true } = {}) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), material);
-  m.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
-  m.castShadow = shadow;
-  m.receiveShadow = true;
-  m.userData.solid = solid;
-  return m;
-}
+/** box() 已移到 core/box.js（世界坐标 UV），这里转出以兼容 */
+export { box } from './box.js';

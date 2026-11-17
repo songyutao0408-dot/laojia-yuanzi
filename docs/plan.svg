@@ -129,9 +129,9 @@
 <rect x="268" y="680" width="12" height="50" fill="#b5523b" stroke="none"/>
 <text x="205" y="605" class="b" text-anchor="middle">厨房</text>
 <text x="205" y="630" class="s" text-anchor="middle">高 2.3 m</text>
-<rect x="142" y="492" width="58" height="58" fill="#8a8a8a" stroke="#2b2b2b" stroke-width="0.8"/>
-<circle cx="171" cy="521" r="17.5" fill="#333"/>
-<text x="171" y="567.5" class="s" text-anchor="middle">灶台</text>
+<rect x="142" y="492" width="63" height="73" fill="#8a8a8a" stroke="#2b2b2b" stroke-width="0.8"/>
+<circle cx="173.5" cy="536" r="17.5" fill="#333"/>
+<text x="173.5" y="582.5" class="s" text-anchor="middle">灶台</text>
 <rect x="140" y="490" width="25" height="25" fill="none" stroke="#111" stroke-width="2" stroke-dasharray="4 2"/>
 <text x="172.5" y="485" class="s">烟囱</text>
 <rect x="130" y="380" width="150" height="100" fill="none" stroke="#7a5a3a" stroke-width="1" stroke-dasharray="3 3"/>
@@ -161,14 +161,14 @@
 <line x1="585" y1="535" x2="585" y2="502.5" stroke="#2f4a35" stroke-width="2"/>
 <circle cx="585" cy="570" r="7.5" fill="#9aa3a8" stroke="#2b2b2b" stroke-width="0.8"/>
 <text x="615" y="565" class="b">压水井</text>
-<circle cx="360" cy="510" r="160" fill="#4f7d3a" fill-opacity="0.12" stroke="#4f7d3a" stroke-width="1.5" stroke-dasharray="6 4"/>
-<circle cx="360" cy="510" r="11" fill="#5a3e22"/>
+<circle cx="360" cy="510" r="250" fill="#4f7d3a" fill-opacity="0.12" stroke="#4f7d3a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<circle cx="360" cy="510" r="15" fill="#5a3e22"/>
 <text x="360" y="537.5" class="b" text-anchor="middle" fill="#4f7d3a">梧桐（西）</text>
-<text x="360" y="557.5" class="s" text-anchor="middle">高 4.6 m</text>
-<circle cx="720" cy="510" r="160" fill="#4f7d3a" fill-opacity="0.12" stroke="#4f7d3a" stroke-width="1.5" stroke-dasharray="6 4"/>
-<circle cx="720" cy="510" r="11" fill="#5a3e22"/>
+<text x="360" y="557.5" class="s" text-anchor="middle">高 10 m</text>
+<circle cx="720" cy="510" r="250" fill="#4f7d3a" fill-opacity="0.12" stroke="#4f7d3a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<circle cx="720" cy="510" r="15" fill="#5a3e22"/>
 <text x="720" y="537.5" class="b" text-anchor="middle" fill="#4f7d3a">梧桐（东）</text>
-<text x="720" y="557.5" class="s" text-anchor="middle">高 4.6 m</text>
+<text x="720" y="557.5" class="s" text-anchor="middle">高 10 m</text>
 <circle cx="585" cy="495" r="70" fill="#a33a2a" fill-opacity="0.12" stroke="#a33a2a" stroke-width="1.5" stroke-dasharray="6 4"/>
 <circle cx="585" cy="495" r="4" fill="#5a3e22"/>
 <text x="585" y="485" class="b" text-anchor="middle" fill="#a33a2a">石榴</text>
