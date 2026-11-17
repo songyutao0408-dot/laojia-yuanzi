@@ -49,7 +49,7 @@ src/
   core/whitebox.js      白模纯色材质（树、压水井、菜地还在用，第 4 步替换）
   textures/             canvas 程序生成的 PBR 贴图（颜色/法线/粗糙度），见 textures/index.js 的清单
     materials.js        mat(key) 材质库（首次使用时生成并缓存）；stainMat/wetMat/grassMat/coupletMat/fuMat 贴花材质
-  ground/               黄土地面、院外地面、红砖小路
+  ground/               黄土地面（院内没有砖路）、院外地面、井边湿地
   buildings/            北屋、厨房、土墙、大门、影背墙、茅厕（一个建筑一个文件）
     wall.js             通用构件：wallWithOpenings（带门窗洞的厚墙，可带过梁/窗台/玻璃）、brickBox（四墙+地坪+平顶+檐口）、baseStain（墙根泛碱泥点）
     doorsWindows.js     woodDoor（门框+门槛+向内半开的门扇+倒福）、woodWindow（木框窗棂）、couplets（春联+横批）
@@ -101,4 +101,4 @@ docs/
 
 另已确认（v3）：西北屋窗只在门西侧、东北屋窗只在门东侧；空当西端有土墙；影背墙距大门三四米；茅厕东西约 2 m。
 
-另已确认（v4）：大门无红砖门垛；菜地种丝瓜、豆角。另已确认（v5）：梧桐约 10 m 高、冠幅半径约 5 m；北屋隔墙无门。目前 spec 中待确认：梧桐树种是否按泡桐来做（第 4 步前确认）。
+另已确认（v4）：大门无红砖门垛；菜地种丝瓜、豆角。另已确认（v5）：梧桐约 10 m 高、冠幅半径约 5 m；北屋隔墙无门。另已确认（v7）：所有砖为很淡的旧红色；院内没有砖路（裸露黄土，不要加任何通道/砖/装饰）；梧桐即泡桐；北屋墙根 0.35 m 水泥勒脚。目前 spec 中没有待确认项。

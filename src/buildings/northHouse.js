@@ -14,6 +14,7 @@ const COUPLETS = {
 /**
  * 北屋：一排两间平顶房（西北屋、东北屋），清水红砖墙。
  * - 墙厚 0.24 m，门洞可走进去，木框玻璃窗，水泥过梁、砖窗台
+ * - 外墙根一圈约 0.35 m 高抹水泥的勒脚，上面才是清水砖
  * - 室内地坪高 0.45 m（铺砖），门前 3 级红砖台阶；屋顶一圈砖檐口
  * - 木门两扇向内半开，门上倒贴福字，门两侧褪色春联；墙根泛碱、泥点
  * - 每间房暴露 interiorAnchor（室内西北角、地坪面），以后 src/interiors/ 的室内细节挂在这里
@@ -72,6 +73,21 @@ export function createNorthHouse() {
       const depth = st.run * (st.count - i);
       group.add(box(room.door.x - st.width / 2, room.door.x + st.width / 2, top - st.rise, top, NH.rect.z1, NH.rect.z1 + depth, stepMats, { solid: false }));
     }
+  }
+
+  // 墙根水泥勒脚：四面外墙各一条，比砖面凸出 1.5 cm
+  {
+    const { x0, x1, z0, z1 } = NH.rect;
+    const e = 0.015;
+    const H = NH.plinth;
+    const c = mat('cementPlinth');
+    const o = { solid: false };
+    group.add(box(x0 - e, x1 + e, 0, H, z1 - 0.05, z1 + e, c, o));
+    group.add(box(x0 - e, x1 + e, 0, H, z0 - e, z0 + 0.05, c, o));
+    group.add(box(x0 - e, x0 + 0.05, 0, H, z0, z1, c, o));
+    group.add(box(x1 - 0.05, x1 + e, 0, H, z0, z1, c, o));
+    // 勒脚上沿一道抹出的小斜坡（压在砖面上的水泥收口）
+    group.add(box(x0 - e, x1 + e, H, H + 0.02, z1 - 0.05, z1 + 0.006, c, o));
   }
 
   // 墙根泛碱 + 泥点（南立面、东西山墙的院内一侧）

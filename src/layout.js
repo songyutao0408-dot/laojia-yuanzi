@@ -8,6 +8,7 @@
  *   +Y = 上，地面 y = 0
  *   原点 = 整个宅院（院墙围合范围）的中心
  *
+ * 院子地面是裸露的黄土，没有砖铺的路。
  * 矩形一律用 { x0, x1, z0, z1 } 表示（x0 < x1，z0 < z1，即 z0 是北边、z1 是南边）。
  * 这个文件只放纯数据，不 import three，因此 Node 脚本（scripts/gen-plan.mjs）也能直接读取。
  * 修改尺寸：先改 docs/scene-spec.md，再改这里，然后 `npm run plan` 重新生成平面图。
@@ -27,6 +28,7 @@ export const NORTH_HOUSE = {
   rect: { x0: -7.5, x1: 7.5, z0: -9, z1: -4 }, // 外轮廓，进深 5 m
   height: 3.5, // 地面到屋顶面
   parapet: 0.35, // 屋顶边沿砖砌檐口（女儿墙）高度
+  plinth: 0.35, // 外墙根一圈抹水泥的勒脚高度（约三四十厘米）
   wall: WALL.brick,
   floor: 0.45, // 室内地坪 = 3 级台阶 × 0.15
   partitionX: 0, // 两间之间的隔墙中心线
@@ -142,29 +144,6 @@ export const GARDEN = {
     { crop: '豆角', z0: 1.0, z1: 5.2, trellis: true },
   ],
 };
-
-/** 红砖小路：中心线折线 + 宽度 */
-export const BRICK_PATHS = [
-  {
-    id: 'main',
-    width: 0.8,
-    points: [
-      [-7.1, 6.5], // 大门内
-      [-4.4, 6.5], // 影背墙前左转
-      [-4.4, 3.8],
-      [0.0, 3.8],
-      [0.0, -2.9], // 到北屋台阶前
-    ],
-  },
-  {
-    id: 'steps',
-    width: 0.8,
-    points: [
-      [-3.75, -2.9],
-      [3.75, -2.9],
-    ],
-  },
-];
 
 /** 默认视角 */
 export const VIEWS = {

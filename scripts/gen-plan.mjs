@@ -44,12 +44,6 @@ for (let x = Math.ceil(L.LOT.x0); x <= L.LOT.x1; x++)
 for (let z = Math.ceil(L.LOT.z0); z <= L.LOT.z1; z++)
   line(L.LOT.x0, z, L.LOT.x1, z, `stroke="#000" stroke-opacity="${z === 0 ? 0.35 : 0.08}" stroke-width="${z === 0 ? 1.2 : 1}"`);
 
-// 红砖小路
-for (const p of L.BRICK_PATHS) {
-  const d = p.points.map(([x, z], i) => `${i ? 'L' : 'M'}${f(X(x))},${f(Y(z))}`).join(' ');
-  out.push(`<path d="${d}" fill="none" stroke="${C.path}" stroke-opacity="0.55" stroke-width="${p.width * S}" stroke-linejoin="miter" stroke-linecap="square"/>`);
-}
-
 // 菜地
 rect(L.GARDEN.rect, `fill="${C.garden}" fill-opacity="0.35" stroke="${C.garden}" stroke-width="1.5"`);
 for (const b of L.GARDEN.beds) {

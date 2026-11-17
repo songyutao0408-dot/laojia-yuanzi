@@ -43,8 +43,6 @@
 <line x1="130" y1="930" x2="880" y2="930" stroke="#000" stroke-opacity="0.08" stroke-width="1"/>
 <line x1="130" y1="980" x2="880" y2="980" stroke="#000" stroke-opacity="0.08" stroke-width="1"/>
 <line x1="130" y1="1030" x2="880" y2="1030" stroke="#000" stroke-opacity="0.08" stroke-width="1"/>
-<path d="M150,905 L285,905 L285,770 L505,770 L505,435" fill="none" stroke="#c76a4f" stroke-opacity="0.55" stroke-width="40" stroke-linejoin="miter" stroke-linecap="square"/>
-<path d="M317.5,435 L692.5,435" fill="none" stroke="#c76a4f" stroke-opacity="0.55" stroke-width="40" stroke-linejoin="miter" stroke-linecap="square"/>
 <rect x="755" y="410" width="105" height="430" fill="#7a9a4a" fill-opacity="0.35" stroke="#7a9a4a" stroke-width="1.5"/>
 <rect x="760" y="412.5" width="95" height="205" fill="#7a9a4a" fill-opacity="0.45" stroke="none"/>
 <circle cx="770" cy="422.5" r="2" fill="#6b5a2a"/>

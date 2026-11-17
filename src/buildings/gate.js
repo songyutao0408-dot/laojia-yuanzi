@@ -67,7 +67,6 @@ export function createGate() {
   };
   group.add(makeLeaf(GATE.z0, +1));
   group.add(makeLeaf(GATE.z1, -1));
-  // 门洞地面的一道水泥门槛石
-  group.add(box(GATE.x - 0.2, GATE.x + 0.2, 0, 0.04, GATE.z0, GATE.z1, mat('concrete'), { solid: false }));
+  // 门洞地面就是黄土，不加门槛石
   return group;
 }

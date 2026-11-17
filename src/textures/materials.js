@@ -13,7 +13,7 @@ const DEFS = {
   // 烟熏黑的砖（烟囱顶、灶口）：同一套砖贴图，乘深色
   brickSoot: () => ({ ...shared('brick'), color: 0x3b3430, roughness: 1 }),
   paving: () => ({ ...brickPaving({ worn: 0.6 }), roughness: 1 }),
-  floorBrick: () => ({ ...shared('paving'), color: 0xa89c90, roughness: 1 }),
+  floorBrick: () => ({ ...shared('paving'), color: 0xd8d0c8, roughness: 1 }),
   earth: () => ({ ...rammedEarth(), roughness: 1 }),
   ground: () => ({ ...loessGround(), roughness: 1 }),
   groundOutside: () => ({ ...shared('ground'), color: 0xa8a48c, roughness: 1 }),
@@ -27,6 +27,8 @@ const DEFS = {
   wood: () => ({ ...paintedWood({ paint: [110, 42, 32] }), roughness: 1 }),
   oldWood: () => ({ ...paintedWood({ paint: [118, 100, 80], seed: 85, peelAmount: 0 }), roughness: 1 }),
   rawWood: () => ({ ...bark({ base: [120, 100, 80], seed: 95 }), roughness: 1 }),
+  // 北屋墙根的水泥勒脚：旧水泥、略发黄发黑
+  cementPlinth: () => ({ ...concrete({ tint: [0.92, 0.9, 0.85], seed: 53 }), roughness: 1 }),
   limeWash: () => ({ ...concrete({ tint: [1.55, 1.52, 1.45], seed: 59, size: 256 }), roughness: 1 }),
 };
 
