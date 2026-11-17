@@ -55,10 +55,10 @@ src/
   buildings/            北屋、厨房、土墙、大门、影背墙、茅厕（一个建筑一个文件）
     wall.js             通用构件：wallWithOpenings（带门窗洞的厚墙，可带过梁/窗台/玻璃）、brickBox（四墙+地坪+平顶+檐口）、baseStain（墙根泛碱泥点）
     doorsWindows.js     woodDoor（门框+门槛+向内半开的门扇+倒福）、woodWindow（木框窗棂）、couplets（春联+横批）
-  trees/                泡桐（当地叫梧桐）、石榴、枣树（一种树一个文件）
+  trees/                泡桐（当地叫梧桐）、石榴、枣树（一种树一个文件）；picking.js 摘果子动画
     treeBuilder.js      递归生长枝干骨架 → 缩放到目标树高/冠幅 → 树皮圆管 + 叶片卡片（InstancedMesh）+ 挂果点 + 碰撞体
     wind.js             叶片风摆（onBeforeCompile 注入顶点位移），main.js 每帧 updateWind(t)
-  well/                 压水井：井台、铸铁泵身、出水嘴、压杆（节点 handle-pivot / spout-tip / piston-rod 留给第 6 步动画）、铁桶、葫芦瓢
+  well/                 压水井：井台、铸铁泵身、出水嘴、压杆、铁桶、葫芦瓢；pumping.js 压水动画（压杆上下、水柱、桶里水位上升、涟漪）
   garden/               菜地：两畦（丝瓜、豆角）、起垄、竹竿人字架、藤叶卡片、丝瓜和豆荚
   lighting/             光照与时间
     index.js            Sky 天空（带云）+ 天空生成的环境光（PMREM，压低太阳光晕）+ 太阳/月亮平行光（阴影）+ 半球光 + 远雾；setTime(v)、onTimeChange
@@ -67,12 +67,18 @@ src/
     nightLights.js      夜间：屋里吊灯泡（点光源）、窗后暖光面、门窗向外的聚光
     postfx.js           EffectComposer：RenderPass → 识别透明叶片的 GTAO（仅高画质）→ OutputPass（ACES + sRGB）
   effects/smoke.js      厨房烟囱炊烟粒子（setAmount 随时间变化）
-  controls/             俯视/环绕/走进去 三种浏览模式、碰撞、手机摇杆
+  controls/             浏览与交互
+    viewModes.js        三种模式切换：top 俯视（平移缩放）、orbit 环绕、walk 走进去
+    firstPerson.js      第一人称：WASD/方向键、Shift 跑、鼠标转头（单击锁定，Esc 退出；未锁定时拖动）、上台阶、视线起伏
+    colliders.js        从 userData.solid 的 Mesh 生成可旋转矩形碰撞体 + 高度过滤；groundHeight(x,z) 台阶/室内地坪
+    touch.js            手机：左下虚拟摇杆、滑动转头、轻点交互
+    interact.js         点击压水井 / 井旁按 E 压水；点击摘石榴、枣；走近提示；“兜里”计数
   interiors/            室内细节（以后补），见 interiors/README.md
-  ui/                   样式、HUD；timeSlider.js 时间滑块
+  ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针
 scripts/
   gen-plan.mjs          由 layout.js 生成 docs/plan.svg
   screenshot.mjs        自检截图
+  interaction-test.mjs  交互自检（npm run test:interact）：撞墙、出大门、上台阶进屋、进厨房、撞树、按 E 压水、摘石榴、摘枣
 docs/
   scene-spec.md         场景权威描述
   plan.svg              俯视平面图
@@ -80,7 +86,7 @@ docs/
 
 ## 实现约定
 
-- **碰撞**：参与第一人称碰撞的 Mesh 设 `userData.solid = true`（墙、树干、泵身、玻璃等；地坪、台阶、屋顶为 false）。第 6 步从场景里收集这些 Mesh 生成碰撞体
+- **碰撞**：参与第一人称碰撞的 Mesh 设 `userData.solid = true`（墙、树干、泵身、玻璃、门扇等；地坪、台阶、屋顶为 false）。controls/colliders.js 在第一次进入“走进去”时收集，只认绕竖轴的旋转；高度在“脚底+0.22 m ~ 脚底+1.3 m”之外的不挡人。新加的室内家具要挡人就设 solid=true；以后室内地坪有变化要同步改 groundHeight()
 - **室内锚点**：北屋每间、厨房各有一个 `interior-anchor-<west|east|kitchen>` 节点，位于室内西北角墙内侧、地坪面，`userData.size = { w, d, h }` 为室内净空
 - 北屋室内地坪 0.45 m，门洞底 = 地坪；台阶 3 级在门外
 - 树冠不能用球体：用 treeBuilder 的枝干骨架 + 叶片卡片。树的外形参数在各物种文件顶部的 PARAMS 里
@@ -104,7 +110,7 @@ docs/
 - [x] **第 3 步**：材质与建筑细节（红砖、土墙、门窗、台阶、灶台、影背墙瓷砖画、铁门）
 - [x] **第 4 步**：植物（梧桐、石榴、枣树、菜地）和压水井
 - [x] **第 5 步**：光影、Sky 天空、GTAO/SSAO、时间切换、星空、炊烟、雾
-- [ ] **第 6 步**：三种浏览模式完善、第一人称碰撞、手机摇杆、压水井/摘果交互、指北针
+- [x] **第 6 步**：三种浏览模式完善、第一人称碰撞、手机摇杆、压水井/摘果交互、指北针
 - [ ] **第 7 步**：性能分级、单文件 HTML 打包（Release 附件或 dist-single/）、README 写在线链接和操作说明
 
 ## 待确认 / 已做的假设

@@ -17,3 +17,31 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #d9c8a4; fon
 #time .ticks { display: flex; justify-content: space-between; margin-top: 2px; }
 #time .ticks button { font: inherit; font-size: 13px; background: none; border: none; color: #6a5038; padding: 2px 4px; cursor: pointer; }
 #time .ticks button.active { color: #8a3b26; font-weight: 700; }
+
+/* 指北针 */
+#compass { position: fixed; right: 12px; top: 60px; pointer-events: none; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.25)); }
+/* 提示 */
+#hud2 .toast, #hud2 .hint, #hud2 .help { position: fixed; left: 50%; transform: translateX(-50%); background: rgba(40, 28, 18, 0.72); color: #fff6e4; border-radius: 8px; padding: 7px 14px; font-size: 14px; pointer-events: none; opacity: 0; transition: opacity 0.4s; white-space: nowrap; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; }
+#hud2 .toast { top: 64px; }
+#hud2 .hint { bottom: 96px; }
+#hud2 .help { top: 104px; white-space: normal; text-align: center; font-size: 13px; }
+#hud2 .show { opacity: 1; }
+#hud2 .basket { position: fixed; right: 12px; top: 124px; color: #3a2a18; background: rgba(255, 248, 235, 0.8); border-radius: 6px; padding: 3px 8px; font-size: 13px; }
+#hud2 .basket:empty { display: none; }
+#hud2 .crosshair { position: fixed; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: rgba(255,255,255,0.85); box-shadow: 0 0 0 1px rgba(0,0,0,0.4); display: none; pointer-events: none; }
+#hud2 .crosshair.show { display: block; }
+/* 手机摇杆 */
+#touch { display: none; }
+#touch .stick { position: fixed; left: 24px; bottom: 28px; width: 120px; height: 120px; border-radius: 50%; background: rgba(255, 248, 235, 0.25); border: 2px solid rgba(255, 248, 235, 0.6); touch-action: none; }
+#touch .knob { position: absolute; left: 36px; top: 36px; width: 48px; height: 48px; border-radius: 50%; background: rgba(255, 248, 235, 0.85); box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+/* 手机：顶部标题和按钮会换成两行，指北针、提示往下挪；“走进去”时时间滑块挪到摇杆右边 */
+@media (max-width: 700px) {
+  #title { font-size: 14px; }
+  #compass { top: 112px; }
+  #hud2 .toast { top: 112px; }
+  #hud2 .help { top: 160px; }
+  #hud2 .basket { top: 176px; }
+  body.walking #time { left: 160px; right: 12px; width: auto; transform: none; bottom: 28px; padding: 6px 8px 4px; }
+  body.walking #time .ticks button { font-size: 12px; padding: 2px 1px; }
+  body.walking #hud2 .hint { bottom: 168px; }
+}
