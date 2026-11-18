@@ -10,7 +10,7 @@
 
 ## 发给家人：单文件版（不用联网）
 
-- 下载：[laojia-yuanzi.html](https://github.com/songyutao0408-dot/laojia-yuanzi/releases/download/latest/laojia-yuanzi.html)（约 0.7 MB）
+- 下载：[laojia-yuanzi.html](https://github.com/songyutao0408-dot/laojia-yuanzi/releases/download/latest/laojia-yuanzi.html)（约 4 MB，含背景音乐）
   - 也可以从网站直接下载：https://songyutao0408-dot.github.io/laojia-yuanzi/laojia-yuanzi.html （右键“另存为”）
 - 双击用浏览器打开就行，不需要联网，所有内容都在这一个文件里
 - 可以通过微信、QQ、邮件发给家人。手机上收到后，选“用浏览器打开”（微信里的预览可能打不开）
@@ -34,7 +34,7 @@
 
 - 屏幕下方的**时间滑块**：清晨 / 正午 / 傍晚 / 夜晚，可以拖到中间看过渡。夜晚北屋窗户透出灯光，满天星星
 - 右上角的**指北针**始终指向北
-- **背景音乐**：原创的怀旧小曲（古筝、竹笛的味道），循环播放。浏览器规定要先点一下页面才能出声；指北针左边的 ♪ 按钮可以开关，会记住你的选择。iPhone 上如果没声音，看看侧边静音开关
+- **背景音乐**：怀旧背景音乐，循环播放。浏览器规定要先点一下页面才能出声；指北针左边的 ♪ 按钮可以开关，会记住你的选择。iPhone 上如果没声音，看看侧边静音开关
 - 墙、树干、窗户都穿不过去；门前台阶会一级级走上去，能走进两间北屋和厨房，也能从大门走出去
 
 ### 能做的事（在“走进去”里）

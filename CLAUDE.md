@@ -69,9 +69,10 @@ src/
     nightLights.js      夜间：屋里吊灯泡（点光源）、窗后暖光面、门窗向外的聚光
     postfx.js           EffectComposer：RenderPass → 识别透明叶片的 GTAO（仅高画质）→ OutputPass（ACES + sRGB）
   effects/smoke.js      厨房烟囱炊烟粒子（setAmount 随时间变化）
-  audio/                背景音乐（纯合成，无音频文件）
-    score.js            乐谱：原创《老院子》，D 宫五声调式、72 拍/分、16 小节约 53 秒；改旋律/和弦改这里
-    bgm.js              renderBGM()：OfflineAudioContext 离线合成（拨弦/竹笛/垫底和弦/分解和弦/低音 + 混响 + 磁带走音 + 低通），尾巴折回开头无缝循环；createBGMPlayer() 淡入淡出、后台暂停
+  audio/                背景音乐
+    bgm.mp3             用户提供的 BGM（2:40）：已裁掉开头 0.13 s 空白、开头 0.3 s 淡入、结尾 3 s 淡出，128 kbps（原曲结尾是突然停住的，不淡出循环会“咔”一下）
+    bgm.js              createBGMPlayer()：<audio loop> 边下边播 + Web Audio GainNode 淡入淡出（iOS 的 audio.volume 只读）；空闲时预取成 blob；后台暂停；probe() 自检用
+                        单文件版里 MP3 以 data: 内联；只通过 SRC.url 引用一次，否则压缩器会把 3.4 MB 的字符串复制多份
   controls/             浏览与交互
     viewModes.js        三种模式切换：top 俯视（平移缩放）、orbit 环绕、walk 走进去
     firstPerson.js      第一人称：WASD/方向键、Shift 跑、按住鼠标拖动转头（不锁定鼠标）、上台阶、进门辅助（朝门走时自动往门洞中线靠）、视线起伏
@@ -120,7 +121,7 @@ docs/
 - [x] **第 6 步**：三种浏览模式完善、第一人称碰撞、手机摇杆、压水井/摘果交互、指北针
 - [x] **第 7 步**：性能分级、单文件 HTML 打包（Release 附件或 dist-single/）、README 写在线链接和操作说明
 
-七步全部完成。之后追加：背景音乐（src/audio/，用户第一次点击/按键后开始循环，♪按钮开关并记住选择）。
+七步全部完成。之后追加：背景音乐（src/audio/，用户第一次点击/按键后开始循环，♪按钮开关并记住选择）。最初是代码合成的原创小曲，后按用户要求换成用户提供的 MP3（合成版在 git 历史 PR 9 里）。
 
 之后的迭代（如北屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
 
