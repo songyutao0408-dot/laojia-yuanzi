@@ -71,3 +71,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #d9c8a4; fon
 @media (max-width: 700px) {
   #music { top: 117px; }
 }
+
+/* 音乐被浏览器拦下时的“进入院子”遮罩（点一下 = 浏览器要求的用户操作） */
+#enter { position: fixed; inset: 0; z-index: 9; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: radial-gradient(ellipse at center, rgba(40, 26, 14, 0.25), rgba(40, 26, 14, 0.6)); cursor: pointer; }
+#enter.show { display: flex; animation: enterIn 0.5s ease; }
+#enter button { font: inherit; font-size: 22px; font-weight: 700; letter-spacing: 4px; padding: 14px 36px; border-radius: 32px; border: 2px solid #fff3df; background: rgba(138, 59, 38, 0.95); color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.35); cursor: pointer; }
+#enter .sub { color: #fff3df; font-size: 14px; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+@keyframes enterIn { from { opacity: 0; } to { opacity: 1; } }
