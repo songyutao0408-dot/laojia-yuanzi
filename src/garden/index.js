@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Q } from '../core/quality.js';
 import { GARDEN as G } from '../layout.js';
 import { box, worldUV } from '../core/box.js';
 import { rng } from '../textures/canvas.js';
@@ -75,7 +76,7 @@ export function createGarden() {
     // 藤叶：沿竹竿从下往上、在顶上更密
     const isLuffa = bed.crop === '丝瓜';
     const leafMat = applyWind(leafMaterial(isLuffa ? luffaLeaves() : beanLeaves(), { roughness: 0.7 }), { amp: 0.025, freq: 2.1 });
-    const count = isLuffa ? 300 : 340;
+    const count = Math.round((isLuffa ? 300 : 340) * Q.leaf);
     const geo = new THREE.PlaneGeometry(1, 1).translate(0, 0.5, 0);
     const leaves = new THREE.InstancedMesh(geo, leafMat, count);
     const m4 = new THREE.Matrix4();

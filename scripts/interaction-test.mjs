@@ -34,7 +34,7 @@ async function open(from, to, { mobile = false } = {}) {
   page.setDefaultTimeout(240000);
   page.on('pageerror', (e) => errors.push(e.message));
   const cam = `${from[0]},1.2,${from[1]},${to[0]},1.2,${to[1]}`;
-  await page.goto(`${base}?view=walk&quality=low&cam=${cam}`, { waitUntil: 'commit', timeout: 120000 });
+  await page.goto(`${base}?view=walk&quality=low&autoperf=off&cam=${cam}`, { waitUntil: 'commit', timeout: 120000 });
   await page.waitForFunction(() => window.__sceneReady === true, null, { timeout: 300000 });
   await page.waitForTimeout(1500);
   return { page, ctx };

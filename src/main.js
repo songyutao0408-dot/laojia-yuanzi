@@ -1,5 +1,8 @@
 import { createEngine } from './core/engine.js';
-import { detectQuality } from './core/quality.js';
+import { detectQuality, applyQuality } from './core/quality.js';
+import { createPerfMonitor } from './core/perfMonitor.js';
+import { TEX } from './textures/canvas.js';
+import { prewarmTextures } from './textures/prewarm.js';
 import { createLighting } from './lighting/index.js';
 import { createPostFX } from './lighting/postfx.js';
 import { TIME_KEYS } from './lighting/timeOfDay.js';
@@ -21,12 +24,19 @@ import { createPicking } from './trees/picking.js';
 
 const params = new URLSearchParams(location.search);
 const quality = detectQuality();
+const Q = applyQuality(quality);
+TEX.scale = Q.texScale;
 const engine = createEngine(document.getElementById('app'), quality);
 const { scene, camera, renderer } = engine;
 
-// 先让“正在生成”的提示画出来，再开始（同步的）贴图生成
-await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+// 先生成所有程序贴图（每张之间让出一帧，显示进度），再搭场景
 const t0 = performance.now();
+const bar = document.querySelector('#loading .bar i');
+const pct = document.querySelector('#loading .pct');
+await prewarmTextures((p) => {
+  if (bar) bar.style.width = `${Math.round(p * 100)}%`;
+  if (pct) pct.textContent = `${Math.round(p * 100)}%`;
+});
 const lighting = createLighting(engine);
 scene.add(createGround(), createHorizon());
 scene.add(createBuildings());
@@ -35,7 +45,7 @@ scene.add(createWell());
 scene.add(createGarden());
 const smoke = createSmoke();
 scene.add(smoke.object);
-createPostFX(engine);
+const postfx = createPostFX(engine);
 const buildMs = Math.round(performance.now() - t0);
 console.info(`场景生成用时 ${buildMs} ms（画质：${quality}）`);
 document.getElementById('loading')?.classList.add('done');
@@ -86,4 +96,7 @@ setView(params.get('view') || 'orbit');
 const cam = params.get('cam')?.split(',').map(Number);
 if (cam?.length === 6) views.lookAt(cam.slice(0, 3), cam.slice(3));
 
-window.__app = { engine, views, setView, lighting, buildMs, quality, pumping, interaction };
+// ?autoperf=off 关闭按帧率自动降档（自检截图用：无头浏览器帧率极低）
+const perf = params.get('autoperf') === 'off' ? null : createPerfMonitor(engine, { gtao: postfx.gtao, sun: lighting.sun });
+
+window.__app = { engine, views, setView, lighting, buildMs, quality, pumping, interaction, perf };

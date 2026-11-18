@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # 发布 Release（附单文件 HTML）
   pages: write
   id-token: write
 
@@ -27,6 +27,12 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run build:single
+      # 单文件版也放到网站上，可直接下载：.../laojia-yuanzi/laojia-yuanzi.html
+      - run: cp dist-single/index.html dist/laojia-yuanzi.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: laojia-yuanzi-single-html
+          path: dist-single/index.html
       - uses: actions/configure-pages@v5
         if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v3
@@ -44,3 +50,23 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # 合并到 main 后，把单文件 HTML 发布成“最新版” Release 附件，方便下载发给家人
+  release:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: laojia-yuanzi-single-html
+      - name: 发布 latest Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          mv index.html laojia-yuanzi.html
+          gh release delete latest --repo "$REPO" --yes --cleanup-tag || true
+          gh release create latest laojia-yuanzi.html --repo "$REPO" --target "${{ github.sha }}" \
+            --title "老家的院子（单文件版，最新）" \
+            --notes "下载 laojia-yuanzi.html，双击用浏览器打开即可，不需要联网。电脑推荐 Chrome / Edge；手机可以用微信、QQ 发过去，在浏览器里打开。"

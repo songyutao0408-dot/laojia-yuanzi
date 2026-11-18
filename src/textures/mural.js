@@ -5,7 +5,12 @@ import { canvas, rng, textureSet, hash } from './canvas.js';
  * 由 cols × rows 块 20 cm 方瓷砖拼成，白色瓷砖缝，釉面光滑（低粗糙度）。
  * 返回 { set, tilesX, tilesY, tile }，set 为 PBR 纹理（UV 0..1 铺满整幅画，不平铺）。
  */
-export function tileMural({ cols = 11, rows = 8 } = {}) {
+let muralCache = null;
+export function tileMural(opts) {
+  return (muralCache ??= buildMural(opts));
+}
+
+function buildMural({ cols = 11, rows = 8 } = {}) {
   const T = 128; // 每块瓷砖的像素
   const c = canvas(cols * T, rows * T);
   const W = c.width;

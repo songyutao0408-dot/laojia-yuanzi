@@ -31,9 +31,9 @@
 - `npm run build:single` → `dist-single/index.html`（vite-plugin-singlefile，所有资源内联，可双击打开）
 - `npm run plan` → 重新生成 `docs/plan.svg`
 - `npm run build && npm run shots` → Playwright 无头浏览器截图到 `screenshots/`（已 gitignore），并检查黑屏和页面报错。机位列表在 `scripts/screenshot.mjs` 的 `SHOTS`（俯视、环绕、门口、北屋两间室内、厨房室内、院内看大门、台阶看院子）。Playwright 用本机全局安装的版本，不在 package.json 里
-- 页面支持 `?view=top|orbit|walk` 直接打开指定视角，`&time=dawn|noon|dusk|night` 指定时间，`&quality=low|high` 指定画质，`&cam=x,y,z,tx,ty,tz` 指定相机位置/注视点；`window.__app` 暴露 engine / views 方便调试
+- 页面支持 `?autoperf=off`（自检脚本都带上，否则无头浏览器 2 fps 会触发自动降档），`?view=top|orbit|walk` 直接打开指定视角，`&time=dawn|noon|dusk|night` 指定时间，`&quality=low|high` 指定画质，`&cam=x,y,z,tx,ty,tz` 指定相机位置/注视点；`window.__app` 暴露 engine / views 方便调试
 - 部署：`.github/workflows/deploy.yml`，push 到 `main` 自动构建并发布到 GitHub Pages
-  （线上地址：https://songyutao0408-dot.github.io/laojia-yuanzi/ ）
+  （线上地址：https://songyutao0408-dot.github.io/laojia-yuanzi/ ）；同时把单文件版放到网站 `/laojia-yuanzi.html`，并更新名为 `latest` 的 Release（附件 laojia-yuanzi.html）
 
 ## 目录结构与模块职责
 
@@ -44,12 +44,14 @@ src/
   main.js               入口：创建 engine，按模块组装场景，绑定 UI
   layout.js             ★ 唯一的尺寸/位置数据源（纯数据，不 import three）
   core/engine.js        渲染器、场景、相机、主循环（onUpdate 每帧回调、onResize、setRenderFn 接后期、renderNow）
-  core/quality.js       设备性能分级 high/low（?quality= 可强制），低端关 GTAO、阴影贴图减半
+  core/quality.js       设备性能分级 high/low（?quality= 可强制）；Q 为当前设置（texScale 贴图分辨率、leaf 叶片数量系数、GTAO、阴影、像素比）
+  core/perfMonitor.js   运行中按实际帧率自动降档（< 28 fps：关 GTAO → 降像素比 → 降阴影 → 再降像素比）；?autoperf=off 关闭
   core/geom.js          矩形小工具
   core/box.js           box() 盒子工具 + worldUV()：按世界坐标（米）生成 UV，贴图比例真实、跨墙段连续
   core/whitebox.js      白模纯色材质（第 4 步后已基本不用，保留给快速试验）
   textures/             canvas 程序生成的 PBR 贴图（颜色/法线/粗糙度），见 textures/index.js 的清单
     leaves.js           带透明通道的叶片簇贴图（泡桐/石榴/枣/丝瓜/豆角）+ leafMaterial()
+    prewarm.js          加载时逐张预生成所有贴图（每张让出一帧，驱动进度条）
     materials.js        mat(key) 材质库（首次使用时生成并缓存）；stainMat/wetMat/grassMat/coupletMat/fuMat 贴花材质
   ground/               黄土地面（院内没有砖路）、院外地面、井边湿地；horizon.js 院外远处的树林剪影（被雾吞没）
   buildings/            北屋、厨房、土墙、大门、影背墙、茅厕（一个建筑一个文件）
@@ -97,7 +99,7 @@ docs/
 - **光照经验**：傍晚/清晨太阳太低（< 10°）时，2.2 m 的西土墙和 10 m 的泡桐会把整个院子罩进阴影，所以光照用的太阳比天空里的太阳略高；天空生成环境光时要压低太阳附近的米氏散射，否则朝着太阳的墙会被“照白”
 - 透明/贴花/烟/远景用 `userData.noAO = true` 或透明材质，GTAO 渲染法线时会跳过它们
 - **贴图与 UV**：盒子类几何用 `core/box.js` 的世界坐标 UV（单位：米），贴图 `textureSet(..., meters)` 设置 repeat = 1/meters。不平铺的画面（瓷砖画、春联）用几何体自带 0..1 UV
-- **贴图都是运行时 canvas 生成**，首次打开有生成耗时（`window.__app.buildMs`）；分辨率总开关 `TEX.scale`（textures/canvas.js），第 7 步按设备性能调整
+- **贴图都是运行时 canvas 生成**，首次打开有生成耗时（`window.__app.buildMs`，测试机上高画质约 4 s、低画质约 1.3 s）；分辨率总开关 `TEX.scale`（低画质 0.5）。fillMulti 回调里的 x, y 始终是设计分辨率坐标，新写贴图照常按设计尺寸写即可；新材质加进 materials.js 的 DEFS 会被自动预生成
 - 北屋/厨房室内墙面目前与外墙同为清水砖，顶棚白灰；室内装修（抹灰、刷白）留给 src/interiors/ 阶段决定
 
 ## 工作流程（用户要求）
@@ -113,7 +115,9 @@ docs/
 - [x] **第 4 步**：植物（梧桐、石榴、枣树、菜地）和压水井
 - [x] **第 5 步**：光影、Sky 天空、GTAO/SSAO、时间切换、星空、炊烟、雾
 - [x] **第 6 步**：三种浏览模式完善、第一人称碰撞、手机摇杆、压水井/摘果交互、指北针
-- [ ] **第 7 步**：性能分级、单文件 HTML 打包（Release 附件或 dist-single/）、README 写在线链接和操作说明
+- [x] **第 7 步**：性能分级、单文件 HTML 打包（Release 附件或 dist-single/）、README 写在线链接和操作说明
+
+七步全部完成。之后的迭代（如北屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
 
 ## 待确认 / 已做的假设
 

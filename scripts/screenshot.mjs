@@ -58,7 +58,7 @@ for (const [view, query] of SHOTS.filter(([n]) => !only.length || only.includes(
   // 无头浏览器用软件渲染，偶尔导航超时：失败就重试一次
   for (let attempt = 0; ; attempt++) {
     try {
-      await page.goto(`${base}?${query}&quality=${QUALITY}`, { waitUntil: 'commit', timeout: 120000 });
+      await page.goto(`${base}?${query}&quality=${QUALITY}&autoperf=off`, { waitUntil: 'commit', timeout: 120000 });
       await page.waitForFunction(() => window.__sceneReady === true, null, { timeout: 300000 });
       break;
     } catch (e) {
