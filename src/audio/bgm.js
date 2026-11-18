@@ -99,21 +99,29 @@ export function createBGMPlayer() {
       }
       return { rms: +rms.toFixed(4), time: +(audio?.currentTime ?? 0).toFixed(2), duration: +(audio?.duration ?? 0).toFixed(2), src: audio?.src.slice(0, 5) };
     },
-    /** 必须在用户手势里调用 */
-    async start() {
-      if (playing) return;
+    /**
+     * 开始播放，返回是否真的出声了。
+     * 在用户手势里调用一定成功；不在手势里（页面一打开就试）多数浏览器会拦下，这时返回 false、什么也不留下。
+     */
+    async start({ auto = false } = {}) {
+      if (playing) return true;
       playing = true;
       clearTimeout(fadeTimer);
       ensure();
-      ctx?.resume();
+      const resumed = ctx ? ctx.resume().catch(() => {}) : null;
       try {
         await audio.play();
+        // 音频元素放行了，但 AudioContext 可能还被挂起（那样声音会被 GainNode 吃掉）
+        if (ctx && ctx.state !== 'running') await Promise.race([resumed, new Promise((r) => setTimeout(r, 300))]);
+        if (ctx && ctx.state !== 'running') throw new Error('AudioContext 未被允许启动');
       } catch (e) {
         playing = false;
-        console.warn('背景音乐播放失败', e);
-        return;
+        audio.pause();
+        if (!auto) console.warn('背景音乐播放失败', e);
+        return false;
       }
       fade(VOL, 2.5);
+      return true;
     },
     stop() {
       if (!playing) return;

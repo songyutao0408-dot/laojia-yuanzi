@@ -61,7 +61,20 @@ const ui = createHUD(document.getElementById('hud2'), { touch: isTouch });
 const compass = createCompass(document.getElementById('compass'));
 // 背景音乐：第一次点击/按键后开始循环播放，右上角♪按钮开关
 const bgm = createBGMPlayer();
-createMusicButton(document.getElementById('music'), bgm);
+const music = createMusicButton(document.getElementById('music'), bgm);
+// 音乐默认开：先直接试播；被浏览器拦下就显示“进入院子 ♪”，点一下进入并开始播放
+music.tryAutoplay().then((ok) => {
+  if (ok || !music.wanted || bgm.playing) return;
+  const enter = document.getElementById('enter');
+  enter.classList.add('show');
+  const go = () => {
+    enter.classList.remove('show');
+    music.play();
+    window.removeEventListener('keydown', go);
+  };
+  enter.addEventListener('click', go, { once: true });
+  window.addEventListener('keydown', go);
+});
 const pumping = createPumping(scene.getObjectByName('well'));
 const picking = createPicking();
 const interaction = createInteraction({ engine, views, pumping, picking, ui });

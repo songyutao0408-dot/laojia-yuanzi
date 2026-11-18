@@ -1,9 +1,11 @@
 /**
- * 右上角音乐按钮（指北针左边）。
- * 浏览器不允许网页自己出声，所以：默认“开”，等用户第一次点击/按键/触摸页面时开始播放；
- * 点按钮可以关掉，选择会记住（下次打开保持关闭）。
+ * 右上角音乐按钮（指北针左边）。音乐默认开：
+ * 1. 页面加载完先直接试着播放（有的浏览器允许，比如经常访问的网站）
+ * 2. 被浏览器拦下时，main.js 显示“进入院子 ♪”遮罩，点一下就开始（这一下就是浏览器要求的用户操作）
+ * 3. 兜底：第一次点击/按键/触摸页面任意处也会开始
+ * 点按钮可以关掉，选择会记住（下次打开保持关闭）。?music=off 整体关闭（自检脚本用）。
  */
-const KEY = 'laojia-bgm';
+const KEY = 'laojia-bgm-v2'; // v2：换了新名字，之前测试时关掉的记录不再生效，所有人默认重新是“开”
 
 export function createMusicButton(root, player) {
   let want = true;
@@ -12,6 +14,7 @@ export function createMusicButton(root, player) {
   } catch {
     /* 隐私模式等读不了就默认开 */
   }
+  if (new URLSearchParams(location.search).get('music') === 'off') want = false;
   root.innerHTML = '<button type="button" aria-label="背景音乐"><span class="note">♪</span><span class="slash"></span></button>';
   const btn = root.querySelector('button');
   const render = () => {
@@ -26,11 +29,12 @@ export function createMusicButton(root, player) {
       /* ignore */
     }
   };
-  async function play() {
-    const p = player.start();
+  async function play(opts) {
+    const p = player.start(opts);
     render();
-    await p;
+    const ok = await p;
     render();
+    return ok;
   }
 
   btn.addEventListener('click', (e) => {
@@ -52,5 +56,13 @@ export function createMusicButton(root, player) {
   };
   ['pointerdown', 'keydown', 'touchstart'].forEach((t) => window.addEventListener(t, first, true));
   render();
-  return { render };
+  return {
+    render,
+    get wanted() {
+      return want;
+    },
+    /** 不经用户操作直接试播；返回是否成功 */
+    tryAutoplay: () => (want ? play({ auto: true }) : Promise.resolve(false)),
+    play,
+  };
 }
