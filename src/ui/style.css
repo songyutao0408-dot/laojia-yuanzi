@@ -43,5 +43,14 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #d9c8a4; fon
   #hud2 .basket { top: 176px; }
   body.walking #time { left: 160px; right: 12px; width: auto; transform: none; bottom: 28px; padding: 6px 8px 4px; }
   body.walking #time .ticks button { font-size: 12px; padding: 2px 1px; }
-  body.walking #hud2 .hint { bottom: 168px; }
+  body.walking #hud2 .hint { bottom: 168px; left: 50%; }
+}
+
+/* 走近时出现的动作按钮 */
+#hud2 .actions { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); display: flex; gap: 10px; }
+#hud2 .actions button { font: inherit; font-size: 17px; font-weight: 600; padding: 10px 20px; border-radius: 24px; border: 2px solid #fff3df; background: rgba(138, 59, 38, 0.92); color: #fff; box-shadow: 0 3px 10px rgba(0,0,0,0.3); cursor: pointer; touch-action: manipulation; }
+#hud2 .actions button small { font-size: 11px; margin-left: 6px; padding: 1px 5px; border: 1px solid rgba(255,255,255,0.7); border-radius: 4px; vertical-align: 2px; }
+#hud2 .actions button:active { transform: scale(0.95); }
+@media (max-width: 700px) {
+  body.walking #hud2 .actions { bottom: 168px; left: auto; right: 12px; transform: none; flex-direction: column; align-items: flex-end; }
 }

@@ -1,17 +1,43 @@
 import * as THREE from 'three';
-import { VIEWS } from '../layout.js';
+import { VIEWS, NORTH_HOUSE as NH, KITCHEN as K } from '../layout.js';
 import { resolveCollisions, groundHeight } from './colliders.js';
 
 /**
  * “走进去”：第一人称漫步，视线高度 1.2 m（七八岁小孩）。
- * - 电脑：W A S D / 方向键走动，Shift 跑；鼠标转头（点画面锁定鼠标，Esc 退出；不锁定时按住拖动也能转头）
+ * - 电脑：W A S D / 方向键走动，Shift 跑；按住鼠标拖动转头（不锁定鼠标，点哪里就是哪里）
  * - 手机：左下角虚拟摇杆走动，右半屏滑动转头（见 touch.js）
  * - 碰撞：不能穿墙穿树；台阶自动一级级走上去，北屋室内地坪 0.45 m
+ * - 进门辅助：走到门口附近、朝门走时，自动往门洞中线靠，斜着走也能顺进去
  */
-const RADIUS = 0.22;
+const RADIUS = 0.17;
 const WALK = 1.5; // m/s，小孩走路
 const RUN = 3.0;
 const STEP_UP = 0.22; // 一次最多迈上去的高度
+
+/** 门洞：pos 沿墙方向的中心、at 墙中线、axis 墙的走向、half 半宽 */
+const DOORWAYS = [
+  ...NH.rooms.map((r) => ({ axis: 'x', pos: r.door.x, at: NH.rect.z1 - NH.wall / 2, half: r.door.width / 2 - 0.07 })),
+  { axis: 'z', pos: K.door.z, at: K.rect.x1 - K.wall / 2, half: K.door.width / 2 - 0.07 },
+];
+
+/** 朝门洞走时把人往门洞中线拉（dirX/dirZ 为这一帧的移动方向） */
+function doorAssist(p, dirX, dirZ, dt) {
+  const len = Math.hypot(dirX, dirZ);
+  if (len < 1e-6) return;
+  dirX /= len;
+  dirZ /= len;
+  for (const d of DOORWAYS) {
+    const along = d.axis === 'x' ? p.x - d.pos : p.z - d.pos; // 偏离门洞中线多少
+    const toWall = d.axis === 'x' ? d.at - p.z : d.at - p.x; // 到墙中线的距离（带方向）
+    const moveToWall = d.axis === 'x' ? dirZ * Math.sign(toWall) : dirX * Math.sign(toWall);
+    if (Math.abs(toWall) > 1.6 || Math.abs(along) > d.half + 0.8 || moveToWall < 0.3) continue;
+    const free = d.half - RADIUS - 0.03; // 不用拉的范围
+    if (Math.abs(along) <= free) continue;
+    const k = Math.min(Math.abs(along) - free, 2.0 * dt) * Math.sign(along);
+    if (d.axis === 'x') p.x -= k;
+    else p.z -= k;
+  }
+}
 
 export function createFirstPerson(camera, dom, getColliders) {
   const state = {
@@ -77,15 +103,6 @@ export function createFirstPerson(camera, dom, getColliders) {
   });
   window.addEventListener('pointerup', (e) => {
     if (!state.enabled || e.pointerType === 'touch' || !drag) return;
-    // 没拖动的单击：锁定鼠标（之后鼠标一动就转头）
-    if (drag.moved < 4 && !state.locked && dom.requestPointerLock) {
-      try {
-        const r = dom.requestPointerLock();
-        r?.catch?.(() => {});
-      } catch {
-        /* 某些环境（如 iframe）不允许锁定鼠标，就继续用拖动转头 */
-      }
-    }
     drag = null;
   });
   document.addEventListener('pointerlockchange', () => {
@@ -115,6 +132,7 @@ export function createFirstPerson(camera, dom, getColliders) {
       fwd.set(-Math.sin(state.yaw), 0, -Math.cos(state.yaw));
       right.set(Math.cos(state.yaw), 0, -Math.sin(state.yaw));
       const next = state.pos.clone().addScaledVector(fwd, my * speed * dt).addScaledVector(right, mx * speed * dt);
+      doorAssist(next, next.x - state.pos.x, next.z - state.pos.z, dt);
       // 太高的台阶上不去（当作墙）
       const g = groundHeight(next.x, next.z);
       if (g - state.feet <= STEP_UP) {

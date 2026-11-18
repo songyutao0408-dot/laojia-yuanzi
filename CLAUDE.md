@@ -69,16 +69,16 @@ src/
   effects/smoke.js      厨房烟囱炊烟粒子（setAmount 随时间变化）
   controls/             浏览与交互
     viewModes.js        三种模式切换：top 俯视（平移缩放）、orbit 环绕、walk 走进去
-    firstPerson.js      第一人称：WASD/方向键、Shift 跑、鼠标转头（单击锁定，Esc 退出；未锁定时拖动）、上台阶、视线起伏
+    firstPerson.js      第一人称：WASD/方向键、Shift 跑、按住鼠标拖动转头（不锁定鼠标）、上台阶、进门辅助（朝门走时自动往门洞中线靠）、视线起伏
     colliders.js        从 userData.solid 的 Mesh 生成可旋转矩形碰撞体 + 高度过滤；groundHeight(x,z) 台阶/室内地坪
     touch.js            手机：左下虚拟摇杆、滑动转头、轻点交互
-    interact.js         点击压水井 / 井旁按 E 压水；点击摘石榴、枣；走近提示；“兜里”计数
+    interact.js         走近时出现大按钮（压水/摘石榴/打枣），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
   interiors/            室内细节（以后补），见 interiors/README.md
   ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针
 scripts/
   gen-plan.mjs          由 layout.js 生成 docs/plan.svg
   screenshot.mjs        自检截图
-  interaction-test.mjs  交互自检（npm run test:interact）：撞墙、出大门、上台阶进屋、进厨房、撞树、按 E 压水、摘石榴、摘枣
+  interaction-test.mjs  交互自检（npm run test:interact，ONLY=A..F 可只跑部分）：只用真实按键/点击/触摸，从附近自己走过去：斜着进西北屋、进厨房、井边按 E、点按钮摘石榴、点画面摘石榴、打枣、手机摇杆进东北屋、手机点压水
 docs/
   scene-spec.md         场景权威描述
   plan.svg              俯视平面图
@@ -90,6 +90,8 @@ docs/
 - **室内锚点**：北屋每间、厨房各有一个 `interior-anchor-<west|east|kitchen>` 节点，位于室内西北角墙内侧、地坪面，`userData.size = { w, d, h }` 为室内净空
 - 北屋室内地坪 0.45 m，门洞底 = 地坪；台阶 3 级在门外
 - 树冠不能用球体：用 treeBuilder 的枝干骨架 + 叶片卡片。树的外形参数在各物种文件顶部的 PARAMS 里
+- **交互要宽容**：不要求精确点中小物件（石榴 8 cm、压杆 3 cm）；用户实测过“必须点准”在手机上基本用不了。新增可交互物件时也走“走近出按钮 + 点击就近吸附”的路子
+- **测试要模拟真人**：交互测试只用真实输入事件（keyboard.down / mouse.click / 触摸），不要直接调控制器或瞬移到目标上——第 6 步第一版就是因为测试“作弊”而没发现问题
 - **可采摘的果子**：石榴每个果子是一个 Group（userData.fruit = 'pomegranate'，split 表示咧口）；枣子是一个 InstancedMesh（userData.fruit = 'jujube'），摘掉时把对应实例矩阵缩为 0
 - 自检截图：无头浏览器软件渲染很慢，每个机位 30~60 s，偶尔导航超时，脚本会自动重试一次；截图前等 4 s 让阴影和环境光就绪（太早截会看起来没有阳光）
 - **光照经验**：傍晚/清晨太阳太低（< 10°）时，2.2 m 的西土墙和 10 m 的泡桐会把整个院子罩进阴影，所以光照用的太阳比天空里的太阳略高；天空生成环境光时要压低太阳附近的米氏散射，否则朝着太阳的墙会被“照白”
