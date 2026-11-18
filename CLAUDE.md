@@ -69,6 +69,9 @@ src/
     nightLights.js      夜间：屋里吊灯泡（点光源）、窗后暖光面、门窗向外的聚光
     postfx.js           EffectComposer：RenderPass → 识别透明叶片的 GTAO（仅高画质）→ OutputPass（ACES + sRGB）
   effects/smoke.js      厨房烟囱炊烟粒子（setAmount 随时间变化）
+  audio/                背景音乐（纯合成，无音频文件）
+    score.js            乐谱：原创《老院子》，D 宫五声调式、72 拍/分、16 小节约 53 秒；改旋律/和弦改这里
+    bgm.js              renderBGM()：OfflineAudioContext 离线合成（拨弦/竹笛/垫底和弦/分解和弦/低音 + 混响 + 磁带走音 + 低通），尾巴折回开头无缝循环；createBGMPlayer() 淡入淡出、后台暂停
   controls/             浏览与交互
     viewModes.js        三种模式切换：top 俯视（平移缩放）、orbit 环绕、walk 走进去
     firstPerson.js      第一人称：WASD/方向键、Shift 跑、按住鼠标拖动转头（不锁定鼠标）、上台阶、进门辅助（朝门走时自动往门洞中线靠）、视线起伏
@@ -76,7 +79,7 @@ src/
     touch.js            手机：左下虚拟摇杆、滑动转头、轻点交互
     interact.js         走近时出现大按钮（压水/摘石榴/打枣），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
   interiors/            室内细节（以后补），见 interiors/README.md
-  ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针
+  ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针；musicButton.js 音乐开关（指北针左边）
 scripts/
   gen-plan.mjs          由 layout.js 生成 docs/plan.svg
   screenshot.mjs        自检截图
@@ -117,7 +120,9 @@ docs/
 - [x] **第 6 步**：三种浏览模式完善、第一人称碰撞、手机摇杆、压水井/摘果交互、指北针
 - [x] **第 7 步**：性能分级、单文件 HTML 打包（Release 附件或 dist-single/）、README 写在线链接和操作说明
 
-七步全部完成。之后的迭代（如北屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
+七步全部完成。之后追加：背景音乐（src/audio/，用户第一次点击/按键后开始循环，♪按钮开关并记住选择）。
+
+之后的迭代（如北屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
 
 ## 待确认 / 已做的假设
 

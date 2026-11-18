@@ -43,6 +43,7 @@ const pos = (page) => page.evaluate(() => { const s = window.__app.views.fp.stat
 /** 按住某个键，直到 cond 满足或超时 */
 async function holdUntil(page, key, cond, maxMs = 90000) {
   await page.keyboard.down(key);
+  if (process.env.TRACE) console.log('  按键后', await page.evaluate(() => ({ keys: [...window.__app.views.fp.state.keys], enabled: window.__app.views.fp.state.enabled, focus: document.hasFocus() })));
   const t0 = Date.now();
   let p;
   while (Date.now() - t0 < maxMs) {
