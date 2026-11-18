@@ -2,64 +2,162 @@ import * as THREE from 'three';
 import { WELL, TREES } from '../layout.js';
 
 /**
- * 交互总控：
- * - 点击压水井（压杆、泵身）或在井旁按 E → 压水
- * - 点击石榴、枣子 → 摘下（“走进去”模式下要走到伸手够得着的地方，约 3 m 内）
- * - 走近时在屏幕下方给提示；右上角记着摘了几个
+ * 交互总控（不需要精确点中小东西）：
+ * - 走近压水井 / 石榴树 / 枣树时，屏幕下方出现大按钮：“压水”“摘石榴”“打枣”；点按钮或按 E 执行
+ * - 也可以直接点画面：选点击位置附近（约 90 像素内）够得着的果子或压水井
+ * - 石榴：伸手够得着（离眼睛 2.6 m 内）才能摘；枣树高，小孩站到树下用竹竿打枣，水平 3 m 内的都能打下来
+ * - 环绕/俯视模式下点果子、压水井也有效（不限距离）
  */
-const REACH = 3.2;
-const WELL_NEAR = 2.3;
+const WELL_NEAR = 2.0;
+const POME_REACH = 2.6;
+const JUJUBE_REACH = 3.0;
+const CLICK_RADIUS = 90;
 
 export function createInteraction({ engine, views, pumping, picking, ui }) {
   const { scene, camera, renderer } = engine;
-  const ray = new THREE.Raycaster();
-  const ndc = new THREE.Vector2();
   const well = scene.getObjectByName('well');
   const pump = well.getObjectByName('pump');
-  const fruitTargets = [];
-  scene.traverse((o) => {
-    if (o.name === 'pomegranate-fruits' || o.name === 'jujube-fruits') fruitTargets.push(o);
-  });
+  const handle = well.getObjectByName('handle-pivot');
+  const pomeGroups = scene.getObjectByName('pomegranate-fruits').children;
+  const jujube = scene.getObjectByName('jujube-fruits');
   const basket = { 石榴: 0, 枣: 0 };
   const wellPos = new THREE.Vector3(WELL.x, 0, WELL.z);
-  const fruitTrees = TREES.filter((t) => t.kind === 'pomegranate' || t.kind === 'jujube');
+  const pomeTree = TREES.find((t) => t.kind === 'pomegranate');
+  const jujubeTree = TREES.find((t) => t.kind === 'jujube');
+
+  // 枣子的世界坐标（只算一次）
+  scene.updateMatrixWorld(true);
+  const m4 = new THREE.Matrix4();
+  const jujubePos = [];
+  for (let i = 0; i < jujube.count; i++) {
+    jujube.getMatrixAt(i, m4);
+    jujubePos.push(new THREE.Vector3().setFromMatrixPosition(m4).applyMatrix4(jujube.matrixWorld));
+  }
+  const jujubeLeft = () => {
+    const s = new THREE.Vector3();
+    return (i) => {
+      jujube.getMatrixAt(i, m4);
+      s.setFromMatrixScale(m4);
+      return s.x > 0.01;
+    };
+  };
+  const alive = jujubeLeft();
 
   const walking = () => views.current === 'walk';
+  const eye = () => camera.position;
   const playerXZ = () => {
     const p = walking() ? views.fp.position : camera.position;
     return new THREE.Vector3(p.x, 0, p.z);
   };
+  const flat = (x, z) => new THREE.Vector3(x, 0, z);
+
+  // —— 候选目标 ——
+  function fruitsInReach(limitPome = POME_REACH, limitJujube = JUJUBE_REACH) {
+    const out = [];
+    const e = eye();
+    const w = new THREE.Vector3();
+    for (const g of pomeGroups) {
+      if (g.userData.picked || !g.visible) continue;
+      g.getWorldPosition(w);
+      const d = w.distanceTo(e);
+      if (d <= limitPome) out.push({ kind: '石榴', pos: w.clone(), dist: d, hit: { object: g } });
+    }
+    jujubePos.forEach((p, i) => {
+      if (!alive(i)) return;
+      const d = Math.hypot(p.x - e.x, p.z - e.z);
+      if (d <= limitJujube) out.push({ kind: '枣', pos: p, dist: p.distanceTo(e), hit: { object: jujube, instanceId: i } });
+    });
+    return out;
+  }
+
+  /** 视线正前方附近优先：按“与视线夹角 + 距离”打分 */
+  function bestFacing(list) {
+    const dir = camera.getWorldDirection(new THREE.Vector3());
+    let best = null;
+    let bs = Infinity;
+    for (const c of list) {
+      const v = c.pos.clone().sub(eye()).normalize();
+      const s = (1 - v.dot(dir)) * 4 + c.dist * 0.3;
+      if (s < bs) {
+        bs = s;
+        best = c;
+      }
+    }
+    return best;
+  }
 
   function doPump() {
     pumping.pump();
     ui.toast('吱嘎——吱嘎——，水哗哗地流进桶里');
   }
+  function doPick(c) {
+    const got = picking.pick(c.hit);
+    if (!got) return false;
+    const key = got.includes('石榴') ? '石榴' : '枣';
+    basket[key]++;
+    ui.toast(got === '枣' ? '竹竿一打，掉下来一颗枣，脆甜！' : got === '咧开口的石榴' ? '摘了一个咧开口的石榴，籽红得发亮' : '摘了一个大石榴');
+    ui.basket(basket);
+    return true;
+  }
 
+  // —— 当前能做的事（按钮）——
+  function availableActions() {
+    const acts = [];
+    const p = playerXZ();
+    if (!walking()) return acts;
+    if (p.distanceTo(wellPos) <= WELL_NEAR) acts.push({ label: '压水', run: doPump });
+    const fruits = fruitsInReach();
+    const pome = fruits.filter((f) => f.kind === '石榴');
+    const jj = fruits.filter((f) => f.kind === '枣');
+    if (pome.length) acts.push({ label: '摘石榴', run: () => doPick(bestFacing(pome)) });
+    else if (p.distanceTo(flat(pomeTree.x, pomeTree.z)) <= pomeTree.crown + 0.8) acts.push({ label: '摘石榴', run: () => ui.toast('再往树跟前走走，伸手就够着了') });
+    // 枣树高，小孩站到树底下拿竹竿打
+    if (jj.length && p.distanceTo(flat(jujubeTree.x, jujubeTree.z)) <= jujubeTree.crown) acts.push({ label: '打枣', run: () => doPick(bestFacing(jj)) });
+    return acts;
+  }
+
+  // —— 直接点画面：选点击处附近的目标 ——
+  const proj = new THREE.Vector3();
   function clickAt(clientX, clientY) {
     const r = renderer.domElement.getBoundingClientRect();
-    if (clientX == null) ndc.set(0, 0); // 锁定鼠标时：屏幕中心
-    else ndc.set(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1);
-    ray.setFromCamera(ndc, camera);
-    const hits = ray.intersectObjects([pump, ...fruitTargets], true);
-    if (!hits.length) return false;
-    const hit = hits[0];
-    if (walking() && hit.distance > REACH) {
-      ui.toast('再走近一点才够得着');
-      return true;
+    const cands = [];
+    const toScreen = (w) => {
+      proj.copy(w).project(camera);
+      if (proj.z > 1) return null;
+      return { x: r.left + ((proj.x + 1) / 2) * r.width, y: r.top + ((1 - proj.y) / 2) * r.height };
+    };
+    const near = walking() ? playerXZ().distanceTo(wellPos) <= WELL_NEAR + 0.5 : true;
+    if (near) {
+      for (const o of [handle, pump]) {
+        const w = o.getWorldPosition(new THREE.Vector3());
+        if (o === handle) w.add(new THREE.Vector3(0, 0.15, -0.35)); // 压杆中段
+        cands.push({ kind: 'pump', pos: w });
+      }
     }
-    let o = hit.object;
-    while (o && o !== pump) o = o.parent;
-    if (o === pump) {
-      doPump();
-      return true;
+    for (const f of walking() ? fruitsInReach() : fruitsInReach(1e9, 1e9)) cands.push(f);
+    let best = null;
+    let bd = walking() ? CLICK_RADIUS : 40;
+    for (const c of cands) {
+      const s = toScreen(c.pos);
+      if (!s) continue;
+      const d = Math.hypot(s.x - clientX, s.y - clientY);
+      if (d < bd) {
+        bd = d;
+        best = c;
+      }
     }
-    const got = picking.pick(hit);
-    if (got) {
-      const key = got.includes('石榴') ? '石榴' : '枣';
-      basket[key]++;
-      ui.toast(got === '枣' ? '摘了一颗枣，脆甜！' : got === '咧开口的石榴' ? '摘了一个咧开口的石榴，籽红得发亮' : '摘了一个大石榴');
-      ui.basket(basket);
+    if (!best) {
+      // 点到了够不着的果子：提示走近
+      if (walking()) {
+        for (const f of fruitsInReach(1e9, 1e9)) {
+          const s = toScreen(f.pos);
+          if (s && Math.hypot(s.x - clientX, s.y - clientY) < 40) return ui.toast('再走近一点才够得着');
+        }
+      }
+      return false;
     }
+    if (best.kind === 'pump') doPump();
+    else doPick(best);
     return true;
   }
 
@@ -72,32 +170,36 @@ export function createInteraction({ engine, views, pumping, picking, ui }) {
     if (e.pointerType === 'touch' || !down) return;
     const moved = Math.abs(e.clientX - down.x) + Math.abs(e.clientY - down.y);
     down = null;
-    if (moved > 5) return;
-    const locked = document.pointerLockElement === renderer.domElement;
-    clickAt(locked ? null : e.clientX, locked ? null : e.clientY);
+    if (moved <= 6) clickAt(e.clientX, e.clientY);
   });
 
+  // E 键：执行第一个可做的动作；环绕模式下直接压水
   window.addEventListener('keydown', (e) => {
-    if (e.code !== 'KeyE' || e.repeat) return;
-    if (!walking() || playerXZ().distanceTo(wellPos) <= WELL_NEAR) doPump();
-    else ui.toast('走到压水井旁边再按 E');
+    if ((e.code !== 'KeyE' && e.key !== 'e' && e.key !== 'E') || e.repeat) return;
+    if (!walking()) return doPump();
+    const acts = availableActions();
+    if (acts.length) acts[0].run();
+    else ui.toast('走到压水井或果树旁边再按 E');
   });
 
-  // 走近提示（每 0.2 s 检查一次）
-  let acc = 0;
+  let acc = 1;
   return {
     tap: (x, y) => clickAt(x, y),
+    actions: availableActions,
+    get basket() {
+      return { ...basket };
+    },
     update(dt) {
       acc += dt;
       if (acc < 0.2) return;
       acc = 0;
+      const acts = availableActions();
+      ui.actions(acts);
       if (!walking()) return ui.hint(null);
       const p = playerXZ();
-      if (p.distanceTo(wellPos) <= WELL_NEAR) return ui.hint(ui.touch ? '点一下压杆就能压水' : '按 E（或点压杆）压水');
-      for (const t of fruitTrees) {
-        if (p.distanceTo(new THREE.Vector3(t.x, 0, t.z)) <= t.crown + 1) return ui.hint(t.kind === 'jujube' ? '点树上的枣子摘一颗' : '点树上的石榴摘一个');
-      }
-      ui.hint(null);
+      if (acts.length) ui.hint(null);
+      else if (p.distanceTo(flat(jujubeTree.x, jujubeTree.z)) <= jujubeTree.crown + 1.5) ui.hint('枣树上的枣都打完了');
+      else ui.hint(null);
     },
   };
 }

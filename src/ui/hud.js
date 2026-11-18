@@ -8,13 +8,14 @@ export function createHUD(root, { touch }) {
     <div class="hint"></div>
     <div class="basket"></div>
     <div class="help"></div>
-    <div class="crosshair"></div>`;
+    <div class="crosshair"></div>
+    <div class="actions"></div>`;
   const $ = (s) => root.querySelector(s);
   let toastTimer = 0;
   let helpTimer = 0;
   const help = touch
-    ? '左下角摇杆走动 · 右边滑动转头 · 点压杆压水 · 点果子摘下来'
-    : 'W A S D 走动（Shift 跑）· 鼠标转头（点一下画面锁定，Esc 退出）· E 压水 · 点果子摘下来';
+    ? '左下角摇杆走动 · 屏幕上滑动转头 · 走到压水井、石榴树、枣树旁边，点下面出现的按钮'
+    : 'W A S D 走动（Shift 跑）· 按住鼠标拖动转头 · 走到压水井、果树旁边按 E 或点下面出现的按钮';
   return {
     touch,
     toast(msg) {
@@ -40,6 +41,24 @@ export function createHUD(root, { touch }) {
       clearTimeout(helpTimer);
       if (on) helpTimer = setTimeout(() => el.classList.remove('show'), 7000);
       root.classList.toggle('walking', on);
+    },
+    /** acts：[{label, run}]；同样的按钮不重复重建 */
+    actions(acts) {
+      const el = $('.actions');
+      const key = acts.map((a) => a.label).join('|');
+      if (el.dataset.key === key) {
+        el._acts = acts;
+        return;
+      }
+      el.dataset.key = key;
+      el._acts = acts;
+      el.innerHTML = acts.map((a, i) => `<button data-i="${i}">${a.label}${!touch && i === 0 ? '<small>E</small>' : ''}</button>`).join('');
+      el.querySelectorAll('button').forEach((b) =>
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          el._acts[+b.dataset.i]?.run();
+        }),
+      );
     },
     setLocked(on) {
       $('.crosshair').classList.toggle('show', on);
