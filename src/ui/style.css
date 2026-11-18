@@ -9,7 +9,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #d9c8a4; fon
 #view-buttons button { font: inherit; font-size: 14px; padding: 6px 14px; border: 1px solid #8a6a4a; border-radius: 6px; background: rgba(255, 248, 235, 0.85); color: #3a2a18; cursor: pointer; }
 #view-buttons button.active { background: #8a3b26; color: #fff; border-color: #8a3b26; }
 #view-buttons button:disabled { opacity: 0.45; cursor: not-allowed; }
-#loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: #5a4028; font-size: 18px; letter-spacing: 2px; background: #e9dcc2; transition: opacity 0.6s; z-index: 10; }
+#loading { position: fixed; inset: 0; display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; color: #5a4028; font-size: 18px; letter-spacing: 2px; background: #e9dcc2; transition: opacity 0.6s; z-index: 10; }
 #loading.done { opacity: 0; pointer-events: none; }
 
 #time { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(420px, calc(100vw - 32px)); background: rgba(255, 248, 235, 0.82); border-radius: 10px; padding: 8px 12px 6px; box-sizing: border-box; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
@@ -54,3 +54,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #d9c8a4; fon
 @media (max-width: 700px) {
   body.walking #hud2 .actions { bottom: 168px; left: auto; right: 12px; transform: none; flex-direction: column; align-items: flex-end; }
 }
+
+#loading .bar { width: min(280px, 70vw); height: 6px; border-radius: 3px; background: rgba(90, 64, 40, 0.2); overflow: hidden; }
+#loading .bar i { display: block; height: 100%; width: 0; background: #8a3b26; transition: width 0.2s; }
+#loading .tip { font-size: 13px; letter-spacing: 0; color: #8a6a4a; }

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Q } from '../core/quality.js';
 import { mat } from '../textures/index.js';
 import { jujubeLeaves, leafMaterial } from '../textures/leaves.js';
 import { rng } from '../textures/canvas.js';
@@ -32,7 +33,7 @@ export function createJujube(t) {
   g.add(wood);
 
   leafMat ??= applyWind(leafMaterial(jujubeLeaves(), { roughness: 0.6 }), { amp: 0.035, freq: 1.7 });
-  g.add(leafCards(sk, leafMat, { count: 750, size: [0.35, 0.55], seed, spread: 0.3, droop: 0.3 }));
+  g.add(leafCards(sk, leafMat, { count: Math.round(750 * Q.leaf), size: [0.35, 0.55], seed, spread: 0.3, droop: 0.3 }));
 
   // 枣子：红、半红、青绿
   const pts = fruitPoints(sk, 260, seed + 1, { minLevel: 2, hang: 0.05 });

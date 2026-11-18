@@ -131,9 +131,11 @@ export function textureSet({ color, height, rough, normalStrength = 2 }, meters 
     if (repeat) t.repeat.set(1 / mx, 1 / my);
     return t;
   };
+  // 分辨率减半时相邻像素的高度差变大，法线强度相应减小，凹凸感保持一致
+  const ns = normalStrength * (height ? height.width / Math.max(1, color.width) : 1) * TEX.scale;
   return {
     map: mk(color, true),
-    normalMap: height ? mk(heightToNormal(height, normalStrength), false) : null,
+    normalMap: height ? mk(heightToNormal(height, ns), false) : null,
     roughnessMap: rough ? mk(rough, false) : null,
   };
 }
@@ -151,6 +153,7 @@ export const mixRGB = (a, b, t) => [mix(a[0], b[0], t), mix(a[1], b[1], t), mix(
 /**
  * 一次逐像素生成颜色/高度/粗糙度三张 canvas。
  * fn(u, v, x, y) → { c:[r,g,b](0..255), a?:0..255, h:0..1, r:0..1 }
+ * x, y 始终是“设计分辨率”（w × h）下的整数坐标；实际画布按 TEX.scale 缩放，低端机像素少、生成快。
  */
 export function fillMulti(w, h, fn, { alpha = false } = {}) {
   const color = canvas(w, h);
@@ -165,7 +168,7 @@ export function fillMulti(w, h, fn, { alpha = false } = {}) {
   const ri = rough.getContext('2d').createImageData(W, Hh);
   for (let y = 0, k = 0; y < Hh; y++) {
     for (let x = 0; x < W; x++, k += 4) {
-      const p = fn(x / W, y / Hh, x, y, W, Hh);
+      const p = fn(x / W, y / Hh, Math.floor((x * w) / W), Math.floor((y * h) / Hh), w, h);
       ci.data[k] = p.c[0];
       ci.data[k + 1] = p.c[1];
       ci.data[k + 2] = p.c[2];

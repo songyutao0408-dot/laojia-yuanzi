@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Q } from '../core/quality.js';
 import { mat } from '../textures/index.js';
 import { paulowniaLeaves, leafMaterial } from '../textures/leaves.js';
 import { rng } from '../textures/canvas.js';
@@ -32,7 +33,7 @@ export function createPaulownia(t) {
   g.add(wood);
 
   leafMat ??= applyWind(leafMaterial(paulowniaLeaves(), { roughness: 0.75 }), { amp: 0.05, freq: 1.3 });
-  g.add(leafCards(sk, leafMat, { count: 700, size: [1.0, 1.6], seed, spread: 0.9, droop: 0.25 }));
+  g.add(leafCards(sk, leafMat, { count: Math.round(700 * Q.leaf), size: [1.0, 1.6], seed, spread: 0.9, droop: 0.25 }));
 
   // 蒴果：一串串挂在枝梢，青褐色尖卵形
   const pts = fruitPoints(sk, 22, seed + 5, { minLevel: 2, hang: 0.25 });

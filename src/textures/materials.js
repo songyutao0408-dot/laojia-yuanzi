@@ -37,6 +37,9 @@ const DEFS = {
   limeWash: () => ({ ...concrete({ tint: [1.55, 1.52, 1.45], seed: 59, size: 256 }), roughness: 1 }),
 };
 
+/** 所有材质名（加载时按顺序预生成，用于显示进度） */
+export const MATERIAL_KEYS = () => Object.keys(DEFS);
+
 const cache = new Map();
 function shared(key) {
   // 取另一个材质已生成的贴图组（不重复生成）

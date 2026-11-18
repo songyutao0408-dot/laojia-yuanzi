@@ -55,6 +55,8 @@ export function createEngine(container, quality = 'high') {
     quality,
     onUpdate: (fn) => updaters.push(fn),
     onResize: (fn) => resizers.push(fn),
+    /** 像素比变化后通知后期处理等重新按尺寸分配 */
+    onResizeNow: () => resize(),
     setRenderFn: (fn) => (render = fn),
     /** 立刻渲染一帧（截图自检读像素用） */
     renderNow: () => render(),

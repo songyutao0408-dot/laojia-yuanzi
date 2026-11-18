@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Q } from '../core/quality.js';
 import { mat } from '../textures/index.js';
 import { pomegranateLeaves, leafMaterial } from '../textures/leaves.js';
 import { rng } from '../textures/canvas.js';
@@ -31,7 +32,7 @@ export function createPomegranate(t) {
   g.add(wood);
 
   leafMat ??= applyWind(leafMaterial(pomegranateLeaves(), { roughness: 0.55 }), { amp: 0.03, freq: 1.9 });
-  g.add(leafCards(sk, leafMat, { count: 420, size: [0.32, 0.5], seed, spread: 0.2, droop: 0.1 }));
+  g.add(leafCards(sk, leafMat, { count: Math.round(420 * Q.leaf), size: [0.32, 0.5], seed, spread: 0.2, droop: 0.1 }));
 
   g.add(createFruits(sk, seed));
   g.add(trunkCollider(0.28, 1.2));
