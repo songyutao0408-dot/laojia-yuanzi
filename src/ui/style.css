@@ -58,3 +58,16 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #d9c8a4; fon
 #loading .bar { width: min(280px, 70vw); height: 6px; border-radius: 3px; background: rgba(90, 64, 40, 0.2); overflow: hidden; }
 #loading .bar i { display: block; height: 100%; width: 0; background: #8a3b26; transition: width 0.2s; }
 #loading .tip { font-size: 13px; letter-spacing: 0; color: #8a6a4a; }
+
+/* 背景音乐按钮（指北针左边） */
+#music { position: fixed; right: 76px; top: 64px; }
+#music button { width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid #6a5038; background: rgba(255, 248, 235, 0.85); color: #8a7a68; font-size: 22px; line-height: 1; cursor: pointer; position: relative; padding: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+#music button .slash { position: absolute; left: 50%; top: 50%; width: 28px; height: 2px; background: #8a7a68; transform: translate(-50%, -50%) rotate(-45deg); }
+#music button.on { color: #8a3b26; }
+#music button.on .slash { display: none; }
+#music button.on .note { display: inline-block; animation: bob 1.6s ease-in-out infinite; }
+#music button.loading .note { opacity: 0.45; }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@media (max-width: 700px) {
+  #music { top: 117px; }
+}

@@ -17,6 +17,8 @@ import { createViewModes } from './controls/viewModes.js';
 import { createTimeSlider } from './ui/timeSlider.js';
 import { createHUD } from './ui/hud.js';
 import { createCompass } from './ui/compass.js';
+import { createMusicButton } from './ui/musicButton.js';
+import { createBGMPlayer } from './audio/bgm.js';
 import { createTouchControls } from './controls/touch.js';
 import { createInteraction } from './controls/interact.js';
 import { createPumping } from './well/pumping.js';
@@ -57,6 +59,9 @@ engine.onUpdate((dt) => views.update(dt));
 const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 const ui = createHUD(document.getElementById('hud2'), { touch: isTouch });
 const compass = createCompass(document.getElementById('compass'));
+// 背景音乐：第一次点击/按键后开始循环播放，右上角♪按钮开关
+const bgm = createBGMPlayer();
+createMusicButton(document.getElementById('music'), bgm);
 const pumping = createPumping(scene.getObjectByName('well'));
 const picking = createPicking();
 const interaction = createInteraction({ engine, views, pumping, picking, ui });
@@ -99,4 +104,4 @@ if (cam?.length === 6) views.lookAt(cam.slice(0, 3), cam.slice(3));
 // ?autoperf=off 关闭按帧率自动降档（自检截图用：无头浏览器帧率极低）
 const perf = params.get('autoperf') === 'off' ? null : createPerfMonitor(engine, { gtao: postfx.gtao, sun: lighting.sun });
 
-window.__app = { engine, views, setView, lighting, buildMs, quality, pumping, interaction, perf };
+window.__app = { bgm, engine, views, setView, lighting, buildMs, quality, pumping, interaction, perf };
