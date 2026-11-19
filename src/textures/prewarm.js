@@ -1,6 +1,6 @@
 import { mat, MATERIAL_KEYS, stainMat, wetMat, grassMat, fuMat } from './materials.js';
 import { tileMural } from './mural.js';
-import { paulowniaLeaves, pomegranateLeaves, jujubeLeaves, luffaLeaves, beanLeaves } from './leaves.js';
+import { paulowniaLeaves, pomegranateLeaves, jujubeLeaves, luffaLeaves, beanLeaves, artichokeLeaves, artichokeFlower } from './leaves.js';
 
 /**
  * 加载时把所有程序贴图预先生成一遍：每生成一张就让出一帧，更新进度条，页面不会“卡死”。
@@ -10,7 +10,7 @@ export async function prewarmTextures(onProgress) {
   const jobs = [
     ...MATERIAL_KEYS().map((k) => () => mat(k)),
     () => tileMural(),
-    paulowniaLeaves, pomegranateLeaves, jujubeLeaves, luffaLeaves, beanLeaves,
+    paulowniaLeaves, pomegranateLeaves, jujubeLeaves, luffaLeaves, beanLeaves, artichokeLeaves, artichokeFlower,
     stainMat, wetMat, grassMat, fuMat,
   ];
   const nextFrame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));

@@ -162,3 +162,36 @@ export function mudPlaster({ soot = 0.5, seed = 61 } = {}) {
   });
   return textureSet({ ...set, normalStrength: 2 }, 1);
 }
+
+/**
+ * 石灰抹面（台阶、神龛）：灰白的石灰，用旧了发黄发灰，踩踏处发暗，边角零星掉皮露出里面的旧红砖。
+ * 一张 = 1 m × 1 m
+ */
+export function limePlaster({ seed = 63, chips = 1 } = {}) {
+  const W = 512;
+  const fine = makeFbm(seed, 48, 3);
+  const mid = makeFbm(seed + 1, 6, 4);
+  const chipN = makeFbm(seed + 2, 10, 4);
+  const set = fillMulti(W, W, (u, v, x, y) => {
+    const f = fine(u, v);
+    const m = mid(u, v);
+    let c = [214, 210, 198];
+    c = mixRGB(c, [178, 172, 156], clamp01((m - 0.42) * 1.6)); // 发黄发灰的旧痕
+    c = mixRGB(c, [232, 230, 222], clamp01((f - 0.62) * 2));
+    c = mixRGB(c, [150, 140, 124], clamp01((f - 0.7) * 3) * 0.5); // 细小污点
+    let h = 0.55 + f * 0.15 + m * 0.1;
+    let r = 0.9;
+    // 掉皮：露出里面淡红的旧砖
+    const k = chipN(u, v);
+    const chip = clamp01((k - (0.74 - 0.04 * chips)) * 14);
+    if (chip > 0) {
+      const brick = (Math.floor(y / 32) + Math.floor((x + (Math.floor(y / 32) % 2) * 64) / 128)) % 3;
+      const bc = [[176, 128, 110], [164, 118, 102], [186, 140, 120]][brick];
+      c = mixRGB(c, bc, chip);
+      h -= chip * 0.25;
+      r = 0.95;
+    }
+    return { c, h, r };
+  });
+  return textureSet({ ...set, normalStrength: 2.5 }, 1);
+}

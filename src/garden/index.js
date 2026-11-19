@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createArtichokes } from './artichoke.js';
 import { Q } from '../core/quality.js';
 import { GARDEN as G } from '../layout.js';
 import { box, worldUV } from '../core/box.js';
@@ -129,6 +130,7 @@ export function createGarden() {
       group.add(pods);
     }
   }
+  group.add(createArtichokes());
   return group;
 }
 

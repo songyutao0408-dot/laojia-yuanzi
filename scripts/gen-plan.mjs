@@ -112,14 +112,6 @@ for (const room of NH.rooms) {
     ...room.windows.map((w) => ({ side: 's', kind: 'window', a: w.x - w.width / 2, b: w.x + w.width / 2 })),
   ];
   brickBox(r, NH.wall, ops, room.name, `室内 ${(room.x1 - room.x0 - 1.5 * NH.wall).toFixed(1)}×${(NH.rect.z1 - NH.rect.z0 - 2 * NH.wall).toFixed(1)} m · 高 ${NH.height} m`);
-  // 台阶
-  const st = NH.steps;
-  for (let i = 0; i < st.count; i++) {
-    rect(
-      { x0: room.door.x - st.width / 2, x1: room.door.x + st.width / 2, z0: NH.rect.z1, z1: NH.rect.z1 + st.run * (st.count - i) },
-      `fill="${C.brick}" fill-opacity="${0.35 + i * 0.2}" stroke="${C.ink}" stroke-width="0.6"`,
-    );
-  }
 }
 
 const K = L.KITCHEN;
@@ -139,6 +131,55 @@ text((K.stove.x0 + K.stove.x1) / 2, K.stove.z1 + 0.35, '灶台', 'class="s" text
 const ch = K.chimney;
 rect({ x0: ch.x - ch.size / 2, x1: ch.x + ch.size / 2, z0: ch.z - ch.size / 2, z1: ch.z + ch.size / 2 }, `fill="none" stroke="#111" stroke-width="2" stroke-dasharray="4 2"`);
 text(ch.x + 0.4, ch.z - 0.35, '烟囱', 'class="s"');
+
+// 台阶（两间屋连通）+ 天地神位
+{
+  const st = NH.steps;
+  for (let i = 0; i < st.count; i++) {
+    rect({ x0: st.x0, x1: st.x1, z0: NH.rect.z1, z1: NH.rect.z1 + st.run * (st.count - i) }, `fill="#d8d3c4" fill-opacity="${0.5 + i * 0.2}" stroke="${C.ink}" stroke-width="0.6"`);
+  }
+  text(st.x1 - 1.2, NH.rect.z1 + 0.62, '石灰台阶（连通）', 'class="xs" text-anchor="middle"');
+  const sh = NH.shrine;
+  rect({ x0: sh.x - sh.width / 2, x1: sh.x + sh.width / 2, z0: NH.rect.z1, z1: NH.rect.z1 + sh.depth }, `fill="#b8322a" stroke="${C.ink}" stroke-width="0.8"`);
+  text(sh.x + 0.1, NH.rect.z1 + 1.25, '天地神位', 'class="s" text-anchor="middle" fill="#b8322a"');
+}
+// 大水缸
+{
+  const v = L.WATER_VAT;
+  out.push(`<circle cx="${f(X(v.x))}" cy="${f(Y(v.z))}" r="${v.bellyRadius * S}" fill="#3a2e24" stroke="${C.ink}" stroke-width="1"/>`);
+  out.push(`<circle cx="${f(X(v.x))}" cy="${f(Y(v.z))}" r="${v.rimRadius * 0.8 * S}" fill="#5f7d8a"/>`);
+  text(v.x + 0.55, v.z + 0.12, '水缸', 'class="s"');
+}
+// 洋姜、青石板
+{
+  const B = L.BACK_YARD;
+  const a = B.jerusalemArtichoke;
+  rect(a, `fill="#9a9a3a" fill-opacity="0.35" stroke="#7a7a2a" stroke-width="1" stroke-dasharray="4 3"`);
+  for (let k = 0; k < 26; k++) {
+    const px = a.x0 + 0.2 + ((Math.sin(k * 12.9898) * 43758.5453) % 1 + 1) % 1 * (a.x1 - a.x0 - 0.4);
+    const pz = a.z0 + 0.2 + ((Math.sin(k * 78.233) * 12345.678) % 1 + 1) % 1 * (a.z1 - a.z0 - 0.4);
+    out.push(`<circle cx="${f(X(px))}" cy="${f(Y(pz))}" r="3" fill="#d8a820"/>`);
+  }
+  text((a.x0 + a.x1) / 2, (a.z0 + a.z1) / 2 + 0.1, '洋姜', 'class="b" text-anchor="middle"');
+  const { l, w } = B.slabSize;
+  for (const sl of B.slabs) {
+    out.push(`<rect x="${f(X(sl.x) - (l * S) / 2)}" y="${f(Y(sl.z) - (w * S) / 2)}" width="${f(l * S)}" height="${f(w * S)}" fill="#7d8c96" fill-opacity="0.85" stroke="${C.ink}" stroke-width="0.8" transform="rotate(${-sl.rot} ${f(X(sl.x))} ${f(Y(sl.z))})"/>`);
+  }
+  text(B.slabs[0].x, B.slabs[0].z - 0.45, '青石板', 'class="s" text-anchor="middle"');
+}
+// 秋千（挂在枣树弯出来的枝干上）
+{
+  const t = L.TREES.find((t) => t.kind === 'jujube');
+  const sw = L.SWING;
+  const n = Math.hypot(...sw.dir);
+  const dx = sw.dir[0] / n;
+  const dz = sw.dir[1] / n;
+  line(t.x, t.z, t.x + dx * sw.branchLength, t.z + dz * sw.branchLength, `stroke="#5a3e22" stroke-width="3"`);
+  const cx = t.x + dx * sw.hang;
+  const cz = t.z + dz * sw.hang;
+  line(cx - dx * 0.25, cz - dz * 0.25, cx + dx * 0.25, cz + dz * 0.25, `stroke="#8a5a2a" stroke-width="6"`);
+  text(cx - 0.3, cz + 0.05, '秋千', 'class="s" text-anchor="end"');
+}
 
 // 厨房与西北屋之间的空当
 {

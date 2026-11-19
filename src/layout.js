@@ -32,7 +32,10 @@ export const NORTH_HOUSE = {
   wall: WALL.brick,
   floor: 0.45, // 室内地坪 = 3 级台阶 × 0.15
   partitionX: 0, // 两间之间的隔墙中心线
-  steps: { count: 3, rise: 0.15, run: 0.3, width: 1.4 },
+  // 两间屋的台阶连成一长溜：砖砌成台阶，外面抹石灰；x0..x1 为东西范围（西到厨房东墙那条线，东到菜地前）
+  steps: { count: 3, rise: 0.15, run: 0.3, x0: -4.5, x1: 4.8 },
+  // 台阶正中、两间屋中间的墙根下：天地神位（小神龛 + 香炉），立在最上一级台阶上
+  shrine: { x: 0, width: 0.62, depth: 0.32, height: 1.15 },
   rooms: [
     {
       id: 'west',
@@ -144,6 +147,26 @@ export const GARDEN = {
     { crop: '豆角', z0: 1.0, z1: 5.2, trellis: true },
   ],
 };
+
+/** 大水缸：西北屋门口、西边那棵梧桐树下（门东侧，不挡进门的路） */
+export const WATER_VAT = { x: -2.05, z: -2.35, height: 0.86, rimRadius: 0.36, bellyRadius: 0.43, baseRadius: 0.27 };
+
+/** 影背墙和茅厕之间的空地 */
+export const BACK_YARD = {
+  // 洋姜（菊芋）：一片 2 米来高的洋姜，初秋开小黄花
+  jerusalemArtichoke: { x0: -2.7, x1: 2.4, z0: 6.3, z1: 8.45 },
+  // 凌乱放着的老青石板：1.8 m × 0.6 m × 0.12 m；rot 为绕竖轴转角（度，0 = 长边东西向）；y 为板底高度（叠放的那块垫高）
+  slabs: [
+    { x: -1.9, z: 5.25, rot: 8, y: 0 },
+    { x: 0.35, z: 5.45, rot: -6, y: 0 },
+    { x: 0.55, z: 5.6, rot: 17, y: 0.12 },
+    { x: 3.45, z: 7.55, rot: 78, y: 0 },
+  ],
+  slabSize: { l: 1.8, w: 0.6, t: 0.12 },
+};
+
+/** 枣树弯出来的那根枝干上绑的秋千：枝干从主干约 1.75 m 处朝 dir 方向伸出；秋千挂在离主干 hang 米处 */
+export const SWING = { dir: [-0.8, -0.6], branchFrom: 1.75, branchLength: 2.2, hang: 1.35, seatHeight: 0.45, ropeGap: 0.46 };
 
 /** 默认视角 */
 export const VIEWS = {

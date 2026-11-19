@@ -56,12 +56,13 @@ src/
   ground/               黄土地面（院内没有砖路）、院外地面、井边湿地；horizon.js 院外远处的树林剪影（被雾吞没）
   buildings/            北屋、厨房、土墙、大门、影背墙、茅厕（一个建筑一个文件）
     wall.js             通用构件：wallWithOpenings（带门窗洞的厚墙，可带过梁/窗台/玻璃）、brickBox（四墙+地坪+平顶+檐口）、baseStain（墙根泛碱泥点）
+    steps.js            北屋门前连通两间的石灰台阶（NH.steps.x0..x1）、天地神位小神龛（NH.shrine）
     doorsWindows.js     woodDoor（门框+门槛+向内半开的门扇+倒福）、woodWindow（木框窗棂）、couplets（春联+横批）
-  trees/                泡桐（当地叫梧桐）、石榴、枣树（一种树一个文件）；picking.js 摘果子动画
+  trees/                泡桐（当地叫梧桐）、石榴、枣树（一种树一个文件）；picking.js 摘果子动画；swing.js 秋千（jujube.js 的 addSwingLimb 加出那根弯出来的枝干，参数在 layout.SWING）
     treeBuilder.js      递归生长枝干骨架 → 缩放到目标树高/冠幅 → 树皮圆管 + 叶片卡片（InstancedMesh）+ 挂果点 + 碰撞体
     wind.js             叶片风摆（onBeforeCompile 注入顶点位移），main.js 每帧 updateWind(t)
   well/                 压水井：井台、铸铁泵身、出水嘴、压杆、铁桶、葫芦瓢；pumping.js 压水动画（压杆上下、水柱、桶里水位上升、涟漪）
-  garden/               菜地：两畦（丝瓜、豆角）、起垄、竹竿人字架、藤叶卡片、丝瓜和豆荚
+  garden/               菜地：两畦（丝瓜、豆角）、起垄、竹竿人字架、藤叶卡片、丝瓜和豆荚；artichoke.js 影背墙和茅厕之间的洋姜
   lighting/             光照与时间
     index.js            Sky 天空（带云）+ 天空生成的环境光（PMREM，压低太阳光晕）+ 太阳/月亮平行光（阴影）+ 半球光 + 远雾；setTime(v)、onTimeChange
     timeOfDay.js        四个时间预设（清晨/正午/傍晚/夜晚）及插值；改光照手感主要改这里
@@ -69,6 +70,7 @@ src/
     nightLights.js      夜间：屋里吊灯泡（点光源）、窗后暖光面、门窗向外的聚光
     postfx.js           EffectComposer：RenderPass → 识别透明叶片的 GTAO（仅高画质）→ OutputPass（ACES + sRGB）
   effects/smoke.js      厨房烟囱炊烟粒子（setAmount 随时间变化）
+  yard/                 院子里的零碎物件（一个物件一个文件）：waterVat.js 大水缸、stoneSlabs.js 老青石板
   audio/                背景音乐
     bgm.mp3             用户提供的 BGM（2:40）：已裁掉开头 0.13 s 空白、开头 0.3 s 淡入、结尾 3 s 淡出，128 kbps（原曲结尾是突然停住的，不淡出循环会“咔”一下）
     bgm.js              createBGMPlayer()：<audio loop> 边下边播 + Web Audio GainNode 淡入淡出（iOS 的 audio.volume 只读）；空闲时预取成 blob；后台暂停；probe() 自检用
@@ -78,7 +80,7 @@ src/
     firstPerson.js      第一人称：WASD/方向键、Shift 跑、按住鼠标拖动转头（不锁定鼠标）、上台阶、进门辅助（朝门走时自动往门洞中线靠）、视线起伏
     colliders.js        从 userData.solid 的 Mesh 生成可旋转矩形碰撞体 + 高度过滤；groundHeight(x,z) 台阶/室内地坪
     touch.js            手机：左下虚拟摇杆、滑动转头、轻点交互
-    interact.js         走近时出现大按钮（压水/摘石榴/打枣），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
+    interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
   interiors/            室内细节（以后补），见 interiors/README.md
   ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针；musicButton.js 音乐开关（指北针左边，偏好存在 localStorage 'laojia-bgm-v2'）
 scripts/
@@ -94,11 +96,12 @@ docs/
 
 - **碰撞**：参与第一人称碰撞的 Mesh 设 `userData.solid = true`（墙、树干、泵身、玻璃、门扇等；地坪、台阶、屋顶为 false）。controls/colliders.js 在第一次进入“走进去”时收集，只认绕竖轴的旋转；高度在“脚底+0.22 m ~ 脚底+1.3 m”之外的不挡人。新加的室内家具要挡人就设 solid=true；以后室内地坪有变化要同步改 groundHeight()
 - **室内锚点**：北屋每间、厨房各有一个 `interior-anchor-<west|east|kitchen>` 节点，位于室内西北角墙内侧、地坪面，`userData.size = { w, d, h }` 为室内净空
-- 北屋室内地坪 0.45 m，门洞底 = 地坪；台阶 3 级在门外
+- 北屋室内地坪 0.45 m，门洞底 = 地坪；门外是连通两间的 3 级台阶（x0..x1），groundHeight 按整条台阶算；青石板也能踩上去（groundHeight 里按旋转矩形判断）
 - 树冠不能用球体：用 treeBuilder 的枝干骨架 + 叶片卡片。树的外形参数在各物种文件顶部的 PARAMS 里
 - **交互要宽容**：不要求精确点中小物件（石榴 8 cm、压杆 3 cm）；用户实测过“必须点准”在手机上基本用不了。新增可交互物件时也走“走近出按钮 + 点击就近吸附”的路子
 - **测试要模拟真人**：交互测试只用真实输入事件（keyboard.down / mouse.click / 触摸），不要直接调控制器或瞬移到目标上——第 6 步第一版就是因为测试“作弊”而没发现问题
 - **可采摘的果子**：石榴每个果子是一个 Group（userData.fruit = 'pomegranate'，split 表示咧口）；枣子是一个 InstancedMesh（userData.fruit = 'jujube'），摘掉时把对应实例矩阵缩为 0
+- 自检截图要等加载层消失（`#loading.done`）再拍——第 7 步加了进度条后，`__sceneReady` 会在贴图生成完之前就变成 true
 - 自检截图：无头浏览器软件渲染很慢，每个机位 30~60 s，偶尔导航超时，脚本会自动重试一次；截图前等 4 s 让阴影和环境光就绪（太早截会看起来没有阳光）
 - **光照经验**：傍晚/清晨太阳太低（< 10°）时，2.2 m 的西土墙和 10 m 的泡桐会把整个院子罩进阴影，所以光照用的太阳比天空里的太阳略高；天空生成环境光时要压低太阳附近的米氏散射，否则朝着太阳的墙会被“照白”
 - 透明/贴花/烟/远景用 `userData.noAO = true` 或透明材质，GTAO 渲染法线时会跳过它们
@@ -133,4 +136,4 @@ docs/
 
 另已确认（v3）：西北屋窗只在门西侧、东北屋窗只在门东侧；空当西端有土墙；影背墙距大门三四米；茅厕东西约 2 m。
 
-另已确认（v4）：大门无红砖门垛；菜地种丝瓜、豆角。另已确认（v5）：梧桐约 10 m 高、冠幅半径约 5 m；北屋隔墙无门。另已确认（v7）：所有砖为很淡的旧红色；院内没有砖路（裸露黄土，不要加任何通道/砖/装饰）；梧桐即泡桐；北屋墙根 0.35 m 水泥勒脚。目前 spec 中没有待确认项。
+另已确认（v4）：大门无红砖门垛；菜地种丝瓜、豆角。另已确认（v5）：梧桐约 10 m 高、冠幅半径约 5 m；北屋隔墙无门。另已确认（v7）：所有砖为很淡的旧红色；院内没有砖路（裸露黄土，不要加任何通道/砖/装饰）；梧桐即泡桐；北屋墙根 0.35 m 水泥勒脚。第 8 轮（家人补充的水缸、洋姜/青石板、连通台阶/天地神位、秋千）里样式和范围是 Claude 补的，在 spec 里标了【待确认】。
