@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { NORTH_HOUSE as NH, KITCHEN as K, LOT } from '../layout.js';
+import { NORTH_HOUSE as NH, KITCHEN as K, LOT, BACK_YARD } from '../layout.js';
 
 /**
  * 第一人称碰撞（俯视平面上的 2D 碰撞 + 高度过滤）：
@@ -102,15 +102,25 @@ export function groundHeight(x, z) {
   const r = NH.rect;
   // 北屋室内（含门洞下的门槛位置）
   if (x > r.x0 && x < r.x1 && z > r.z0 && z < r.z1) return NH.floor;
-  // 台阶：越靠近门越高
+  // 台阶（两间屋连通的一长溜）：越靠近墙越高
   const st = NH.steps;
-  for (const room of NH.rooms) {
-    if (Math.abs(x - room.door.x) <= st.width / 2 && z >= r.z1 && z <= r.z1 + st.run * st.count) {
-      const fromWall = z - r.z1;
-      const i = st.count - 1 - Math.floor(fromWall / st.run); // 0 = 最外一级
-      return st.rise * (Math.max(0, i) + 1);
-    }
+  if (x >= st.x0 && x <= st.x1 && z >= r.z1 && z <= r.z1 + st.run * st.count) {
+    const fromWall = z - r.z1;
+    const i = st.count - 1 - Math.floor(fromWall / st.run); // 0 = 最外一级
+    return st.rise * (Math.max(0, i) + 1);
   }
+  // 青石板：可以踩上去（叠着的那块更高）
+  let h = 0;
+  const { l, w, t } = BACK_YARD.slabSize;
+  for (const sl of BACK_YARD.slabs) {
+    const a = (-sl.rot * Math.PI) / 180;
+    const dx = x - sl.x;
+    const dz = z - sl.z;
+    const lx = dx * Math.cos(a) + dz * Math.sin(a);
+    const lz = -dx * Math.sin(a) + dz * Math.cos(a);
+    if (Math.abs(lx) <= l / 2 && Math.abs(lz) <= w / 2) h = Math.max(h, sl.y + t);
+  }
+  if (h > 0) return h;
   const k = K.rect;
   if (x > k.x0 && x < k.x1 && z > k.z0 && z < k.z1) return K.floor;
   return 0;

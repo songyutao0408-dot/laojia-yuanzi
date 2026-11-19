@@ -228,3 +228,43 @@ export const beanLeaves = () =>
 export function leafMaterial(map, { roughness = 0.8, color = 0xffffff } = {}) {
   return new THREE.MeshStandardMaterial({ map, alphaTest: 0.5, side: THREE.DoubleSide, roughness, metalness: 0, color });
 }
+
+/** 洋姜（菊芋）：一小枝上几片粗糙的卵状披针形叶，叶缘有锯齿感，深绿略发灰 */
+export const artichokeLeaves = () =>
+  tex('artichoke', 256, (ctx, S, r) => {
+    for (let i = 0; i < 4; i++) {
+      const x = S * (0.2 + i * 0.2) + (r() - 0.5) * 20;
+      const y = S * (0.45 + r() * 0.25);
+      stem(ctx, x, y, x + (r() - 0.5) * S * 0.08, y + S * 0.12, 2.5, 'rgb(96,104,58)');
+      paintLeaf(ctx, r, (c, L) => ovalLeaf(c, L, 0.27), S * (0.36 + r() * 0.08), x, y, (r() - 0.5) * 1.2, { autumn: 0.22, veins: 'pinnate' });
+    }
+  });
+
+/** 洋姜的小黄花：像小向日葵，10~12 片黄舌瓣、中间褐黄色花心（正面朝外的卡片） */
+export const artichokeFlower = () =>
+  tex('artichoke-flower', 128, (ctx, S, r) => {
+    const cx = S / 2;
+    const cy = S / 2;
+    const n = 11;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + r() * 0.15;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(a);
+      const g = ctx.createLinearGradient(0, 0, 0, -S * 0.46);
+      g.addColorStop(0, 'rgb(214,150,20)');
+      g.addColorStop(1, 'rgb(250,206,48)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(0, -S * 0.27, S * 0.07, S * 0.2, (r() - 0.5) * 0.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    const cg = ctx.createRadialGradient(cx, cy, 2, cx, cy, S * 0.15);
+    cg.addColorStop(0, 'rgb(120,86,30)');
+    cg.addColorStop(1, 'rgb(176,128,36)');
+    ctx.fillStyle = cg;
+    ctx.beginPath();
+    ctx.arc(cx, cy, S * 0.14, 0, Math.PI * 2);
+    ctx.fill();
+  });

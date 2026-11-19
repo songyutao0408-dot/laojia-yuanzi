@@ -4,6 +4,7 @@ import { box } from '../core/box.js';
 import { mat, glassMat, stainMat } from '../textures/index.js';
 import { brickBox, wallWithOpenings, baseStain } from './wall.js';
 import { woodDoor, woodWindow, couplets } from './doorsWindows.js';
+import { createSteps, createShrine } from './steps.js';
 
 /** 每间门上的旧春联（右 = 上联，左 = 下联，站在门外看） */
 const COUPLETS = {
@@ -64,16 +65,9 @@ export function createNorthHouse() {
     }
   }
 
-  // 台阶：3 级红砖台阶，踏面铺砖、侧面砌砖，最上一级与室内地坪齐平
-  const st = NH.steps;
-  const stepMats = [mat('brick'), mat('brick'), mat('paving'), mat('paving'), mat('brick'), mat('brick')];
-  for (const room of NH.rooms) {
-    for (let i = 0; i < st.count; i++) {
-      const top = st.rise * (i + 1);
-      const depth = st.run * (st.count - i);
-      group.add(box(room.door.x - st.width / 2, room.door.x + st.width / 2, top - st.rise, top, NH.rect.z1, NH.rect.z1 + depth, stepMats, { solid: false }));
-    }
-  }
+  // 台阶：两间屋连成一长溜的 3 级台阶，砖砌、外面抹石灰；最上一级与室内地坪齐平
+  group.add(createSteps());
+  group.add(createShrine());
 
   // 墙根水泥勒脚：四面外墙各一条，比砖面凸出 1.5 cm
   {

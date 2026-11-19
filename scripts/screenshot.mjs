@@ -45,6 +45,11 @@ const SHOTS = [
   ['paulownia-under', 'view=orbit&cam=-0.5,1.2,2.5,-2.9,5.5,-1.4'],
   ['gate-from-yard', 'view=orbit&cam=-2.5,1.6,2.5,-7.3,1,6.5'],
   ['yard-from-steps', 'view=orbit&cam=0.5,1.8,-3.3,1,1.2,4'],
+  // 第 8 轮新增：水缸、连通台阶与天地神位、洋姜与青石板、秋千
+  ['vat-steps', 'view=orbit&cam=0.6,1.7,1.4,-2.6,0.6,-3.6'],
+  ['shrine', 'view=orbit&cam=0.9,1.3,-1.6,0,1.0,-4'],
+  ['backyard', 'view=orbit&cam=-2.7,1.7,3.4,1.2,0.6,7.4'],
+  ['swing', 'view=orbit&cam=4.7,1.6,1.0,2.7,1.4,4.2'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
   ['orbit-noon', 'view=orbit&time=noon'],
@@ -59,7 +64,7 @@ for (const [view, query] of SHOTS.filter(([n]) => !only.length || only.includes(
   for (let attempt = 0; ; attempt++) {
     try {
       await page.goto(`${base}?${query}&quality=${QUALITY}&autoperf=off&music=off`, { waitUntil: 'commit', timeout: 120000 });
-      await page.waitForFunction(() => window.__sceneReady === true, null, { timeout: 300000 });
+      await page.waitForFunction(() => window.__sceneReady === true && !!window.__app && document.getElementById('loading')?.classList.contains('done'), null, { timeout: 300000 });
       break;
     } catch (e) {
       if (attempt >= 1) throw e;

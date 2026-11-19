@@ -35,7 +35,7 @@ async function open(from, to, { mobile = false } = {}) {
   page.on('pageerror', (e) => errors.push(e.message));
   const cam = `${from[0]},1.2,${from[1]},${to[0]},1.2,${to[1]}`;
   await page.goto(`${base}?view=walk&quality=low&autoperf=off&music=off&cam=${cam}`, { waitUntil: 'commit', timeout: 120000 });
-  await page.waitForFunction(() => window.__sceneReady === true, null, { timeout: 300000 });
+  await page.waitForFunction(() => window.__sceneReady === true && !!window.__app && document.getElementById('loading')?.classList.contains('done'), null, { timeout: 300000 });
   await page.waitForTimeout(1500);
   return { page, ctx };
 }
@@ -135,6 +135,25 @@ if (run('E')) {
   const b = await basket(page);
   check('E 走到枣树下点“打枣”', ok && b.includes('枣 1'), { ok, b });
   await ctx.close();
+}
+// G) 秋千：从院子里走到枣树弯出来的枝干下，点“荡秋千”，秋千荡起来；再踩上青石板
+if (run('G')) {
+  const { page, ctx } = await open([1.2, 2.3], [2.9, 3.8]);
+  await holdUntil(page, 'KeyW', (p) => Math.hypot(p.x - 2.92, p.z - 3.79) < 1.4);
+  const ok = await waitButton(page, '荡秋千');
+  if (ok) await page.locator('#hud2 .actions button', { hasText: '荡秋千' }).click();
+  let maxAng = 0;
+  for (let i = 0; i < 6; i++) {
+    await page.waitForTimeout(500);
+    maxAng = Math.max(maxAng, await page.evaluate(() => Math.abs(window.__app.engine.scene.getObjectByName('swing').rotation.x)));
+  }
+  check('G1 走到秋千旁点“荡秋千”，秋千荡起来', ok && maxAng > 0.15, { ok, maxAng: +maxAng.toFixed(2) });
+  await ctx.close();
+  // 踩上青石板：从石板北边往南走
+  const o2 = await open([-1.9, 4.3], [-1.9, 8]);
+  const p = await holdUntil(o2.page, 'KeyW', (p) => p.z > 5.2 && p.feet > 0.1, 60000);
+  check('G2 能踩上青石板', p.feet > 0.1, p);
+  await o2.ctx.close();
 }
 // F) 手机（iPhone 13 模拟）：用摇杆往前走进东北屋，再到井边点“压水”按钮
 if (run('F')) {

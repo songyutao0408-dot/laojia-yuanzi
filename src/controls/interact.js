@@ -13,7 +13,7 @@ const POME_REACH = 2.6;
 const JUJUBE_REACH = 3.0;
 const CLICK_RADIUS = 90;
 
-export function createInteraction({ engine, views, pumping, picking, ui }) {
+export function createInteraction({ engine, views, pumping, picking, ui, swing }) {
   const { scene, camera, renderer } = engine;
   const well = scene.getObjectByName('well');
   const pump = well.getObjectByName('pump');
@@ -106,6 +106,11 @@ export function createInteraction({ engine, views, pumping, picking, ui }) {
     const p = playerXZ();
     if (!walking()) return acts;
     if (p.distanceTo(wellPos) <= WELL_NEAR) acts.push({ label: '压水', run: doPump });
+    if (swing) {
+      const sp = swing.position;
+      if (Math.hypot(p.x - sp.x, p.z - sp.z) <= 1.8)
+        acts.push({ label: '荡秋千', run: () => (swing.push(), ui.toast('秋千荡起来了——枣树枝吱呀吱呀地响')) });
+    }
     const fruits = fruitsInReach();
     const pome = fruits.filter((f) => f.kind === '石榴');
     const jj = fruits.filter((f) => f.kind === '枣');

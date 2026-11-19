@@ -97,9 +97,6 @@
 <rect x="493" y="130" width="12" height="250" fill="#b5523b" stroke="none"/>
 <text x="317.5" y="255" class="b" text-anchor="middle">西北屋</text>
 <text x="317.5" y="280" class="s" text-anchor="middle">室内 7.1×4.5 m · 高 3.5 m</text>
-<rect x="282.5" y="380" width="70" height="45" fill="#b5523b" fill-opacity="0.35" stroke="#2b2b2b" stroke-width="0.6"/>
-<rect x="282.5" y="380" width="70" height="30" fill="#b5523b" fill-opacity="0.55" stroke="#2b2b2b" stroke-width="0.6"/>
-<rect x="282.5" y="380" width="70" height="15" fill="#b5523b" fill-opacity="0.75" stroke="#2b2b2b" stroke-width="0.6"/>
 <rect x="505" y="130" width="375" height="250" fill="#d98a6c" fill-opacity="0.25" stroke="none"/>
 <rect x="505" y="130" width="375" height="12" fill="#b5523b" stroke="none"/>
 <rect x="505" y="368" width="165" height="12" fill="#b5523b" stroke="none"/>
@@ -112,9 +109,6 @@
 <rect x="868" y="130" width="12" height="250" fill="#b5523b" stroke="none"/>
 <text x="692.5" y="255" class="b" text-anchor="middle">东北屋</text>
 <text x="692.5" y="280" class="s" text-anchor="middle">室内 7.1×4.5 m · 高 3.5 m</text>
-<rect x="657.5" y="380" width="70" height="45" fill="#b5523b" fill-opacity="0.35" stroke="#2b2b2b" stroke-width="0.6"/>
-<rect x="657.5" y="380" width="70" height="30" fill="#b5523b" fill-opacity="0.55" stroke="#2b2b2b" stroke-width="0.6"/>
-<rect x="657.5" y="380" width="70" height="15" fill="#b5523b" fill-opacity="0.75" stroke="#2b2b2b" stroke-width="0.6"/>
 <rect x="130" y="480" width="150" height="250" fill="#d98a6c" fill-opacity="0.25" stroke="none"/>
 <rect x="130" y="480" width="150" height="12" fill="#b5523b" stroke="none"/>
 <rect x="130" y="718" width="150" height="12" fill="#b5523b" stroke="none"/>
@@ -132,6 +126,51 @@
 <text x="173.5" y="582.5" class="s" text-anchor="middle">灶台</text>
 <rect x="140" y="490" width="25" height="25" fill="none" stroke="#111" stroke-width="2" stroke-dasharray="4 2"/>
 <text x="172.5" y="485" class="s">烟囱</text>
+<rect x="280" y="380" width="465" height="45" fill="#d8d3c4" fill-opacity="0.5" stroke="#2b2b2b" stroke-width="0.6"/>
+<rect x="280" y="380" width="465" height="30" fill="#d8d3c4" fill-opacity="0.7" stroke="#2b2b2b" stroke-width="0.6"/>
+<rect x="280" y="380" width="465" height="15" fill="#d8d3c4" fill-opacity="0.9" stroke="#2b2b2b" stroke-width="0.6"/>
+<text x="685" y="411" class="xs" text-anchor="middle">石灰台阶（连通）</text>
+<rect x="489.5" y="380" width="31" height="16" fill="#b8322a" stroke="#2b2b2b" stroke-width="0.8"/>
+<text x="510" y="442.5" class="s" text-anchor="middle" fill="#b8322a">天地神位</text>
+<circle cx="402.5" cy="462.5" r="21.5" fill="#3a2e24" stroke="#2b2b2b" stroke-width="1"/>
+<circle cx="402.5" cy="462.5" r="14.399999999999999" fill="#5f7d8a"/>
+<text x="430" y="468.5" class="s">水缸</text>
+<rect x="370" y="895" width="255" height="107.5" fill="#9a9a3a" fill-opacity="0.35" stroke="#7a7a2a" stroke-width="1" stroke-dasharray="4 3"/>
+<circle cx="380" cy="905" r="3" fill="#d8a820"/>
+<circle cx="596.6" cy="966.8" r="3" fill="#d8a820"/>
+<circle cx="393.4" cy="979.4" r="3" fill="#d8a820"/>
+<circle cx="511.2" cy="957.4" r="3" fill="#d8a820"/>
+<circle cx="467.8" cy="963.1" r="3" fill="#d8a820"/>
+<circle cx="486.6" cy="936.3" r="3" fill="#d8a820"/>
+<circle cx="527.1" cy="986.4" r="3" fill="#d8a820"/>
+<circle cx="418.9" cy="948.8" r="3" fill="#d8a820"/>
+<circle cx="457.3" cy="951" r="3" fill="#d8a820"/>
+<circle cx="506.8" cy="912" r="3" fill="#d8a820"/>
+<circle cx="608.3" cy="929.5" r="3" fill="#d8a820"/>
+<circle cx="573" cy="971.9" r="3" fill="#d8a820"/>
+<circle cx="422.1" cy="949.7" r="3" fill="#d8a820"/>
+<circle cx="613.9" cy="927.6" r="3" fill="#d8a820"/>
+<circle cx="571.8" cy="988.3" r="3" fill="#d8a820"/>
+<circle cx="483.8" cy="916.7" r="3" fill="#d8a820"/>
+<circle cx="597.8" cy="964.6" r="3" fill="#d8a820"/>
+<circle cx="482" cy="936.8" r="3" fill="#d8a820"/>
+<circle cx="531.4" cy="957.2" r="3" fill="#d8a820"/>
+<circle cx="455.8" cy="926" r="3" fill="#d8a820"/>
+<circle cx="558.7" cy="953.8" r="3" fill="#d8a820"/>
+<circle cx="510.7" cy="938" r="3" fill="#d8a820"/>
+<circle cx="535.3" cy="935.4" r="3" fill="#d8a820"/>
+<circle cx="478.5" cy="907.5" r="3" fill="#d8a820"/>
+<circle cx="411.9" cy="928.3" r="3" fill="#d8a820"/>
+<circle cx="457.7" cy="926.2" r="3" fill="#d8a820"/>
+<text x="497.5" y="953.8" class="b" text-anchor="middle">洋姜</text>
+<rect x="365" y="827.5" width="90" height="30" fill="#7d8c96" fill-opacity="0.85" stroke="#2b2b2b" stroke-width="0.8" transform="rotate(-8 410 842.5)"/>
+<rect x="477.5" y="837.5" width="90" height="30" fill="#7d8c96" fill-opacity="0.85" stroke="#2b2b2b" stroke-width="0.8" transform="rotate(6 522.5 852.5)"/>
+<rect x="487.5" y="845" width="90" height="30" fill="#7d8c96" fill-opacity="0.85" stroke="#2b2b2b" stroke-width="0.8" transform="rotate(-17 532.5 860)"/>
+<rect x="632.5" y="942.5" width="90" height="30" fill="#7d8c96" fill-opacity="0.85" stroke="#2b2b2b" stroke-width="0.8" transform="rotate(-78 677.5 957.5)"/>
+<text x="410" y="820" class="s" text-anchor="middle">青石板</text>
+<line x1="705" y1="810" x2="617" y2="744" stroke="#5a3e22" stroke-width="3"/>
+<line x1="661" y1="777" x2="641" y2="762" stroke="#8a5a2a" stroke-width="6"/>
+<text x="636" y="772" class="s" text-anchor="end">秋千</text>
 <rect x="130" y="380" width="150" height="100" fill="none" stroke="#7a5a3a" stroke-width="1" stroke-dasharray="3 3"/>
 <text x="205" y="435" class="s" text-anchor="middle">空当 约 2 m</text>
 <rect x="760" y="860" width="100" height="150" fill="#d98a6c" fill-opacity="0.25" stroke="none"/>

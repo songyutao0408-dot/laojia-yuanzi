@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { redBrick, brickPaving } from './brick.js';
-import { rammedEarth, loessGround, concrete, mudPlaster } from './earth.js';
+import { rammedEarth, loessGround, concrete, mudPlaster, limePlaster } from './earth.js';
 import { rustyIron, paintedWood, bark, smoothBark } from './metalWood.js';
 import { coupletTexture, fuTexture, grassCard, wallBaseStain, wetPatch } from './decals.js';
 
@@ -32,6 +32,10 @@ const DEFS = {
   barkPomegranate: () => ({ ...smoothBark({ base: [112, 96, 82], seed: 98, lenticels: 0.3 }), roughness: 1 }),
   barkJujube: () => ({ ...bark({ base: [92, 76, 62], seed: 99 }), roughness: 1 }),
   galvanized: () => ({ ...rustyIron({ paint: [150, 154, 156], rustAmount: 0.25, seed: 79 }), roughness: 1, metalness: 0.5 }),
+  // 台阶、神龛外面抹的石灰
+  lime: () => ({ ...limePlaster(), roughness: 1 }),
+  // 青石板：青灰色、磨得有点光
+  bluestone: () => ({ ...concrete({ tint: [0.78, 0.82, 0.84], seed: 67 }), roughness: 1 }),
   // 北屋墙根的水泥勒脚：旧水泥、略发黄发黑
   cementPlinth: () => ({ ...concrete({ tint: [0.92, 0.9, 0.85], seed: 53 }), roughness: 1 }),
   limeWash: () => ({ ...concrete({ tint: [1.55, 1.52, 1.45], seed: 59, size: 256 }), roughness: 1 }),
