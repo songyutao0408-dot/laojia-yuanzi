@@ -184,8 +184,8 @@ text(ch.x + 0.4, ch.z - 0.35, '烟囱', 'class="s"');
 // 父亲和大黄
 {
   const C2 = L.CHARACTERS;
-  const fx = C2.father.handX + 0.25;
-  const fz = C2.father.handZ;
+  const fx = C2.father.x;
+  const fz = C2.father.z;
   out.push(`<circle cx="${f(X(fx))}" cy="${f(Y(fz))}" r="${0.2 * S}" fill="#26304c" stroke="${C.ink}" stroke-width="1"/>`);
   out.push(`<ellipse cx="${f(X(C2.dog.x))}" cy="${f(Y(C2.dog.z))}" rx="${0.3 * S}" ry="${0.14 * S}" fill="#c8892f" stroke="${C.ink}" stroke-width="0.8" transform="rotate(${-(C2.dog.rot - 90)} ${f(X(C2.dog.x))} ${f(Y(C2.dog.z))})"/>`);
   text(fx + 0.3, fz + 0.45, '父亲', 'class="s"');
