@@ -88,7 +88,7 @@ const touch = createTouchControls(document.getElementById('touch'), renderer.dom
 engine.onUpdate((dt) => {
   pumping.update(dt);
   swing?.update(dt, engine.elapsed ?? performance.now() / 1000);
-  characters.update(dt, performance.now() / 1000);
+  characters.update(dt, performance.now() / 1000, camera);
   picking.update(dt);
   interaction.update(dt);
   compass.update(camera);
@@ -102,6 +102,7 @@ views.onChange((name) => {
 engine.onUpdate((dt, t) => updateWind(t));
 engine.onUpdate((dt) => smoke.update(dt, renderer, camera, scene.fog));
 lighting.onTimeChange((p) => smoke.setAmount(p.smoke));
+lighting.onTimeChange((p) => characters.setLight(p));
 
 // 时间：?time=dawn|noon|dusk|night，默认傍晚
 const timeKey = params.get('time');

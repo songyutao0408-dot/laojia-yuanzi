@@ -7,7 +7,7 @@ import { ellipsoid, Limb } from './rig.js';
  * 大黄：一条大个的中华田园犬（农村土狗），土黄色短毛，胸口、肚子、嘴巴和四个爪子发白，
  * 黑鼻头，三角耳朵竖着，尾巴往上卷。坐在父亲右手边，抬头看着他。
  * - 尾巴一直摇（被摸时摇得更快）
- * - nuzzle()：亲昵地把头往父亲大腿上蹭，耳朵往后背、眯眼，持续约 3 秒
+ * - nuzzle()：低头往父亲大腿上拱、一下一下地蹭，耳朵往后背、眯眼，持续约 3 秒
  * 局部坐标：+z 朝前（脸的方向），+y 朝上，地面 y = 0。
  */
 let furSet = null;
@@ -37,7 +37,7 @@ export function createDog() {
   const DARK = fur(0xa86a24); // 背上颜色深一点
   const CREAM = fur(0xecd6a8);
   const black = new THREE.MeshStandardMaterial({ color: 0x15110e, roughness: 0.35 });
-  const S = 1.15; // 大个的土狗
+  const S = D.scale ?? 1.1; // 大个的土狗
 
   const body = new THREE.Group();
   body.scale.setScalar(S);
@@ -103,7 +103,7 @@ export function createDog() {
   const head = new THREE.Group();
   head.name = 'dog-head';
   head.position.set(0, 0.15, 0.05);
-  head.rotation.x = -0.35; // 抬头看父亲
+  head.rotation.x = -0.22; // 微微抬头（头顶正好在父亲手底下）
   neckPivot.add(head);
   const skull = ellipsoid(YELLOW, 0.072, 0.068, 0.08);
   skull.position.set(0, 0.02, 0);
@@ -227,10 +227,11 @@ export function createDog() {
         if (nuzzleT > dur) nuzzleT = -1;
       }
       const rub = Math.sin(t * 7) * k;
-      neckPivot.rotation.y = base.neckY - 0.55 * k;
-      neckPivot.rotation.x = base.neckX + 0.12 * k + rub * 0.06;
-      head.rotation.x = base.headX + 0.3 * k + rub * 0.12;
-      head.rotation.z = base.headZ - 0.45 * k + rub * 0.08;
+      // 父亲的腿就在狗的正前方：低头往前拱，一下一下左右蹭
+      neckPivot.rotation.y = base.neckY + rub * 0.22;
+      neckPivot.rotation.x = base.neckX + 0.18 * k + Math.abs(rub) * 0.05;
+      head.rotation.x = base.headX + 0.28 * k;
+      head.rotation.z = base.headZ - 0.3 * k + rub * 0.14;
       ears.forEach((e, i) => (e.rotation.x = -0.15 - 0.9 * k));
       // 眨眼 / 眯眼
       blinkT -= dt;
