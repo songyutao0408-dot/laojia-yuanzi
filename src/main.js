@@ -13,6 +13,7 @@ import { createTrees, updateWind } from './trees/index.js';
 import { createWell } from './well/index.js';
 import { createGarden } from './garden/index.js';
 import { createYardItems } from './yard/index.js';
+import { createCharacters } from './characters/index.js';
 import { createSmoke } from './effects/smoke.js';
 import { createViewModes } from './controls/viewModes.js';
 import { createTimeSlider } from './ui/timeSlider.js';
@@ -47,6 +48,8 @@ scene.add(createTrees());
 scene.add(createWell());
 scene.add(createGarden());
 scene.add(createYardItems());
+const characters = createCharacters();
+scene.add(characters.group);
 const smoke = createSmoke();
 scene.add(smoke.object);
 const postfx = createPostFX(engine);
@@ -80,11 +83,12 @@ music.tryAutoplay().then((ok) => {
 const pumping = createPumping(scene.getObjectByName('well'));
 const swing = scene.getObjectByName('jujube')?.userData.swing;
 const picking = createPicking();
-const interaction = createInteraction({ engine, views, pumping, picking, ui, swing });
+const interaction = createInteraction({ engine, views, pumping, picking, ui, swing, characters });
 const touch = createTouchControls(document.getElementById('touch'), renderer.domElement, views.fp, (x, y) => interaction.tap(x, y));
 engine.onUpdate((dt) => {
   pumping.update(dt);
   swing?.update(dt, engine.elapsed ?? performance.now() / 1000);
+  characters.update(dt, performance.now() / 1000);
   picking.update(dt);
   interaction.update(dt);
   compass.update(camera);
@@ -121,4 +125,4 @@ if (cam?.length === 6) views.lookAt(cam.slice(0, 3), cam.slice(3));
 // ?autoperf=off 关闭按帧率自动降档（自检截图用：无头浏览器帧率极低）
 const perf = params.get('autoperf') === 'off' ? null : createPerfMonitor(engine, { gtao: postfx.gtao, sun: lighting.sun });
 
-window.__app = { bgm, engine, views, setView, lighting, buildMs, quality, pumping, interaction, perf };
+window.__app = { characters, bgm, engine, views, setView, lighting, buildMs, quality, pumping, interaction, perf };

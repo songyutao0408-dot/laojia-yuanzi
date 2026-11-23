@@ -30,7 +30,7 @@
 - `npm run build` → `dist/`（base = `/laojia-yuanzi/`，用于 GitHub Pages）
 - `npm run build:single` → `dist-single/index.html`（vite-plugin-singlefile，所有资源内联，可双击打开）
 - `npm run plan` → 重新生成 `docs/plan.svg`
-- `npm run build && npm run shots` → Playwright 无头浏览器截图到 `screenshots/`（已 gitignore），并检查黑屏和页面报错。机位列表在 `scripts/screenshot.mjs` 的 `SHOTS`（俯视、环绕、门口、北屋两间室内、厨房室内、院内看大门、台阶看院子）。Playwright 用本机全局安装的版本，不在 package.json 里
+- `npm run build && npm run shots` → Playwright 无头浏览器截图到 `screenshots/`（已 gitignore），并检查黑屏和页面报错；`npm run shots -- father-dog father-face` 只截指定机位。机位列表在 `scripts/screenshot.mjs` 的 `SHOTS`（俯视、环绕、门口、北屋两间室内、厨房室内、院内看大门、台阶看院子）。Playwright 用本机全局安装的版本，不在 package.json 里
 - 页面支持 `?autoperf=off`（自检脚本都带上，否则无头浏览器 2 fps 会触发自动降档）、`?music=off`（不放音乐、不出“进入院子”遮罩，自检脚本都带上），`?view=top|orbit|walk` 直接打开指定视角，`&time=dawn|noon|dusk|night` 指定时间，`&quality=low|high` 指定画质，`&cam=x,y,z,tx,ty,tz` 指定相机位置/注视点；`window.__app` 暴露 engine / views 方便调试
 - 部署：`.github/workflows/deploy.yml`，push 到 `main` 自动构建并发布到 GitHub Pages
   （线上地址：https://songyutao0408-dot.github.io/laojia-yuanzi/ ）；同时把单文件版放到网站 `/laojia-yuanzi.html`，并更新名为 `latest` 的 Release（附件 laojia-yuanzi.html）
@@ -71,6 +71,10 @@ src/
     postfx.js           EffectComposer：RenderPass → 识别透明叶片的 GTAO（仅高画质）→ OutputPass（ACES + sRGB）
   effects/smoke.js      厨房烟囱炊烟粒子（setAmount 随时间变化）
   yard/                 院子里的零碎物件（一个物件一个文件）：waterVat.js 大水缸、stoneSlabs.js 老青石板
+  characters/           人和动物（西边梧桐树下，位置在 layout.CHARACTERS）
+    father.js           父亲：参考照片衣着的程序化 3D 人物，**不贴照片**。头：椭球改出宽脸/下巴 + 鼻梁、眉骨、眼窝等起伏；faceAtlas() 用 canvas 画脸（左半边正面投影：黑短发往后梳、浓眉、细长眼、法令纹）和后脑勺（右半边），按三角形分正面/背面给 UV；hairlineY()/backHairlineY() 同时决定画的发际线和头发鼓起的位置。衣着：衬衫、格子毛背心（V 领用 alphaMap 挖）、运动裤、运动鞋；左手插兜，右手两段骨骼 IK 搭在狗头上。之前的照片版本在 git 历史 PR 13 里
+    dog.js              大黄：坐姿中华田园犬，尾巴摇、眨眼、呼吸；nuzzle() 往父亲腿上蹭（约 3 s）
+    rig.js              Limb（两点间肢体）、solveTwoBone（解析两段骨骼 IK，父亲右臂用）、ellipsoid
   audio/                背景音乐
     bgm.mp3             用户提供的 BGM（2:40）：已裁掉开头 0.13 s 空白、开头 0.3 s 淡入、结尾 3 s 淡出，128 kbps（原曲结尾是突然停住的，不淡出循环会“咔”一下）
     bgm.js              createBGMPlayer()：<audio loop> 边下边播 + Web Audio GainNode 淡入淡出（iOS 的 audio.volume 只读）；空闲时预取成 blob；后台暂停；probe() 自检用
@@ -80,7 +84,7 @@ src/
     firstPerson.js      第一人称：WASD/方向键、Shift 跑、按住鼠标拖动转头（不锁定鼠标）、上台阶、进门辅助（朝门走时自动往门洞中线靠）、视线起伏
     colliders.js        从 userData.solid 的 Mesh 生成可旋转矩形碰撞体 + 高度过滤；groundHeight(x,z) 台阶/室内地坪
     touch.js            手机：左下虚拟摇杆、滑动转头、轻点交互
-    interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
+    interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千/摸摸大黄），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
   interiors/            室内细节（以后补），见 interiors/README.md
   ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针；musicButton.js 音乐开关（指北针左边，偏好存在 localStorage 'laojia-bgm-v2'）
 scripts/
@@ -99,6 +103,7 @@ docs/
 - 北屋室内地坪 0.45 m，门洞底 = 地坪；门外是连通两间的 3 级台阶（x0..x1），groundHeight 按整条台阶算；青石板也能踩上去（groundHeight 里按旋转矩形判断）
 - 树冠不能用球体：用 treeBuilder 的枝干骨架 + 叶片卡片。树的外形参数在各物种文件顶部的 PARAMS 里
 - **交互要宽容**：不要求精确点中小物件（石榴 8 cm、压杆 3 cm）；用户实测过“必须点准”在手机上基本用不了。新增可交互物件时也走“走近出按钮 + 点击就近吸附”的路子
+- **父亲不要贴照片**：用户先后否定了程序捏的人物（不像）、抠图照片人（和环境格格不入）、照片的脸贴到 3D 头上（“太丑了”）。最后明确要求：按照片做 3D 的就行，像不像无所谓，**不要再把照片上的脸贴上去**。照片只作衣着、发型、身形的参考，仓库里不放父亲的照片
 - **测试要模拟真人**：交互测试只用真实输入事件（keyboard.down / mouse.click / 触摸），不要直接调控制器或瞬移到目标上——第 6 步第一版就是因为测试“作弊”而没发现问题
 - **可采摘的果子**：石榴每个果子是一个 Group（userData.fruit = 'pomegranate'，split 表示咧口）；枣子是一个 InstancedMesh（userData.fruit = 'jujube'），摘掉时把对应实例矩阵缩为 0
 - 自检截图要等加载层消失（`#loading.done`）再拍——第 7 步加了进度条后，`__sceneReady` 会在贴图生成完之前就变成 true

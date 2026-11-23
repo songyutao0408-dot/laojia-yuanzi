@@ -155,6 +155,36 @@ if (run('G')) {
   check('G2 能踩上青石板', p.feet > 0.1, p);
   await o2.ctx.close();
 }
+// H) 大黄：从院子里走到西边梧桐树下，点“摸摸大黄”，大黄往父亲腿上蹭；环绕视角下直接点狗头也行
+if (run('H')) {
+  const { page, ctx } = await open([-3.2, 1.6], [-3.0, -0.3]);
+  await holdUntil(page, 'KeyW', (p) => p.z < 1.0);
+  const ok = await waitButton(page, '摸摸大黄');
+  if (ok) await page.locator('#hud2 .actions button', { hasText: '摸摸大黄' }).click();
+  await page.waitForTimeout(700);
+  const nuzzling = await page.evaluate(() => window.__app.characters.dog.nuzzling);
+  check('H1 走到大黄旁点“摸摸大黄”，大黄蹭父亲的腿', ok && nuzzling, { ok, nuzzling });
+  await ctx.close();
+  // 环绕视角：点画面上狗头的位置
+  const ctx2 = await browser.newContext({ viewport: { width: 640, height: 400 } });
+  const p2 = await ctx2.newPage();
+  p2.setDefaultTimeout(240000);
+  await p2.goto(`${base}?view=orbit&quality=low&autoperf=off&music=off&cam=-1.6,1.6,1.8,-2.9,0.8,-0.3`, { waitUntil: 'commit', timeout: 120000 });
+  await p2.waitForFunction(() => window.__sceneReady === true && !!window.__app && document.getElementById('loading')?.classList.contains('done'), null, { timeout: 300000 });
+  await p2.waitForTimeout(1500);
+  const pt = await p2.evaluate(() => {
+    const app = window.__app;
+    const v = app.characters.dogHeadPosition().project(app.engine.camera);
+    const r = app.engine.renderer.domElement.getBoundingClientRect();
+    return { x: r.left + ((v.x + 1) / 2) * r.width + 12, y: r.top + ((1 - v.y) / 2) * r.height };
+  });
+  await p2.mouse.click(pt.x, pt.y);
+  await p2.waitForTimeout(1200);
+  const n2 = await p2.evaluate(() => window.__app.characters.dog.nuzzling);
+  await p2.screenshot({ path: 'screenshots/test-dog-nuzzle.png' });
+  check('H2 环绕视角点狗头，大黄蹭腿', n2, { n2 });
+  await ctx2.close();
+}
 // F) 手机（iPhone 13 模拟）：用摇杆往前走进东北屋，再到井边点“压水”按钮
 if (run('F')) {
   const { page, ctx } = await open([3.55, 1.5], [3.55, -6], { mobile: true }); // 东北屋门在 x = 3.75，偏开 0.2 m

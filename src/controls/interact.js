@@ -13,7 +13,7 @@ const POME_REACH = 2.6;
 const JUJUBE_REACH = 3.0;
 const CLICK_RADIUS = 90;
 
-export function createInteraction({ engine, views, pumping, picking, ui, swing }) {
+export function createInteraction({ engine, views, pumping, picking, ui, swing, characters }) {
   const { scene, camera, renderer } = engine;
   const well = scene.getObjectByName('well');
   const pump = well.getObjectByName('pump');
@@ -86,6 +86,11 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing }
     return best;
   }
 
+  function doPetDog() {
+    if (!characters) return;
+    characters.dog.nuzzle();
+    ui.toast('大黄眯起眼，尾巴摇得欢，往父亲腿上蹭了又蹭');
+  }
   function doPump() {
     pumping.pump();
     ui.toast('吱嘎——吱嘎——，水哗哗地流进桶里');
@@ -106,6 +111,10 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing }
     const p = playerXZ();
     if (!walking()) return acts;
     if (p.distanceTo(wellPos) <= WELL_NEAR) acts.push({ label: '压水', run: doPump });
+    if (characters) {
+      const dp = characters.dogHeadPosition();
+      if (Math.hypot(p.x - dp.x, p.z - dp.z) <= 2.0) acts.push({ label: '摸摸大黄', run: doPetDog });
+    }
     if (swing) {
       const sp = swing.position;
       if (Math.hypot(p.x - sp.x, p.z - sp.z) <= 1.8)
@@ -140,6 +149,11 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing }
       }
     }
     for (const f of walking() ? fruitsInReach() : fruitsInReach(1e9, 1e9)) cands.push(f);
+    // 大黄的头：走进去时 3 m 内能点，环绕/俯视时随便点
+    if (characters) {
+      const dp = characters.dogHeadPosition();
+      if (!walking() || dp.distanceTo(eye()) <= 3) cands.push({ kind: 'dog', pos: dp });
+    }
     let best = null;
     let bd = walking() ? CLICK_RADIUS : 40;
     for (const c of cands) {
@@ -162,6 +176,7 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing }
       return false;
     }
     if (best.kind === 'pump') doPump();
+    else if (best.kind === 'dog') doPetDog();
     else doPick(best);
     return true;
   }
