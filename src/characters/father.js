@@ -1,15 +1,13 @@
 import * as THREE from 'three';
 import { CHARACTERS } from '../layout.js';
 import { Limb, ellipsoid, solveTwoBone } from './rig.js';
-import headUrl from './father-head.webp?url';
 
 /**
- * 父亲（现在 70 岁左右的样子）：按用户给的正面照做成的 3D 人物，和院子里其他东西一样受场景光照、投影子。
+ * 父亲（现在 70 岁左右的样子）：参考用户给的正面照做的程序化 3D 人物，和院子里其他东西一样受场景光照、投影子。
+ * 用户要求不要把照片上的脸贴上去，像不像无所谓——脸、头发都是代码建模、在 canvas 上画的。
  *
- * - 脸：照片上的脸（father-head.webp 左半边，已压低饱和度、略调暖）从正面投影到椭球头上；
- *   头型按照片的轮廓收下巴，鼻梁、眉骨、眼窝做了起伏，所以侧面看也有立体感。
- *   照片里他的脸微微侧着，投影时按拍照的角度投，所以脸做成正的，两颊不会被拉长。
- *   后脑勺、头顶用贴图右半边（黑短发、后脖颈）。
+ * - 头：椭球改出宽脸、下巴，鼻梁/鼻头、眉骨、眼窝、颧骨、嘴唇的起伏；
+ *   贴图（faceAtlas）左半边是正面投影的脸（黑短发往后梳、浓眉、细长眼、法令纹），右半边是后脑勺头发和后脖颈。
  * - 衣着照照片：淡紫灰的长袖衬衫（领子、袖口露出来），外面藏青格子的开衫毛背心（V 领、一排扣子、罗纹下摆），
  *   黑色运动裤（左大腿上一个小白标），黑运动鞋。
  * - 个子约 1.72 m，站着时上身略往右边（狗那边）倾；左手插在裤兜里，
@@ -17,22 +15,32 @@ import headUrl from './father-head.webp?url';
  * 局部坐标：+z 朝前，+y 朝上，脚底 y = 0；他的右手边是 -x。
  */
 
-// 头部椭球半轴（米）和照片上对应的像素（照片坐标：头中心 (544, 556)，半宽 88 px、半高 116 px；贴图裁剪框 (434, 426)–(654, 686)）
-// 照片上 1 px ≈ 1.1 mm（全身 1551 px 对应 1.72 m）
+// 头部椭球半轴（米）
 const RX = 0.096;
 const RY = 0.128;
 const RZ = 0.11;
-const CROP = { x0: 434, y0: 426, w: 220, h: 260, cx: 544, cy: 556, hw: 88, hh: 116 };
-// 照片里他的脸朝他右手边偏了约 14°（鼻子、两眼中点在头轮廓中线左边约 2.6 cm）：
-// 头本身做成正脸朝前，投影照片时把投影方向也偏这么多，脸两侧才不会被拉长
-const PHOTO_YAW = THREE.MathUtils.degToRad(14);
-// 五官（头部局部坐标，米）：鼻头 y ≈ -0.044，两眼 y ≈ 0、相距约 6.8 cm，嘴 y ≈ -0.08，下巴 y ≈ -0.119
+// 五官（头部局部坐标，米）：鼻头 y ≈ -0.044，两眼 y ≈ 0、相距约 6.8 cm，眉 y ≈ 0.024，嘴 y ≈ -0.08，下巴 y ≈ -0.119
 const NOSE = { x: 0, y: -0.044 };
+const EYE = { x: 0.034, y: 0 };
+const MOUTH_Y = -0.08;
+// 贴图坐标：左半边（脸）u = 0.5 × (0.5 + x/RX × 0.4)；两半共用 v = 0.5 + y/RY × 0.45
+const FU = 0.4;
+const FV = 0.45;
 
-const SKIN = 0xb87460; // 和照片里的肤色一致（sRGB）
+const SKIN = 0xb87460; // 晒得红黑的肤色（sRGB）
 const SHIRT = 0xa8a5b8; // 淡紫灰衬衫
 const NAVY = 0x222a46; // 藏青毛背心
 const PANTS = 0x1a1b21;
+
+/** 前额发际线高度（米），x 为头部局部横坐标：两边额角略往后退，到耳朵上沿变成鬓角 */
+function hairlineY(x) {
+  const a = Math.min(1, Math.abs(x) / RX);
+  return 0.07 + 0.012 * Math.exp(-((a - 0.6) ** 2) / 0.03) - 0.09 * smooth(0.78, 1, a);
+}
+/** 后脑勺的发际线（米）：正后方到后脖颈，往两边升到耳朵上沿 */
+function backHairlineY(x) {
+  return -0.054 + 0.05 * smooth(0.5, 1, Math.abs(x) / RX);
+}
 
 const smooth = (a, b, x) => {
   const t = THREE.MathUtils.clamp((x - a) / (b - a), 0, 1);
@@ -40,7 +48,7 @@ const smooth = (a, b, x) => {
 };
 const gauss = (dx, dy, sx, sy) => Math.exp(-((dx * dx) / (2 * sx * sx) + (dy * dy) / (2 * sy * sy)));
 
-/** 头：椭球 + 五官起伏；正面三角形用照片投影的 UV，背面用头发贴图 */
+/** 头：椭球 + 五官起伏；正面三角形用脸的贴图（正面投影），背面用后脑勺 */
 function headGeometry() {
   const g = new THREE.SphereGeometry(1, 72, 54);
   const pos = g.attributes.position;
@@ -56,10 +64,12 @@ function headGeometry() {
     const y = yn * RY;
     let z = zn * RZ;
     // 下半张脸收成下巴
-    if (yn < -0.45) x *= 1 - (-0.45 - yn) * 0.5;
+    if (yn < -0.55) x *= 1 - (-0.55 - yn) * 0.55;
+    // 宽脸：颧骨到腮帮子往外撑一点
+    if (zn > 0) x *= 1 + 0.06 * gauss(0, yn + 0.3, 1, 0.3) * zn;
     // 头发：发际线以上往外鼓一点（短发的厚度）
-    const hairline = THREE.MathUtils.lerp(-0.42, 0.5, smooth(-0.2, 0.35, zn));
-    const puff = 0.008 * smooth(hairline, hairline + 0.2, yn);
+    const hairline = THREE.MathUtils.lerp(backHairlineY(x), hairlineY(x), smooth(-0.2, 0.3, zn)) / RY;
+    const puff = 0.006 * smooth(hairline - 0.02, hairline + 0.12, yn) + 0.007 * smooth(0.55, 0.95, yn); // 头顶头发蓬一点
     x += xn * puff;
     z += zn * puff;
     const yy = y + yn * puff;
@@ -82,30 +92,217 @@ function headGeometry() {
   const geo = g.toNonIndexed();
   geo.deleteAttribute('normal');
   geo.computeVertexNormals();
-  // 按三角形分区给 UV：避免正面/背面交界处的贴图被拉成一道
+  // 按三角形分区给 UV：正面用脸，背面用后脑勺（避免交界处的贴图被拉成一道）
   const p = geo.attributes.position;
   const uv = geo.attributes.uv;
-  const cosY = Math.cos(PHOTO_YAW);
-  const sinY = Math.sin(PHOTO_YAW);
   for (let t = 0; t < p.count; t += 3) {
-    let cz = 0;
-    for (let k = t; k < t + 3; k++) cz += -p.getX(k) * sinY + p.getZ(k) * cosY;
-    const front = cz / 3 / RZ > -0.1;
+    const cz = (p.getZ(t) + p.getZ(t + 1) + p.getZ(t + 2)) / 3;
+    const front = cz / RZ > -0.1;
     for (let k = t; k < t + 3; k++) {
-      const x = p.getX(k);
-      const y = p.getY(k);
-      const xc = x * cosY - p.getZ(k) * sinY; // 拍照相机看到的横坐标
-      const px = CROP.cx + (xc / RX) * CROP.hw; // 照片像素
-      const py = CROP.cy - (y / RY) * CROP.hh;
-      const vv = 1 - (py - CROP.y0) / CROP.h;
-      if (front) {
-        uv.setXY(k, THREE.MathUtils.clamp((px - CROP.x0) / CROP.w, 0.002, 0.998) * 0.5, vv);
-      } else {
-        uv.setXY(k, 0.5 + THREE.MathUtils.clamp(0.5 + (x / RX) * 0.45, 0.01, 0.99) * 0.5, vv);
-      }
+      const xn = p.getX(k) / RX;
+      const vv = 0.5 + (p.getY(k) / RY) * FV;
+      if (front) uv.setXY(k, 0.5 * THREE.MathUtils.clamp(0.5 + xn * FU, 0.01, 0.99), vv);
+      else uv.setXY(k, 0.5 + 0.5 * THREE.MathUtils.clamp(0.5 + xn * 0.45, 0.01, 0.99), vv);
     }
   }
   return geo;
+}
+
+/**
+ * 头部贴图（1024 × 512，程序画的）：左半边正面投影的脸，右半边后脑勺。
+ * 画的时候直接用头部局部坐标（米）：X(x)、Y(y) 换成画布像素。
+ */
+function faceAtlas() {
+  const c = document.createElement('canvas');
+  c.width = 1024;
+  c.height = 512;
+  const g = c.getContext('2d');
+  let seed = 7;
+  const r = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const fx = (x) => 512 * (0.5 + (x / RX) * FU);
+  const fy = (y) => 512 * (0.5 - (y / RY) * FV);
+  const SKIN_C = [184, 118, 94];
+  const HAIR_C = [34, 31, 30];
+  const rgba = (cc, a) => `rgba(${cc[0] | 0},${cc[1] | 0},${cc[2] | 0},${a})`;
+  const blob = (x, y, rx, ry, color, a) => {
+    const R = Math.max(rx, ry);
+    const gr = g.createRadialGradient(x, y, 0, x, y, R);
+    gr.addColorStop(0, rgba(color, a));
+    gr.addColorStop(1, rgba(color, 0));
+    g.save();
+    g.translate(x, y);
+    g.scale(rx / R, ry / R);
+    g.translate(-x, -y);
+    g.fillStyle = gr;
+    g.beginPath();
+    g.arc(x, y, R, 0, Math.PI * 2);
+    g.fill();
+    g.restore();
+  };
+  const m = (512 * FU) / RX; // 每米多少像素（横向）
+  const my = (512 * FV) / RY; // 纵向
+  // —— 左半边：脸 ——
+  g.fillStyle = rgba(SKIN_C, 1);
+  g.fillRect(0, 0, 512, 512);
+  // 皮肤斑驳、晒黑
+  for (let i = 0; i < 500; i++) blob(r() * 512, r() * 512, 3 + r() * 9, 3 + r() * 9, [120, 66, 46], 0.07);
+  blob(fx(0), fy(0.05), 0.07 * m, 0.03 * my, [150, 90, 66], 0.3); // 额头晒得深
+  for (const s of [-1, 1]) blob(fx(s * 0.05), fy(-0.035), 0.028 * m, 0.022 * my, [196, 92, 76], 0.35); // 脸颊发红
+  blob(fx(0), fy(NOSE.y), 0.014 * m, 0.012 * my, [190, 90, 76], 0.4); // 鼻头
+  // 下巴底下、脖子：暗一点
+  const chin = g.createLinearGradient(0, fy(-0.105), 0, fy(-0.13));
+  chin.addColorStop(0, 'rgba(90,50,36,0)');
+  chin.addColorStop(1, 'rgba(90,50,36,0.45)');
+  g.fillStyle = chin;
+  g.fillRect(0, fy(-0.105), 512, 512);
+  // 抬头纹
+  g.lineCap = 'round';
+  for (const [y, w] of [[0.038, 0.03], [0.047, 0.036], [0.056, 0.032]]) {
+    g.strokeStyle = 'rgba(110,58,40,0.22)';
+    g.lineWidth = 1.6;
+    g.beginPath();
+    g.moveTo(fx(-w), fy(y - 0.002));
+    g.quadraticCurveTo(fx(0), fy(y + 0.003), fx(w), fy(y - 0.002));
+    g.stroke();
+  }
+  // 头发：黑短发往后梳，前面发际线略高，两边鬓角到耳朵上沿
+  {
+    g.save();
+    g.beginPath();
+    g.moveTo(0, 0);
+    g.lineTo(0, fy(hairlineY(-RX)));
+    for (let i = 0; i <= 64; i++) {
+      const x = -RX + (i / 64) * 2 * RX;
+      g.lineTo(fx(x), fy(hairlineY(x)));
+    }
+    g.lineTo(512, fy(hairlineY(RX)));
+    g.lineTo(512, 0);
+    g.closePath();
+    g.clip();
+    g.fillStyle = rgba(HAIR_C, 1);
+    g.fillRect(0, 0, 512, 512);
+    // 往后梳的发丝（从发际线往头顶）
+    for (let i = 0; i < 900; i++) {
+      const x0 = r() * 512;
+      const y0 = fy(0.04) + r() * 60;
+      const l = 20 + r() * 50;
+      const k = r();
+      g.strokeStyle = k > 0.93 ? 'rgba(120,116,112,0.5)' : k > 0.5 ? 'rgba(60,56,54,0.5)' : 'rgba(12,10,10,0.5)';
+      g.lineWidth = 0.8 + r();
+      g.beginPath();
+      g.moveTo(x0, y0);
+      g.quadraticCurveTo(x0 + (x0 - 256) * 0.08, y0 - l * 0.6, x0 + (x0 - 256) * 0.15 + 6, y0 - l);
+      g.stroke();
+    }
+    g.restore();
+    // 发际线一圈柔一点：稀疏的短发碴
+    for (let i = 0; i < 700; i++) {
+      const x = (r() * 2 - 1) * RX;
+      const yb = hairlineY(x);
+      const d = r() * r() * 0.006; // 越往下越稀
+      g.strokeStyle = `rgba(36,30,28,${0.5 - d * 70})`;
+      g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(fx(x), fy(yb - d));
+      g.lineTo(fx(x) + (r() - 0.5) * 2, fy(yb - d) - 5 - r() * 6);
+      g.stroke();
+    }
+  }
+  // 眉毛：浓、黑，眉尾往下
+  for (const s of [-1, 1]) {
+    for (let i = 0; i < 60; i++) {
+      const t = i / 59;
+      const x = s * (0.012 + t * 0.04);
+      const y = 0.022 + Math.sin(t * Math.PI * 0.8) * 0.004 - t * 0.004 + (r() - 0.5) * 0.004;
+      g.strokeStyle = `rgba(${26 + r() * 20},${22 + r() * 16},${20 + r() * 14},${0.55 + r() * 0.3})`;
+      g.lineWidth = 1.4;
+      g.beginPath();
+      g.moveTo(fx(x), fy(y - 0.002));
+      g.lineTo(fx(x + s * 0.004), fy(y + 0.002));
+      g.stroke();
+    }
+  }
+  // 眼睛：细长、单眼皮、上眼皮有点耷拉，眼角细纹
+  for (const s of [-1, 1]) {
+    const ex = s * EYE.x;
+    blob(fx(ex), fy(0.002), 0.02 * m, 0.01 * my, [110, 58, 44], 0.45); // 眼窝的暗
+    g.fillStyle = 'rgb(232,220,206)';
+    g.beginPath();
+    g.ellipse(fx(ex), fy(-0.0005), 0.012 * m, 0.0028 * my, 0, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = 'rgb(36,26,22)';
+    g.beginPath();
+    g.ellipse(fx(ex - s * 0.001), fy(-0.0005), 0.0055 * m, 0.0028 * my, 0, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = 'rgba(255,250,240,0.8)';
+    g.fillRect(fx(ex - s * 0.002) - 1, fy(0.0005) - 1, 2, 2);
+    g.strokeStyle = 'rgba(70,36,28,0.9)';
+    g.lineWidth = 2.2;
+    g.beginPath();
+    g.moveTo(fx(ex - 0.013), fy(-0.0005));
+    g.quadraticCurveTo(fx(ex), fy(0.0045), fx(ex + 0.013), fy(-0.0005)); // 上眼睑
+    g.stroke();
+    g.strokeStyle = 'rgba(96,52,40,0.5)';
+    g.lineWidth = 1.2;
+    g.beginPath();
+    g.moveTo(fx(ex - 0.01), fy(-0.006));
+    g.quadraticCurveTo(fx(ex), fy(-0.0095), fx(ex + 0.011), fy(-0.0055)); // 眼袋
+    g.stroke();
+    for (const d of [-0.003, 0.001, 0.005]) {
+      g.beginPath();
+      g.moveTo(fx(ex + s * 0.016), fy(d * 0.5));
+      g.lineTo(fx(ex + s * 0.024), fy(d * 1.4)); // 鱼尾纹
+      g.stroke();
+    }
+  }
+  // 鼻孔、鼻翼的阴影
+  for (const s of [-1, 1]) blob(fx(s * 0.007), fy(NOSE.y - 0.006), 0.004 * m, 0.0025 * my, [60, 30, 24], 0.7);
+  // 法令纹（很深）
+  g.strokeStyle = 'rgba(96,48,36,0.32)';
+  g.lineWidth = 3;
+  for (const s of [-1, 1]) {
+    g.beginPath();
+    g.moveTo(fx(s * 0.021), fy(NOSE.y + 0.002));
+    g.quadraticCurveTo(fx(s * 0.04), fy(-0.068), fx(s * 0.036), fy(-0.096));
+    g.stroke();
+  }
+  // 嘴：薄嘴唇，嘴角略往下
+  blob(fx(0), fy(MOUTH_Y - 0.0045), 0.019 * m, 0.0045 * my, [158, 74, 64], 0.7);
+  g.strokeStyle = 'rgb(84,40,34)';
+  g.lineWidth = 2.4;
+  g.beginPath();
+  g.moveTo(fx(-0.022), fy(MOUTH_Y - 0.002));
+  g.quadraticCurveTo(fx(0), fy(MOUTH_Y + 0.002), fx(0.022), fy(MOUTH_Y - 0.002));
+  g.stroke();
+  blob(fx(0), fy(-0.105), 0.03 * m, 0.012 * my, [110, 64, 48], 0.25); // 下巴的胡茬阴影
+  // —— 右半边：后脑勺 ——
+  const bx = (x) => 512 + 512 * (0.5 + (x / RX) * 0.45);
+  g.fillStyle = rgba(SKIN_C.map((v) => v * 0.92), 1);
+  g.fillRect(512, 0, 512, 512);
+  g.fillStyle = rgba(HAIR_C, 1);
+  g.beginPath();
+  g.moveTo(512, 0);
+  for (let i = 0; i <= 64; i++) {
+    const x = -RX / 0.9 + (i / 64) * (2 * RX) / 0.9;
+    g.lineTo(bx(x), fy(backHairlineY(x)));
+  }
+  g.lineTo(1024, 0);
+  g.fill();
+  for (let i = 0; i < 1400; i++) {
+    const x0 = 512 + r() * 512;
+    const y0 = r() * (fy(backHairlineY(((x0 - 768) / 512 / 0.45) * RX)) - 10);
+    const k = r();
+    g.strokeStyle = k > 0.93 ? 'rgba(120,116,112,0.45)' : k > 0.5 ? 'rgba(62,58,56,0.45)' : 'rgba(10,9,9,0.5)';
+    g.lineWidth = 0.8 + r();
+    g.beginPath();
+    g.moveTo(x0, y0);
+    g.lineTo(x0 + (r() - 0.5) * 4, y0 + 14 + r() * 20);
+    g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  return t;
 }
 
 /** 毛背心的格子：藏青底、深浅两色细格 */
@@ -348,22 +545,19 @@ export function createFather() {
   const head = new THREE.Group();
   head.position.y = 0.105;
   headPivot.add(head);
-  const headTex = new THREE.TextureLoader().load(headUrl);
-  headTex.colorSpace = THREE.SRGBColorSpace;
-  headTex.anisotropy = 4;
-  const skull = new THREE.Mesh(headGeometry(), new THREE.MeshStandardMaterial({ map: headTex, roughness: 0.66 }));
+  const skull = new THREE.Mesh(headGeometry(), new THREE.MeshStandardMaterial({ map: faceAtlas(), roughness: 0.66 }));
   skull.castShadow = skull.receiveShadow = true;
   head.add(skull);
   // 耳朵
   const earMat = new THREE.MeshStandardMaterial({ color: 0xb06a56, roughness: 0.6 });
   for (const s of [-1, 1]) {
-    const ear = ellipsoid(earMat, 0.011, 0.03, 0.02, 14);
-    ear.position.set(s * RX * 0.93, -0.024, -0.012);
-    ear.rotation.set(0, s * 0.35, s * -0.1);
+    const ear = ellipsoid(earMat, 0.009, 0.031, 0.02, 14);
+    ear.position.set(s * (RX + 0.004), -0.024, -0.014);
+    ear.rotation.set(0, s * 0.45, s * -0.1);
     head.add(ear);
   }
-  // 低头看狗：照片里脸已经朝右手边偏了一点，这里再往右转一些、往下看
-  headPivot.rotation.set(0.16, -0.34, 0.03);
+  // 低头看狗：往右手边转、往下看
+  headPivot.rotation.set(0.2, -0.4, 0.03);
 
   // —— 左手插在裤兜里 ——
   {
@@ -425,7 +619,7 @@ export function createFather() {
     update(dt, t, handTarget, nuzzling) {
       // 呼吸、微微晃
       torso.rotation.x = 0.09 + Math.sin(t * 1.7) * 0.006;
-      headPivot.rotation.y = -0.34 + (nuzzling ? -0.06 : 0) + Math.sin(t * 0.5) * 0.02;
+      headPivot.rotation.y = -0.4 + (nuzzling ? -0.06 : 0) + Math.sin(t * 0.5) * 0.02;
       root.updateMatrixWorld(true);
       shoulderR.getWorldPosition(S);
       body.worldToLocal(S);

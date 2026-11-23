@@ -54,6 +54,7 @@ const SHOTS = [
   ['father-dog', 'view=orbit&cam=-2.6,1.35,2.2,-2.7,0.95,-0.3'],
   ['father-side', 'view=orbit&cam=-0.6,1.4,1.0,-2.7,0.95,-0.3'],
   ['father-face', 'view=orbit&cam=-2.6,1.45,0.75,-2.62,1.35,-0.3'],
+  ['father-portrait', 'view=orbit&cam=-3.1,1.5,0.3,-2.62,1.56,-0.28'], // 正对着脸的近景
   ['father-child', 'view=orbit&cam=-3.4,1.2,1.3,-2.65,1.3,-0.3'], // 小孩视线高度看父亲
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
