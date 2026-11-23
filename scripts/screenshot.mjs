@@ -50,6 +50,10 @@ const SHOTS = [
   ['shrine', 'view=orbit&cam=0.9,1.3,-1.6,0,1.0,-4'],
   ['backyard', 'view=orbit&cam=-2.7,1.7,3.4,1.2,0.6,7.4'],
   ['swing', 'view=orbit&cam=4.7,1.6,1.0,2.7,1.4,4.2'],
+  // 第 9 轮新增：父亲和大黄
+  ['father-dog', 'view=orbit&cam=-2.2,1.45,1.5,-2.85,0.85,-0.3'],
+  ['father-side', 'view=orbit&cam=-1.0,1.3,-0.6,-2.9,0.9,-0.3'],
+  ['father-face', 'view=orbit&cam=-3.15,1.25,0.4,-2.62,1.5,-0.28'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
   ['orbit-noon', 'view=orbit&time=noon'],

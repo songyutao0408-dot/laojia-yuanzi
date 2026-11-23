@@ -71,6 +71,10 @@ src/
     postfx.js           EffectComposer：RenderPass → 识别透明叶片的 GTAO（仅高画质）→ OutputPass（ACES + sRGB）
   effects/smoke.js      厨房烟囱炊烟粒子（setAmount 随时间变化）
   yard/                 院子里的零碎物件（一个物件一个文件）：waterVat.js 大水缸、stoneSlabs.js 老青石板
+  characters/           人和动物（西边梧桐树下，位置在 layout.CHARACTERS）
+    father.js           父亲：程序化人物（绘制的脸部经纬度贴图 + 发帽 alpha 贴图 + 立体鼻/耳），右臂两段骨骼 IK 每帧搭在狗头顶
+    dog.js              大黄：坐姿中华田园犬，尾巴摇、眨眼、呼吸；nuzzle() 往父亲腿上蹭（约 3 s）
+    rig.js              Limb（两点间肢体）、solveTwoBone（解析 IK）、ellipsoid
   audio/                背景音乐
     bgm.mp3             用户提供的 BGM（2:40）：已裁掉开头 0.13 s 空白、开头 0.3 s 淡入、结尾 3 s 淡出，128 kbps（原曲结尾是突然停住的，不淡出循环会“咔”一下）
     bgm.js              createBGMPlayer()：<audio loop> 边下边播 + Web Audio GainNode 淡入淡出（iOS 的 audio.volume 只读）；空闲时预取成 blob；后台暂停；probe() 自检用
@@ -80,7 +84,7 @@ src/
     firstPerson.js      第一人称：WASD/方向键、Shift 跑、按住鼠标拖动转头（不锁定鼠标）、上台阶、进门辅助（朝门走时自动往门洞中线靠）、视线起伏
     colliders.js        从 userData.solid 的 Mesh 生成可旋转矩形碰撞体 + 高度过滤；groundHeight(x,z) 台阶/室内地坪
     touch.js            手机：左下虚拟摇杆、滑动转头、轻点交互
-    interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
+    interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千/摸摸大黄），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
   interiors/            室内细节（以后补），见 interiors/README.md
   ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针；musicButton.js 音乐开关（指北针左边，偏好存在 localStorage 'laojia-bgm-v2'）
 scripts/
@@ -99,6 +103,7 @@ docs/
 - 北屋室内地坪 0.45 m，门洞底 = 地坪；门外是连通两间的 3 级台阶（x0..x1），groundHeight 按整条台阶算；青石板也能踩上去（groundHeight 里按旋转矩形判断）
 - 树冠不能用球体：用 treeBuilder 的枝干骨架 + 叶片卡片。树的外形参数在各物种文件顶部的 PARAMS 里
 - **交互要宽容**：不要求精确点中小物件（石榴 8 cm、压杆 3 cm）；用户实测过“必须点准”在手机上基本用不了。新增可交互物件时也走“走近出按钮 + 点击就近吸附”的路子
+- **人物照片不进仓库**：用户提供的父亲照片只作参考，不提交、不放到网站（网站公开）。如果用户以后要求把真实照片贴到模型上，先提醒会公开
 - **测试要模拟真人**：交互测试只用真实输入事件（keyboard.down / mouse.click / 触摸），不要直接调控制器或瞬移到目标上——第 6 步第一版就是因为测试“作弊”而没发现问题
 - **可采摘的果子**：石榴每个果子是一个 Group（userData.fruit = 'pomegranate'，split 表示咧口）；枣子是一个 InstancedMesh（userData.fruit = 'jujube'），摘掉时把对应实例矩阵缩为 0
 - 自检截图要等加载层消失（`#loading.done`）再拍——第 7 步加了进度条后，`__sceneReady` 会在贴图生成完之前就变成 true

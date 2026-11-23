@@ -168,6 +168,16 @@ export const BACK_YARD = {
 /** 枣树弯出来的那根枝干上绑的秋千：枝干从主干约 1.75 m 处朝 dir 方向伸出；秋千挂在离主干 hang 米处 */
 export const SWING = { dir: [-0.8, -0.6], branchFrom: 1.75, branchLength: 2.2, hang: 1.35, seatHeight: 0.45, ropeGap: 0.46 };
 
+/**
+ * 人和狗：西边梧桐树下（树干在 (-2.9, -1.4)）。
+ * 父亲：约 70 岁、身高约 1.72 m，面朝南略偏西（rot 为绕竖轴转角，度；0 = 面朝南）；
+ * 大黄（中华田园犬）：坐在父亲右手边，面朝父亲、抬头看他，父亲右手搭在它头上。
+ */
+export const CHARACTERS = {
+  father: { x: -2.55, z: -0.3, rot: -18, height: 1.72 },
+  dog: { x: -3.05, z: -0.25, rot: 100 },
+};
+
 /** 默认视角 */
 export const VIEWS = {
   eyeHeight: 1.2, // 七八岁小孩视线高度
