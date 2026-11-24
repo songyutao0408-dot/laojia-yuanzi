@@ -185,6 +185,25 @@ if (run('H')) {
   check('H2 环绕视角点狗头，大黄蹭腿', n2, { n2 });
   await ctx2.close();
 }
+// I) 西北屋：从外屋往东走，穿过挂门帘的小门洞进里屋（起点偏北 0.25 m，靠进门辅助顺进去），按 E 拉灯，再点按钮关灯
+if (run('I')) {
+  const { page, ctx } = await open([-3.6, -6.45], [-0.5, -6.45]);
+  const p = await holdUntil(page, 'KeyW', (p) => p.x > -1.9);
+  const inside = await page.evaluate(() => window.__app.westRoom.inInnerRoom(...(({ x, z }) => [x, z])(window.__app.views.fp.state.pos)));
+  check('I1 穿过门帘走进里屋', p.x > -1.9 && inside, { ...p, inside });
+  const ok = await waitButton(page, '拉灯');
+  await page.keyboard.press('KeyE');
+  await page.waitForTimeout(600);
+  const on = await page.evaluate(() => window.__app.westRoom.lamp.on);
+  await page.screenshot({ path: 'screenshots/test-lamp-on.png' });
+  check('I2 里屋按 E 拉灯，灯亮', ok && on, { ok, on });
+  const ok2 = await waitButton(page, '拉灯（关）');
+  if (ok2) await page.locator('#hud2 .actions button', { hasText: '拉灯' }).click();
+  await page.waitForTimeout(600);
+  const off = !(await page.evaluate(() => window.__app.westRoom.lamp.on));
+  check('I3 再点“拉灯”按钮，灯灭', ok2 && off, { ok2, off });
+  await ctx.close();
+}
 // F) 手机（iPhone 13 模拟）：用摇杆往前走进东北屋，再到井边点“压水”按钮
 if (run('F')) {
   const { page, ctx } = await open([3.55, 1.5], [3.55, -6], { mobile: true }); // 东北屋门在 x = 3.75，偏开 0.2 m

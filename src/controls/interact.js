@@ -7,13 +7,14 @@ import { WELL, TREES } from '../layout.js';
  * - 也可以直接点画面：选点击位置附近（约 90 像素内）够得着的果子或压水井
  * - 石榴：伸手够得着（离眼睛 2.6 m 内）才能摘；枣树高，小孩站到树下用竹竿打枣，水平 3 m 内的都能打下来
  * - 环绕/俯视模式下点果子、压水井也有效（不限距离）
+ * - 西北屋里屋：站在里屋里、离灯绳 1.8 m 内出“拉灯”按钮；也可以直接点灯绳
  */
 const WELL_NEAR = 2.0;
 const POME_REACH = 2.6;
 const JUJUBE_REACH = 3.0;
 const CLICK_RADIUS = 90;
 
-export function createInteraction({ engine, views, pumping, picking, ui, swing, characters }) {
+export function createInteraction({ engine, views, pumping, picking, ui, swing, characters, westRoom }) {
   const { scene, camera, renderer } = engine;
   const well = scene.getObjectByName('well');
   const pump = well.getObjectByName('pump');
@@ -91,6 +92,15 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     characters.dog.nuzzle();
     ui.toast('大黄眯起眼，尾巴摇得欢，往父亲腿上蹭了又蹭');
   }
+  function doLamp() {
+    const on = westRoom.lamp.pull();
+    ui.toast(on ? '咔哒一声，屋顶的灯泡亮了，昏黄昏黄的' : '咔哒，灯灭了');
+  }
+  const nearCord = (p) => {
+    if (!westRoom || !westRoom.inInnerRoom(p.x, p.z)) return false;
+    const c = westRoom.lamp.cordPosition();
+    return Math.hypot(p.x - c.x, p.z - c.z) <= 1.8;
+  };
   function doPump() {
     pumping.pump();
     ui.toast('吱嘎——吱嘎——，水哗哗地流进桶里');
@@ -111,6 +121,7 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     const p = playerXZ();
     if (!walking()) return acts;
     if (p.distanceTo(wellPos) <= WELL_NEAR) acts.push({ label: '压水', run: doPump });
+    if (nearCord(p)) acts.push({ label: westRoom.lamp.on ? '拉灯（关）' : '拉灯', run: doLamp });
     if (characters) {
       const dp = characters.dogHeadPosition();
       if (Math.hypot(p.x - dp.x, p.z - dp.z) <= 2.0) acts.push({ label: '摸摸大黄', run: doPetDog });
@@ -154,6 +165,8 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
       const dp = characters.dogHeadPosition();
       if (!walking() || dp.distanceTo(eye()) <= 3) cands.push({ kind: 'dog', pos: dp });
     }
+    // 里屋的灯绳：走进去时人在里屋里才能点，环绕/俯视时随便点
+    if (westRoom && (!walking() || westRoom.inInnerRoom(playerXZ().x, playerXZ().z))) cands.push({ kind: 'lamp', pos: westRoom.lamp.cordPosition() });
     let best = null;
     let bd = walking() ? CLICK_RADIUS : 40;
     for (const c of cands) {
@@ -177,6 +190,7 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     }
     if (best.kind === 'pump') doPump();
     else if (best.kind === 'dog') doPetDog();
+    else if (best.kind === 'lamp') doLamp();
     else doPick(best);
     return true;
   }

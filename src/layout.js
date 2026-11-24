@@ -59,6 +59,24 @@ export const NORTH_HOUSE = {
   ],
 };
 
+/**
+ * 西北屋室内（第 10 轮）：一道隔墙把西北屋分成两间——西边“外屋”（约 2/3，堂屋）、东边“里屋”。
+ * 坐标是室内坐标：原点 = 西北屋室内西北角（墙内侧）、地坪面；+x 东、+z 南、+y 上（见 src/interiors/README.md）。
+ * 室内净空 7.14 m × 4.52 m × 2.9 m。进屋门在外屋南墙；隔墙上一个小门洞通里屋，门洞挂半截白布门帘。
+ * 里屋：北边一铺炕（西顶隔墙、东顶两屋之间的隔墙、北顶后墙），南墙下一排做蜡烛的器具，南墙被熏黑。
+ */
+export const WEST_ROOM = {
+  origin: { x: NORTH_HOUSE.rect.x0 + NORTH_HOUSE.wall, z: NORTH_HOUSE.rect.z0 + NORTH_HOUSE.wall }, // 室内原点的世界坐标
+  size: { w: 7.14, d: 4.52, h: NORTH_HOUSE.height - 0.15 - NORTH_HOUSE.floor },
+  partition: { x: 4.84, thickness: 0.24 }, // 隔墙中线：外屋净宽 4.72 m，里屋净宽 2.18 m
+  innerDoor: { z: 2.55, width: 0.8, height: 1.9 }, // 隔墙上的小门洞（z 为中心）
+  curtain: { drop: 0.78 }, // 白布门帘长度（门洞高的四成左右）
+  kang: { depth: 1.85, height: 0.62 }, // 炕：从北墙往南 1.85 m，高 0.62 m
+  pullSwitch: { z: 1.45, y: 2.05, cordEnd: 1.2 }, // 拉线开关：装在隔墙东面（炕头这边），灯绳垂到离地 1.2 m
+  bulb: { x: 6.05, z: 2.5, drop: 0.55 }, // 里屋顶上的灯泡（15 W 左右的白炽灯），吊下来 0.55 m
+  candles: { depth: 0.32 }, // 南墙下做蜡烛的器具（离墙 4 cm 摆一排）
+};
+
 /** 厨房：院子西侧北段，与西北屋之间隔约 2 m 的空当 */
 export const KITCHEN = {
   name: '厨房',

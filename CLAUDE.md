@@ -31,7 +31,7 @@
 - `npm run build:single` → `dist-single/index.html`（vite-plugin-singlefile，所有资源内联，可双击打开）
 - `npm run plan` → 重新生成 `docs/plan.svg`
 - `npm run build && npm run shots` → Playwright 无头浏览器截图到 `screenshots/`（已 gitignore），并检查黑屏和页面报错；`npm run shots -- father-dog father-face` 只截指定机位。机位列表在 `scripts/screenshot.mjs` 的 `SHOTS`（俯视、环绕、门口、北屋两间室内、厨房室内、院内看大门、台阶看院子）。Playwright 用本机全局安装的版本，不在 package.json 里
-- 页面支持 `?autoperf=off`（自检脚本都带上，否则无头浏览器 2 fps 会触发自动降档）、`?music=off`（不放音乐、不出“进入院子”遮罩，自检脚本都带上），`?view=top|orbit|walk` 直接打开指定视角，`&time=dawn|noon|dusk|night` 指定时间，`&quality=low|high` 指定画质，`&cam=x,y,z,tx,ty,tz` 指定相机位置/注视点；`window.__app` 暴露 engine / views 方便调试
+- 页面支持 `?lamp=on`（里屋的灯一开始就开着）、`?autoperf=off`（自检脚本都带上，否则无头浏览器 2 fps 会触发自动降档）、`?music=off`（不放音乐、不出“进入院子”遮罩，自检脚本都带上），`?view=top|orbit|walk` 直接打开指定视角，`&time=dawn|noon|dusk|night` 指定时间，`&quality=low|high` 指定画质，`&cam=x,y,z,tx,ty,tz` 指定相机位置/注视点；`window.__app` 暴露 engine / views 方便调试
 - 部署：`.github/workflows/deploy.yml`，push 到 `main` 自动构建并发布到 GitHub Pages
   （线上地址：https://songyutao0408-dot.github.io/laojia-yuanzi/ ）；同时把单文件版放到网站 `/laojia-yuanzi.html`，并更新名为 `latest` 的 Release（附件 laojia-yuanzi.html）
 
@@ -84,13 +84,14 @@ src/
     firstPerson.js      第一人称：WASD/方向键、Shift 跑、按住鼠标拖动转头（不锁定鼠标）、上台阶、进门辅助（朝门走时自动往门洞中线靠）、视线起伏
     colliders.js        从 userData.solid 的 Mesh 生成可旋转矩形碰撞体 + 高度过滤；groundHeight(x,z) 台阶/室内地坪
     touch.js            手机：左下虚拟摇杆、滑动转头、轻点交互
-    interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千/摸摸大黄），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
-  interiors/            室内细节（以后补），见 interiors/README.md
+    interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千/摸摸大黄/里屋拉灯），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
+  interiors/            室内细节，见 interiors/README.md；挂在 interior-anchor-* 上，尺寸在 layout.WEST_ROOM 等（室内坐标）
+    northWest.js        西北屋：隔墙分外屋/里屋，门洞白布门帘（顶点动画，人走近被撩开）、白灰墙；里屋的炕、被子、拉线开关 + 15 瓦灯泡（lamp.pull() 开关，高画质点光源带阴影）、两台做蜡烛的器具（按用户照片）+ 煤球炉、熏黑的南墙和顶棚
   ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针；musicButton.js 音乐开关（指北针左边，偏好存在 localStorage 'laojia-bgm-v2'）
 scripts/
   gen-plan.mjs          由 layout.js 生成 docs/plan.svg
   screenshot.mjs        自检截图
-  interaction-test.mjs  交互自检（npm run test:interact，ONLY=A..F 可只跑部分）：只用真实按键/点击/触摸，从附近自己走过去：斜着进西北屋、进厨房、井边按 E、点按钮摘石榴、点画面摘石榴、打枣、手机摇杆进东北屋、手机点压水
+  interaction-test.mjs  交互自检（npm run test:interact，ONLY=A..I 可只跑部分）：只用真实按键/点击/触摸，从附近自己走过去：斜着进西北屋、进厨房、井边按 E、点按钮摘石榴、点画面摘石榴、打枣、手机摇杆进东北屋、手机点压水、摸大黄（H）、穿过门帘进里屋拉灯（I）
 docs/
   scene-spec.md         场景权威描述
   plan.svg              俯视平面图
@@ -131,7 +132,9 @@ docs/
 
 七步全部完成。之后追加：背景音乐（src/audio/，用户第一次点击/按键后开始循环，♪按钮开关并记住选择）。最初是代码合成的原创小曲，后按用户要求换成用户提供的 MP3（合成版在 git 历史 PR 9 里）。音乐默认开：加载完先直接试播，被浏览器自动播放策略拦下就显示“进入院子 ♪”遮罩（#enter），点一下开始。注意：无头 Chromium 不拦自动播放，而且 navigator.userActivation 一开始就是 true，测拦截路径要自己在 init script 里按 isTrusted 的输入事件模拟。
 
-之后的迭代（如北屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
+之后的迭代（各屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
+
+第 10 轮：西北屋室内第一部分（隔墙分外屋/里屋、门帘、里屋的炕/被子/拉线开关灯/做蜡烛的器具/熏黑的南墙）。外屋陈设、东北屋、厨房室内还没做。
 
 ## 待确认 / 已做的假设
 

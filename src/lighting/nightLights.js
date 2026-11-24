@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { NORTH_HOUSE as NH, KITCHEN as K } from '../layout.js';
+import { NORTH_HOUSE as NH, KITCHEN as K, WEST_ROOM as WR } from '../layout.js';
 
 /**
  * 夜里的灯：
- * - 北屋每间屋顶正中吊一只白炽灯泡（昏黄、2700K 左右），点光源照亮屋里，从门窗透出去
+ * - 北屋每间屋顶正中吊一只白炽灯泡（西北屋在外屋正中）（昏黄、2700K 左右），点光源照亮屋里，从门窗透出去
  * - 窗户玻璃后面一层暖黄光（像隔着旧窗帘/报纸透出来的光）
  * - 门洞、窗洞各有一盏向外斜照的聚光，把门口地面照出一片暖光
  * - 厨房也有一盏更暗的灯
@@ -48,7 +48,9 @@ export function createNightLights() {
   const midZ = (NH.rect.z0 + NH.rect.z1) / 2;
   const zIn = NH.rect.z1 - NH.wall - 0.03; // 南墙内侧
   for (const room of NH.rooms) {
-    addBulb((room.x0 + room.x1) / 2, ceiling - 0.45, midZ, 5, 7);
+    // 西北屋隔成了外屋、里屋：这盏灯挂在外屋正中（里屋的灯用拉线开关自己开关，见 interiors/northWest.js）
+    const bx = room.id === 'west' ? WR.origin.x + (WR.partition.x - WR.partition.thickness / 2) / 2 : (room.x0 + room.x1) / 2;
+    addBulb(bx, ceiling - 0.45, midZ, 5, room.id === 'west' ? 5 : 7);
     const d = room.door;
     addSpill(d.x, NH.floor + 1.9, zIn, d.x, NH.rect.z1 + 2.2, 7);
     for (const w of room.windows) {

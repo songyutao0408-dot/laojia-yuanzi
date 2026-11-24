@@ -109,6 +109,15 @@
 <rect x="868" y="130" width="12" height="250" fill="#b5523b" stroke="none"/>
 <text x="692.5" y="255" class="b" text-anchor="middle">东北屋</text>
 <text x="692.5" y="280" class="s" text-anchor="middle">室内 7.1×4.5 m · 高 3.5 m</text>
+<rect x="378" y="142" width="12" height="107.5" fill="#b5523b" stroke="none"/>
+<rect x="378" y="289.5" width="12" height="78.5" fill="#b5523b" stroke="none"/>
+<line x1="375" y1="247" x2="375" y2="292" stroke="#c42a30" stroke-width="2" stroke-dasharray="2 2"/>
+<rect x="390" y="142" width="109" height="92.5" fill="#d8c08a" stroke="#2b2b2b" stroke-width="0.8"/>
+<text x="444.5" y="195.8" class="s" text-anchor="middle">炕</text>
+<rect x="392.5" y="349.5" width="104" height="16" fill="#b89a48" stroke="#2b2b2b" stroke-width="0.6"/>
+<text x="444.5" y="340.5" class="xs" text-anchor="middle">做蜡烛的器具</text>
+<text x="263" y="187" class="s" text-anchor="middle">外屋</text>
+<text x="444.5" y="259.5" class="s" text-anchor="middle">里屋</text>
 <rect x="130" y="480" width="150" height="250" fill="#d98a6c" fill-opacity="0.25" stroke="none"/>
 <rect x="130" y="480" width="150" height="12" fill="#b5523b" stroke="none"/>
 <rect x="130" y="718" width="150" height="12" fill="#b5523b" stroke="none"/>

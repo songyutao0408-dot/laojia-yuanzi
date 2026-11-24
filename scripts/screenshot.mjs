@@ -56,6 +56,13 @@ const SHOTS = [
   ['father-face', 'view=orbit&cam=-2.6,1.45,0.75,-2.62,1.35,-0.3'],
   ['father-portrait', 'view=orbit&cam=-3.1,1.5,0.3,-2.62,1.56,-0.28'], // 正对着脸的近景
   ['father-child', 'view=orbit&cam=-3.4,1.2,1.3,-2.65,1.3,-0.3'], // 小孩视线高度看父亲
+  // 第 10 轮：西北屋室内（外屋看里屋门帘、里屋的炕、蜡烛器具和熏黑的南墙、拉灯）
+  ['west-outer-door', 'view=orbit&cam=-4.86,1.65,-4.86,-2.42,1.3,-6.21'],
+  ['west-inner-kang', 'view=orbit&cam=-0.36,1.95,-4.56,-1.96,1.2,-7.96'],
+  ['west-inner-candles', 'view=orbit&cam=-1.66,1.95,-6.66,-1.26,1.35,-4.24'],
+  ['west-inner-lamp', 'view=orbit&lamp=on&cam=-0.36,1.95,-4.56,-1.96,1.2,-7.96'],
+  ['west-curtain-walk', 'view=walk&cam=-2.85,1.2,-6.25,-1,1.2,-6.25'], // 走到门洞前，门帘被撩开
+  ['west-inner-night', 'view=orbit&time=night&lamp=on&cam=-1.66,1.95,-6.66,-1.26,1.35,-4.24'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
   ['orbit-noon', 'view=orbit&time=noon'],

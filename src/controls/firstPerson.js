@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { VIEWS, NORTH_HOUSE as NH, KITCHEN as K } from '../layout.js';
+import { VIEWS, NORTH_HOUSE as NH, KITCHEN as K, WEST_ROOM as WR } from '../layout.js';
 import { resolveCollisions, groundHeight } from './colliders.js';
 
 /**
@@ -18,6 +18,8 @@ const STEP_UP = 0.22; // 一次最多迈上去的高度
 const DOORWAYS = [
   ...NH.rooms.map((r) => ({ axis: 'x', pos: r.door.x, at: NH.rect.z1 - NH.wall / 2, half: r.door.width / 2 - 0.07 })),
   { axis: 'z', pos: K.door.z, at: K.rect.x1 - K.wall / 2, half: K.door.width / 2 - 0.07 },
+  // 西北屋外屋通里屋的小门洞
+  { axis: 'z', pos: WR.origin.z + WR.innerDoor.z, at: WR.origin.x + WR.partition.x, half: WR.innerDoor.width / 2 - 0.05 },
 ];
 
 /** 朝门洞走时把人往门洞中线拉（dirX/dirZ 为这一帧的移动方向） */
