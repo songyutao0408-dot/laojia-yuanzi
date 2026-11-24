@@ -86,8 +86,9 @@ src/
     touch.js            手机：左下虚拟摇杆、滑动转头、轻点交互
     interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千/摸摸大黄/里屋拉灯/外屋开电视），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
   interiors/            室内细节，见 interiors/README.md；挂在 interior-anchor-* 上，尺寸在 layout.WEST_ROOM 等（室内坐标）
-    common.js           室内共用：canvasTex、rng、seamlessBlob、炕席、被面、枕头、一摞被子 quiltStack、木纹 woodTex、海报
+    common.js           室内共用：canvasTex、rng、seamlessBlob、炕席、被面、枕头、一摞被子 quiltStack、木纹 woodTex、海报、旧大白 plasterTex、水泥墙裙 cementTex、旧砖地 floorTex
     northWestOuter.js   西北屋外屋陈设（尺寸在 WEST_ROOM.outer）：大木头炕（枕头朝外、靠墙摞被）、电视桌 + 黑白电视（拉杆天线；tv.toggle() 开关：亮线 → 雪花 → 黑白测试图，屏幕前一盏小点光源）+ 座钟（按用户照片：横放木壳、拱顶、镶条立柱，指针走现在的时间）、斑驳圆桌、洗脸盆架 + 洋瓷脸盆（红口沿、囍字，按用户照片）+ 毛巾、脚踏缝纫机
+    northEast.js        东北屋（东西 6 m，仓库；尺寸在 layout.EAST_ROOM）：旧大白 + 水泥墙裙、旧砖地；西墙到北墙一溜石灰大缸（玉米/麦子/木盖/麻袋）、南窗下的床、墙角蛛网（透明贴图）、墙上爬的壁虎（贴图片，趴一会儿窜一下）
     northWest.js        西北屋（东西 9 m）：隔墙分外屋（6 m）/里屋（3 m），门洞白布门帘（顶点动画，人走近被撩开）；墙面旧大白 + 墙根 0.55 m 水泥墙裙（finish() 给每面墙贴两层，外屋也用）、磨旧淡红砖地面；里屋的炕（东西两头顶墙，炕席、炕沿；中间试过竹床、木头床，用户都否了）、被子、拉线开关 + 15 瓦灯泡（lamp.pull() 开关，高画质点光源带阴影）、隔墙上三张画的女明星海报、西南角水缸（复用 yard/waterVat.js）、两台做蜡烛的器具（按用户照片）+ 煤球炉、熏黑的南墙（窗洞处挖空）和顶棚
   ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针；musicButton.js 音乐开关（指北针左边，偏好存在 localStorage 'laojia-bgm-v2'）
 scripts/
@@ -115,7 +116,7 @@ docs/
 - 透明/贴花/烟/远景用 `userData.noAO = true` 或透明材质，GTAO 渲染法线时会跳过它们
 - **贴图与 UV**：盒子类几何用 `core/box.js` 的世界坐标 UV（单位：米），贴图 `textureSet(..., meters)` 设置 repeat = 1/meters。不平铺的画面（瓷砖画、春联）用几何体自带 0..1 UV
 - **贴图都是运行时 canvas 生成**，首次打开有生成耗时（`window.__app.buildMs`，测试机上高画质约 4 s、低画质约 1.3 s）；分辨率总开关 `TEX.scale`（低画质 0.5）。fillMulti 回调里的 x, y 始终是设计分辨率坐标，新写贴图照常按设计尺寸写即可；新材质加进 materials.js 的 DEFS 会被自动预生成
-- 室内墙面：西北屋已按用户描述做成旧大白 + 墙根 0.55 m 水泥墙裙（用户说外屋、以后别的屋也是这样）；东北屋/厨房室内目前还是清水砖，做到时照西北屋的 finish() 做
+- 室内墙面：西北屋、东北屋都是旧大白 + 墙根 0.55 m 水泥墙裙（用户说以后别的屋也是这样）；厨房室内目前还是清水砖，做到时照 northEast.js 的 finish() 做
 
 ## 工作流程（用户要求）
 
@@ -135,6 +136,8 @@ docs/
 七步全部完成。之后追加：背景音乐（src/audio/，用户第一次点击/按键后开始循环，♪按钮开关并记住选择）。最初是代码合成的原创小曲，后按用户要求换成用户提供的 MP3（合成版在 git 历史 PR 9 里）。音乐默认开：加载完先直接试播，被浏览器自动播放策略拦下就显示“进入院子 ♪”遮罩（#enter），点一下开始。注意：无头 Chromium 不拦自动播放，而且 navigator.userActivation 一开始就是 true，测拦截路径要自己在 init script 里按 isTrusted 的输入事件模拟。
 
 之后的迭代（各屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
+
+第 12 轮：东北屋（仓库）：木板门、石灰大缸装粮食、南窗下的床、蛛网、壁虎。厨房室内还没做。
 
 第 11 轮：西北屋外屋陈设（木板门、电视桌/黑白电视/座钟、大木头炕、圆桌、洗脸盆架、缝纫机）。座钟后来按用户补发的照片改成横放的拱顶木壳座钟。
 

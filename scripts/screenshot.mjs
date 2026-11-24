@@ -76,6 +76,12 @@ const SHOTS = [
   ['west-outer-tv-night', 'view=orbit&time=night&tv=on&cam=-3.75,1.65,-4.55,-3.96,1.2,-8.46'],
   ['west-washbasin', 'view=orbit&cam=-2.55,1.75,-5.2,-1.9,1.05,-4.56'],
   ['west-door-inside', 'view=orbit&cam=-3.96,1.75,-6.76,-3.75,1.45,-4.24'],
+  // 第 12 轮：东北屋（仓库）：进门看大缸、大缸近景、南窗下的床、墙角蛛网和壁虎、夜里
+  ['east-from-door', 'view=orbit&cam=4.1,1.75,-4.7,1.9,0.7,-8.2'],
+  ['east-vats', 'view=orbit&cam=4.8,2.1,-5.4,2.0,0.8,-7.6'],
+  ['east-bed', 'view=orbit&cam=2.8,1.8,-6.8,5.8,0.6,-4.6'],
+  ['east-gecko', 'view=orbit&cam=5.0,2.0,-6.6,5.9,2.9,-8.76'],
+  ['east-night', 'view=orbit&time=night&cam=4.1,1.75,-4.7,1.9,0.7,-8.2'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
   ['orbit-noon', 'view=orbit&time=noon'],

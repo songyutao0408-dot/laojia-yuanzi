@@ -56,7 +56,7 @@ export const NORTH_HOUSE = {
       name: '东北屋',
       x0: 1.5,
       x1: 7.5,
-      door: { x: 3.75, width: 0.9, height: 2.0 },
+      door: { x: 3.75, width: 0.9, height: 2.0, style: 'plank' }, // 和西北屋一样的老式木板门（第 12 轮）
       // 只在门东侧有窗，门西侧没有窗
       windows: [{ x: 5.8, width: 1.2, height: 1.2, sill: 0.8 }],
     },
@@ -96,6 +96,37 @@ export const WEST_ROOM = {
     washstand: { x: 5.36, z: 4.2 }, // 进门右手边的旮旯里（外屋东南角，挨着隔墙）
     sewing: { z: 1.4, len: 0.92, depth: 0.46 }, // 隔墙边、里屋门洞往北一点的缝纫机（z 为中心，长边顺着隔墙）
   },
+};
+
+/**
+ * 东北屋室内（第 12 轮）：当仓库用。室内坐标：原点 = 东北屋室内西北角（墙内侧）、地坪面；+x 东、+z 南。
+ * 净空 5.64 m × 4.52 m × 2.9 m；墙面、地面和西北屋一样（旧大白 + 0.55 m 水泥墙裙、旧砖地）。
+ * 进门左手边从西墙一直到北墙，一溜石灰大缸，装着收的粮食；南窗底下一张床（床头朝西）；墙角蛛网，墙上壁虎爬。
+ */
+export const EAST_ROOM = {
+  origin: { x: NORTH_HOUSE.rooms[1].x0 + NORTH_HOUSE.wall / 2, z: NORTH_HOUSE.rect.z0 + NORTH_HOUSE.wall },
+  size: { w: NORTH_HOUSE.rect.x1 - NORTH_HOUSE.wall - (NORTH_HOUSE.rooms[1].x0 + NORTH_HOUSE.wall / 2), d: 4.52, h: NORTH_HOUSE.height - 0.15 - NORTH_HOUSE.floor },
+  vat: { r: 0.43, h: 0.95 }, // 石灰大缸：口沿外半径、高
+  // 大缸：西墙一溜（从南往北）、西北角一口、北墙一溜（从西往东）；fill：corn 玉米 / wheat 麦子 / lid 盖着木盖 / sack 上面压着麻袋
+  vats: [
+    { x: 0.47, z: 4.05, fill: 'wheat' },
+    { x: 0.47, z: 3.13, fill: 'lid' },
+    { x: 0.47, z: 2.21, fill: 'corn' },
+    { x: 0.47, z: 1.29, fill: 'wheat' },
+    { x: 0.47, z: 0.47, fill: 'corn' },
+    { x: 1.39, z: 0.47, fill: 'lid' },
+    { x: 2.31, z: 0.47, fill: 'wheat' },
+    { x: 3.23, z: 0.47, fill: 'sack' },
+    { x: 4.15, z: 0.47, fill: 'corn' },
+    { x: 5.07, z: 0.47, fill: 'lid' },
+  ],
+  bed: { x0: 3.15, length: 2.0, width: 1.5, height: 0.5 }, // 南窗底下的床：x0 为床头（西头），长 2 m 东西向、宽 1.5 m，靠南墙
+  // 墙上的壁虎：wall 哪面墙（n/e/s），u 沿墙的起始位置（从西或从北量），v 离地高
+  geckos: [
+    { wall: 'n', u: 3.6, v: 2.2 },
+    { wall: 'e', u: 2.2, v: 1.7 },
+    { wall: 's', u: 5.0, v: 2.35 },
+  ],
 };
 
 /** 厨房：院子西侧北段，与西北屋之间隔约 2 m 的空当 */

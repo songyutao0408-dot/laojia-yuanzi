@@ -129,6 +129,19 @@
 <text x="379" y="217" class="xs" text-anchor="end">缝纫机</text>
 <text x="324.1" y="307" class="s" text-anchor="middle">外屋</text>
 <text x="505" y="259.5" class="s" text-anchor="middle">里屋</text>
+<circle cx="609.5" cy="344.5" r="21.5" fill="#d8d4c8" stroke="#2b2b2b" stroke-width="0.6"/>
+<circle cx="609.5" cy="298.5" r="21.5" fill="#d8d4c8" stroke="#2b2b2b" stroke-width="0.6"/>
+<circle cx="609.5" cy="252.5" r="21.5" fill="#d8d4c8" stroke="#2b2b2b" stroke-width="0.6"/>
+<circle cx="609.5" cy="206.5" r="21.5" fill="#d8d4c8" stroke="#2b2b2b" stroke-width="0.6"/>
+<circle cx="609.5" cy="165.5" r="21.5" fill="#d8d4c8" stroke="#2b2b2b" stroke-width="0.6"/>
+<circle cx="655.5" cy="165.5" r="21.5" fill="#d8d4c8" stroke="#2b2b2b" stroke-width="0.6"/>
+<circle cx="701.5" cy="165.5" r="21.5" fill="#d8d4c8" stroke="#2b2b2b" stroke-width="0.6"/>
+<circle cx="747.5" cy="165.5" r="21.5" fill="#d8d4c8" stroke="#2b2b2b" stroke-width="0.6"/>
+<circle cx="793.5" cy="165.5" r="21.5" fill="#d8d4c8" stroke="#2b2b2b" stroke-width="0.6"/>
+<circle cx="839.5" cy="165.5" r="21.5" fill="#d8d4c8" stroke="#2b2b2b" stroke-width="0.6"/>
+<text x="666" y="204.5" class="xs">石灰大缸（粮食）</text>
+<rect x="743.5" y="291.5" width="100" height="75" fill="#b88a6a" stroke="#2b2b2b" stroke-width="0.6"/>
+<text x="793.5" y="338" class="xs" text-anchor="middle">床</text>
 <rect x="130" y="480" width="150" height="250" fill="#d98a6c" fill-opacity="0.25" stroke="none"/>
 <rect x="130" y="480" width="150" height="12" fill="#b5523b" stroke="none"/>
 <rect x="130" y="718" width="150" height="12" fill="#b5523b" stroke="none"/>

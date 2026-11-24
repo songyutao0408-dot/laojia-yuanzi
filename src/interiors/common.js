@@ -353,3 +353,121 @@ export function woodTex(base, { seed = 1, planks = 0, dark = 0.35, along = 'v' }
     { repeat: [1, 1] },
   );
 }
+
+/** 刷了大白的墙，十几年下来：发黄发灰、一片片水渍烟渍、蹭脏的印子、苍蝇屎点 */
+export function plasterTex() {
+  return canvasTex(
+    256,
+    256,
+    (g, w, h) => {
+      const r = rng(17);
+      g.fillStyle = '#d9d3c4';
+      g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 70; i++) {
+        const c = ['196,180,140', '140,136,128', '170,160,136', '232,228,218'][Math.floor(r() * 4)];
+        seamlessBlob(g, w, h, r() * w, r() * h, 15 + r() * 70, c, 0.08 + r() * 0.12);
+      }
+      // 往下流的水渍道道
+      for (let i = 0; i < 14; i++) {
+        const x = r() * w;
+        const len = 40 + r() * 140;
+        const y0 = r() * h;
+        g.fillStyle = `rgba(160,140,100,${0.06 + r() * 0.08})`;
+        for (let k = 0; k < len; k += 2) g.fillRect((x + Math.sin(k * 0.05) * 2 + w) % w, (y0 + k) % h, 2 + r() * 2, 2);
+      }
+      // 刷子的道道
+      for (let y = 0; y < h; y += 3) {
+        g.fillStyle = `rgba(255,250,236,${r() * 0.05})`;
+        g.fillRect(0, y, w, 2);
+      }
+      for (let i = 0; i < 900; i++) {
+        g.fillStyle = `rgba(80,66,50,${0.06 + r() * 0.12})`;
+        g.fillRect(r() * w, r() * h, 1, 1);
+      }
+    },
+    { repeat: [1 / 1.6, 1 / 1.6] },
+  );
+}
+
+/** 墙根的水泥墙裙：灰色、抹子印、踢脏的印子 */
+export function cementTex() {
+  return canvasTex(
+    256,
+    256,
+    (g, w, h) => {
+      const r = rng(19);
+      g.fillStyle = '#8a8680';
+      g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 60; i++) seamlessBlob(g, w, h, r() * w, r() * h, 10 + r() * 50, r() > 0.5 ? '70,66,62' : '150,146,138', 0.12 + r() * 0.14);
+      // 抹子抹出来的弧形印
+      for (let i = 0; i < 40; i++) {
+        const x = r() * w;
+        const y = r() * h;
+        g.strokeStyle = `rgba(${r() > 0.5 ? '160,156,148' : '100,96,90'},0.08)`;
+        g.lineWidth = 3 + r() * 5;
+        g.beginPath();
+        g.arc(x, y, 60 + r() * 80, r() * 6, r() * 6 + 0.6);
+        g.stroke();
+      }
+      for (let i = 0; i < 1500; i++) {
+        g.fillStyle = r() > 0.5 ? 'rgba(40,38,34,0.25)' : 'rgba(200,196,188,0.2)';
+        g.fillRect(r() * w, r() * h, 1, 1);
+      }
+    },
+    { repeat: [1 / 1.2, 1 / 1.2] },
+  );
+}
+
+/** 地面：平铺的旧砖（24 × 11.5 cm，错缝），淡红、磨得发白，砖缝里积着土；贴图 1.2 m 见方 */
+export function floorTex() {
+  return canvasTex(
+    512,
+    512,
+    (g, w, h) => {
+      const r = rng(29);
+      const S = w / 1.2; // 像素/米
+      g.fillStyle = '#86766a'; // 砖缝（积着土）
+      g.fillRect(0, 0, w, h);
+      const bw = 0.24 * S;
+      const bh = w / 10; // 10 行
+      for (let row = 0; row < 10; row++) {
+        const off = row % 2 ? bw / 2 : 0;
+        for (let i = -1; i < 6; i++) {
+          const x = i * bw + off;
+          const k = 0.88 + r() * 0.2;
+          const worn = r();
+          const base = [186 * k, 124 * k, 98 * k];
+          const draw = (dx) => {
+            g.fillStyle = `rgb(${base[0]},${base[1]},${base[2]})`;
+            g.fillRect(x + dx + 2, row * bh + 2, bw - 4, bh - 4);
+            // 磨得发白、发亮的一块
+            const gr = g.createRadialGradient(x + dx + bw / 2, row * bh + bh / 2, 0, x + dx + bw / 2, row * bh + bh / 2, bw * 0.6);
+            gr.addColorStop(0, `rgba(214,176,150,${0.25 + worn * 0.35})`);
+            gr.addColorStop(1, 'rgba(214,176,150,0)');
+            g.fillStyle = gr;
+            g.fillRect(x + dx + 2, row * bh + 2, bw - 4, bh - 4);
+            // 坑坑洼洼、缺角
+            for (let n = 0; n < 14; n++) {
+              g.fillStyle = r() > 0.5 ? 'rgba(90,60,50,0.25)' : 'rgba(230,210,190,0.2)';
+              g.fillRect(x + dx + 2 + r() * (bw - 6), row * bh + 2 + r() * (bh - 6), 1 + r() * 4, 1 + r() * 3);
+            }
+            if (r() > 0.7) {
+              g.fillStyle = '#86766a';
+              g.beginPath();
+              const cx = x + dx + (r() > 0.5 ? 2 : bw - 2);
+              const cy = row * bh + (r() > 0.5 ? 2 : bh - 2);
+              g.arc(cx, cy, 3 + r() * 5, 0, Math.PI * 2);
+              g.fill();
+            }
+          };
+          draw(0);
+          if (x + bw > w) draw(-w);
+        }
+      }
+      // 一层浮土、走出来的发暗的道
+      for (let i = 0; i < 40; i++) seamlessBlob(g, w, h, r() * w, r() * h, 30 + r() * 120, r() > 0.5 ? '130,104,84' : '200,170,140', 0.06 + r() * 0.1);
+    },
+    { repeat: [1 / 1.2, 1 / 1.2] },
+  );
+}
+
