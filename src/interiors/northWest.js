@@ -11,7 +11,7 @@ import { createWaterVat } from '../yard/waterVat.js';
  * 西北屋室内（挂在 interior-anchor-west 上；坐标原点 = 室内西北角、地坪面，+x 东、+z 南）：
  * - 墙刷大白，年深日久发黄发脏；墙根往上 0.55 m 抹水泥；地面铺磨旧的淡红砖
  * - 一道隔墙把屋子分成西边的外屋（六成）和东边的里屋（四成），隔墙上一个小门洞，挂半截白布门帘（织着小红花），人走过去会被撩开
- * - 里屋北边一张老木头床，西头挨着隔墙、东头挨着东墙；铺着褥子和老粗布床单，床尾摞着几床八九十年代的缎子被面棉花被，床头两个枕头
+ * - 里屋北边一铺炕（西顶隔墙、东顶东墙、北顶后墙），铺炕席，炕沿一根木头；东头靠后墙叠着几床八九十年代的缎子被面棉花被和两个枕头
  * - 床头隔墙上一个拉线开关，拉一下屋顶的灯泡亮（15 瓦上下的白炽灯，昏黄），再拉一下灭；这面墙上贴着三张八九十年代的女明星海报（画的，不是真人）
  * - 南墙：西南角一口水缸，往东两台做蜡烛的器具（按用户照片），东头煤球炉 + 一锅化开的蜡；南墙上一扇窗；南墙和那片顶棚被烟火熏黑
  */
@@ -172,31 +172,40 @@ function floorTex() {
   );
 }
 
-/** 老粗布床单：白底，蓝、红细条交织成格子，洗得发旧 */
-function sheetTex() {
+/** 炕席：高粱秆/苇子篾编的人字纹，发黄发旧 */
+function reedMat() {
   return canvasTex(
     256,
     256,
     (g, w, h) => {
-      const r = rng(43);
-      g.fillStyle = '#e8e2d4';
+      const r = rng(11);
+      g.fillStyle = '#c4a466';
       g.fillRect(0, 0, w, h);
-      const stripes = (vertical) => {
-        for (const [pos, wd, col] of [[20, 10, '58,86,140'], [36, 4, '170,50,50'], [46, 10, '58,86,140'], [148, 6, '58,86,140'], [160, 3, '170,50,50']]) {
-          g.fillStyle = `rgba(${col},0.55)`;
-          if (vertical) g.fillRect(pos, 0, wd, h);
-          else g.fillRect(0, pos, w, wd);
+      const s = 16; // 一根篾子宽
+      for (let y = 0; y < h; y += s / 2) {
+        for (let x = 0; x < w; x += s) {
+          const dir = (Math.floor(x / s) + Math.floor(y / (s / 2))) % 4 < 2;
+          const k = 0.85 + r() * 0.25;
+          g.fillStyle = `rgb(${206 * k},${170 * k},${104 * k})`;
+          g.save();
+          g.translate(x + s / 2, y + s / 4);
+          g.rotate(dir ? Math.PI / 4 : -Math.PI / 4);
+          g.fillRect(-s * 0.7, -s * 0.2, s * 1.4, s * 0.4);
+          g.strokeStyle = 'rgba(80,60,30,0.35)';
+          g.strokeRect(-s * 0.7, -s * 0.2, s * 1.4, s * 0.4);
+          g.restore();
         }
-      };
-      stripes(true);
-      stripes(false);
-      // 粗布的纱线疙瘩
-      for (let i = 0; i < 3000; i++) {
-        g.fillStyle = r() > 0.5 ? 'rgba(255,255,250,0.12)' : 'rgba(120,110,90,0.1)';
-        g.fillRect(r() * w, r() * h, 1 + r() * 2, 1);
+      }
+      // 睡出来的油亮、发暗的地方
+      for (let i = 0; i < 30; i++) {
+        const gr = g.createRadialGradient(r() * w, r() * h, 0, r() * w, r() * h, 20 + r() * 60);
+        gr.addColorStop(0, 'rgba(90,60,30,0.18)');
+        gr.addColorStop(1, 'rgba(90,60,30,0)');
+        g.fillStyle = gr;
+        g.fillRect(0, 0, w, h);
       }
     },
-    { repeat: [6, 3.5] }, // 褥子是 0..1 UV：约 0.45 m 一格
+    { repeat: [2.6, 2.2] },
   );
 }
 
@@ -765,64 +774,25 @@ export function createNorthWestInterior() {
   hemTop.position.set(cx, dh + 0.03, dz);
   group.add(hemTop);
 
-  // —— 木头床：靠北墙，西头挨着隔墙、东头挨着东墙；旧枣红漆，床头板高、床尾板低 ——
-  const BD = R.bed;
-  const bx0 = IX0 + tc + 0.005;
-  const bx1 = IX1 - tc - 0.005;
-  const bz0 = tc + 0.01;
-  const bz1 = bz0 + BD.width;
-  const topY = BD.height; // 床板面
-  const wood = mat('wood');
-  const P = 0.065; // 床腿（立柱）见方
-  const solidOff = { solid: false };
-  // 四根立柱：床头（西）两根到床头板顶，床尾（东）两根到床尾板顶
-  for (const [x, top] of [[bx0, BD.head], [bx1 - P, BD.foot]]) {
-    for (const z of [bz0, bz1 - P]) {
-      group.add(box(x, x + P, 0, top, z, z + P, wood, solidOff));
-      group.add(box(x - 0.008, x + P + 0.008, top, top + 0.025, z - 0.008, z + P + 0.008, wood, solidOff)); // 柱头
-    }
-  }
-  // 床帮：前后两根大方子，两头两根横撑
-  group.add(box(bx0 + P, bx1 - P, topY - 0.17, topY - 0.03, bz1 - 0.05, bz1, wood, solidOff));
-  group.add(box(bx0 + P, bx1 - P, topY - 0.17, topY - 0.03, bz0, bz0 + 0.05, wood, solidOff));
-  for (const x of [bx0 + P, bx1 - P - 0.05]) group.add(box(x, x + 0.05, topY - 0.17, topY - 0.03, bz0 + P, bz1 - P, wood, solidOff));
-  // 床板：几块宽木板横着铺
-  {
-    const plank = mat('oldWood');
-    const n = 6;
-    const L = bx1 - bx0 - 2 * P;
-    for (let i = 0; i < n; i++) {
-      const x0 = bx0 + P + (i * L) / n;
-      group.add(box(x0 + 0.004, x0 + L / n - 0.004, topY - 0.03, topY, bz0 + 0.05, bz1 - 0.05, plank, solidOff));
-    }
-  }
-  // 床头板（挨着隔墙）、床尾板（挨着东墙）：框 + 中间一块芯板
-  for (const [x, top] of [[bx0, BD.head], [bx1 - P, BD.foot]]) {
-    const xc = x + P / 2;
-    group.add(box(xc - 0.018, xc + 0.018, topY + 0.04, top - 0.02, bz0 + P, bz1 - P, wood, solidOff));
-    group.add(box(xc - 0.025, xc + 0.025, top - 0.08, top - 0.02, bz0 + P, bz1 - P, wood, solidOff)); // 上横档
-    group.add(box(xc - 0.025, xc + 0.025, topY + 0.02, topY + 0.07, bz0 + P, bz1 - P, wood, solidOff)); // 下横档
-  }
-  // 褥子 + 老粗布床单（前沿垂下来一截）
-  const sheetMat = new THREE.MeshStandardMaterial({ map: sheetTex(), roughness: 0.95 });
-  {
-    const mx0 = bx0 + P + 0.01;
-    const mx1 = bx1 - P - 0.01;
-    const pad = new THREE.Mesh(new RoundedBoxGeometry(mx1 - mx0, 0.07, BD.width - 0.04, 3, 0.03), sheetMat);
-    pad.position.set((mx0 + mx1) / 2, topY + 0.035, (bz0 + bz1) / 2);
-    pad.castShadow = pad.receiveShadow = true;
-    group.add(pad);
-    const drape = new THREE.Mesh(new THREE.PlaneGeometry(mx1 - mx0, 0.16), sheetMat);
-    drape.position.set((mx0 + mx1) / 2, topY - 0.01, bz1 + 0.012);
-    drape.receiveShadow = true;
-    group.add(drape);
-  }
-  // 挡人：一个看不见的盒子
-  const bedBlock = box(bx0, bx1, 0, topY + 0.07, bz0, bz1, new THREE.MeshBasicMaterial({ visible: false }));
-  bedBlock.name = 'wooden-bed';
-  group.add(bedBlock);
+  // —— 炕 ——
+  const K = R.kang;
+  // 炕：西顶隔墙、东顶东墙、北顶后墙；炕脸抹灰（比墙面略暗）
+  const kang = box(IX0 + tc, IX1 - tc, 0, K.height, tc, K.depth, new THREE.MeshStandardMaterial({ map: plasterMap, color: 0xd2c6b2, roughness: 1 }));
+  kang.name = 'kang';
+  group.add(kang);
+  // 炕席
+  const reed = new THREE.MeshStandardMaterial({ map: reedMat(), roughness: 0.85 });
+  const mt = new THREE.Mesh(new THREE.BoxGeometry(IX1 - IX0 - 2 * tc - 0.02, 0.006, K.depth - tc - 0.06), reed);
+  mt.position.set((IX0 + IX1) / 2, K.height + 0.003, (K.depth + tc) / 2 - 0.02);
+  mt.receiveShadow = true;
+  group.add(mt);
+  // 炕沿：一根磨得发亮的木头
+  const edgeMat = new THREE.MeshStandardMaterial({ color: 0x5a3a24, roughness: 0.45 });
+  group.add(box(IX0 + tc, IX1 - tc, K.height - 0.07, K.height + 0.02, K.depth - 0.1, K.depth + 0.01, edgeMat, { solid: false }));
+  // 炕脸下沿踢脚的一道泥灰（脏）
+  group.add(box(IX0 + tc, IX1 - tc, 0, 0.12, K.depth, K.depth + 0.006, new THREE.MeshStandardMaterial({ color: 0x6e655a, roughness: 1 }), { solid: false }));
 
-  // —— 被子摞在床尾（东头），枕头在床头（西头，挨着隔墙） ——
+  // —— 被子：东头靠后墙叠着 ——
   {
     const covers = [
       ['#b3192a', '#e86a86', '#f3a6b4', 3],
@@ -831,21 +801,21 @@ export function createNorthWestInterior() {
       ['#d1547a', '#ffffff', '#f5b8c8', 9],
       ['#1f4f8a', '#e8506a', '#f4d27a', 13],
     ];
-    const qw = 1.15; // 叠好的长边，顺着床宽
+    const qw = 1.15;
     const qd = 0.55;
-    let y = topY + 0.07;
-    const qx = bx1 - P - qd / 2 - 0.04;
-    const qz = (bz0 + bz1) / 2;
+    let y = K.height + 0.006;
+    const cx0 = IX1 - tc - qw / 2 - 0.08;
     covers.forEach(([base, f1, f2, seed], i) => {
       const th = 0.12 - i * 0.008;
       const geo = new RoundedBoxGeometry(qw - i * 0.02, th, qd - i * 0.01, 3, 0.035);
       const q = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: quiltTex(base, f1, f2, seed), roughness: 0.6 }));
-      q.position.set(qx + (i % 2 ? 0.01 : -0.008), y + th / 2, qz + (i % 2 ? 0.012 : -0.01));
-      q.rotation.y = Math.PI / 2 + (i % 2 ? 1 : -1) * 0.012;
+      q.position.set(cx0 + (i % 2 ? 0.012 : -0.01), y + th / 2, tc + qd / 2 + 0.06 + (i % 2) * 0.01);
+      q.rotation.y = (i % 2 ? 1 : -1) * 0.012;
       q.castShadow = q.receiveShadow = true;
       group.add(q);
       y += th - 0.004;
     });
+    // 两个枕头摞在被子上
     const pillowTex = canvasTex(128, 64, (g, w, h) => {
       g.fillStyle = '#f0ebe0';
       g.fillRect(0, 0, w, h);
@@ -858,14 +828,14 @@ export function createNorthWestInterior() {
       g.textBaseline = 'middle';
       g.fillText('喜', w / 2, h / 2);
     });
-    for (const dzp of [-0.32, 0.32]) {
+    for (let i = 0; i < 2; i++) {
       const p = new THREE.Mesh(new RoundedBoxGeometry(0.55, 0.1, 0.32, 3, 0.045), new THREE.MeshStandardMaterial({ map: pillowTex, roughness: 0.8 }));
-      p.rotation.y = Math.PI / 2;
-      p.position.set(bx0 + P + 0.22, topY + 0.12, qz + dzp);
+      p.position.set(cx0 - 0.15 + i * 0.32, y + 0.05, tc + 0.25);
       p.castShadow = p.receiveShadow = true;
       group.add(p);
     }
   }
+
 
   // —— 开关这面墙（隔墙东面）上的海报 ——
   {
