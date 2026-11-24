@@ -6,7 +6,10 @@ import { mat } from '../textures/index.js';
 import { Q } from '../core/quality.js';
 import { wallWithOpenings } from '../buildings/wall.js';
 import { createWaterVat } from '../yard/waterVat.js';
-import { canvasTex, rng, reedMat, quiltTex, pillowTex, posterTex, plasterTex, cementTex, floorTex } from './common.js';
+import { canvasTex, rng, reedMat, quiltTex, pillowTex, calendarTex, plasterTex, cementTex, floorTex } from './common.js';
+import cal1 from './calendars/1993-1.webp?url';
+import cal2 from './calendars/1993-2.webp?url';
+import cal3 from './calendars/1993-3.webp?url';
 import { createOuterRoom } from './northWestOuter.js';
 
 /**
@@ -14,7 +17,7 @@ import { createOuterRoom } from './northWestOuter.js';
  * - 墙刷大白，年深日久发黄发脏；墙根往上 0.55 m 抹水泥；地面铺磨旧的淡红砖
  * - 一道隔墙把屋子分成西边的外屋（六成）和东边的里屋（四成），隔墙上一个小门洞，挂半截白布门帘（织着小红花），人走过去会被撩开
  * - 里屋北边一铺炕（西顶隔墙、东顶东墙、北顶后墙），铺炕席，炕沿一根木头；东头靠后墙叠着几床八九十年代的缎子被面棉花被和两个枕头
- * - 床头隔墙上一个拉线开关，拉一下屋顶的灯泡亮（15 瓦上下的白炽灯，昏黄），再拉一下灭；这面墙上贴着三张八九十年代的女明星海报（画的，不是真人）
+ * - 炕头隔墙上一个拉线开关，拉一下屋顶的灯泡亮（15 瓦上下的白炽灯，昏黄），再拉一下灭；这面墙上挂着三张 1993 年的挂历（用户给的照片）
  * - 外屋的陈设（大木头炕、电视桌和黑白电视、座钟、圆桌、洗脸盆架、缝纫机）在 northWestOuter.js
  * - 南墙：西南角一口水缸，往东两台做蜡烛的器具（按用户照片），东头煤球炉 + 一锅化开的蜡；南墙上一扇窗；南墙和那片顶棚被烟火熏黑
  */
@@ -439,21 +442,48 @@ export function createNorthWestInterior() {
   }
 
 
-  // —— 开关这面墙（隔墙东面）上的海报 ——
+  // —— 开关这面墙（隔墙东面）上挂着三张 1993 年的挂历（用户给的照片）——
+  // 每张：上沿一根铁皮夹条，一根线挂在墙上的钉子上；纸往外微微翘，下沿离墙远一点
   {
-    const looks = [
-      { bg1: '#5f8fc8', bg2: '#c8dcef', dress: '#c42a3a', hair: '#1a1210', tilt: -0.08, text: '芳华', seed: 61 },
-      { bg1: '#e48aa6', bg2: '#f6d6c4', dress: '#f4f0e8', hair: '#241812', tilt: 0.1, text: '倩影', seed: 67 },
-      { bg1: '#3e8a7a', bg2: '#d8e6c0', dress: '#6a3a8a', hair: '#1c1410', tilt: -0.04, text: '风采', seed: 71 },
-    ];
+    const urls = [cal1, cal2, cal3];
+    const strip = new THREE.MeshStandardMaterial({ color: 0x8a8478, roughness: 0.35, metalness: 0.7 });
+    const nailMat = new THREE.MeshStandardMaterial({ color: 0x3a3632, roughness: 0.5, metalness: 0.6 });
+    const strMat = new THREE.MeshStandardMaterial({ color: 0xd8d0c0, roughness: 1 });
     R.posters.forEach((ps, i) => {
-      const m = new THREE.Mesh(new THREE.PlaneGeometry(ps.w, ps.h), new THREE.MeshStandardMaterial({ map: posterTex(looks[i % looks.length]), roughness: 0.7 }));
-      m.rotation.y = Math.PI / 2;
-      m.rotation.x = (i % 2 ? 1 : -1) * 0.015;
-      m.position.set(IX0 + t + 0.003, ps.y, ps.z);
-      m.receiveShadow = true;
-      m.userData.noAO = true;
-      group.add(m);
+      const cal = new THREE.Group();
+      cal.position.set(IX0 + t, ps.y, ps.z);
+      cal.rotation.y = Math.PI / 2; // 平面朝 +x（里屋）
+      const geo = new THREE.PlaneGeometry(ps.w, ps.h, 1, 8);
+      const p = geo.attributes.position;
+      for (let k = 0; k < p.count; k++) {
+        const down = (ps.h / 2 - p.getY(k)) / ps.h; // 0 上沿 → 1 下沿
+        p.setZ(k, 0.004 + down * down * 0.025);
+      }
+      geo.computeVertexNormals();
+      const page = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: calendarTex(urls[i % urls.length], 61 + i), roughness: 0.6, side: THREE.DoubleSide }));
+      page.receiveShadow = true;
+      page.userData.noAO = true;
+      cal.add(page);
+      // 上沿的铁皮夹条
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(ps.w + 0.01, 0.022, 0.008), strip);
+      bar.position.set(0, ps.h / 2 - 0.006, 0.008);
+      cal.add(bar);
+      // 挂绳（倒 V 字）和钉子
+      const top = ps.h / 2 + 0.09;
+      for (const sx of [-1, 1]) {
+        const a = new THREE.Vector3(sx * (ps.w / 2 - 0.04), ps.h / 2, 0.009);
+        const b = new THREE.Vector3(0, top, 0.006);
+        const v = new THREE.Vector3().subVectors(b, a);
+        const str = new THREE.Mesh(new THREE.CylinderGeometry(0.0012, 0.0012, v.length(), 4), strMat);
+        str.position.copy(a).addScaledVector(v, 0.5);
+        str.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v.normalize());
+        cal.add(str);
+      }
+      const nail = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.025, 6).rotateX(Math.PI / 2), nailMat);
+      nail.position.set(0, top, 0.01);
+      cal.add(nail);
+      cal.rotateX((i % 2 ? 1 : -1) * 0.012);
+      group.add(cal);
     });
   }
 
