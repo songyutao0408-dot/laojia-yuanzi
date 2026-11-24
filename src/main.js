@@ -15,6 +15,7 @@ import { createGarden } from './garden/index.js';
 import { createYardItems } from './yard/index.js';
 import { createCharacters } from './characters/index.js';
 import { createNorthWestInterior } from './interiors/northWest.js';
+import { createNorthEastInterior } from './interiors/northEast.js';
 import { createSmoke } from './effects/smoke.js';
 import { createViewModes } from './controls/viewModes.js';
 import { createTimeSlider } from './ui/timeSlider.js';
@@ -48,6 +49,8 @@ scene.add(createBuildings());
 // 室内：挂到各房间的室内锚点上
 const westRoom = createNorthWestInterior();
 scene.getObjectByName('interior-anchor-west').add(westRoom.group);
+const eastRoom = createNorthEastInterior();
+scene.getObjectByName('interior-anchor-east').add(eastRoom.group);
 scene.add(createTrees());
 scene.add(createWell());
 scene.add(createGarden());
@@ -94,6 +97,7 @@ engine.onUpdate((dt) => {
   swing?.update(dt, engine.elapsed ?? performance.now() / 1000);
   characters.update(dt, performance.now() / 1000);
   westRoom.update(dt, performance.now() / 1000, views.current === 'walk' ? views.fp.state.pos : null);
+  eastRoom.update(dt, performance.now() / 1000);
   picking.update(dt);
   interaction.update(dt);
   compass.update(camera);
@@ -135,4 +139,4 @@ if (params.get('tv') === 'on') westRoom.tv.toggle();
 // ?autoperf=off 关闭按帧率自动降档（自检截图用：无头浏览器帧率极低）
 const perf = params.get('autoperf') === 'off' ? null : createPerfMonitor(engine, { gtao: postfx.gtao, sun: lighting.sun });
 
-window.__app = { westRoom, characters, bgm, engine, views, setView, lighting, buildMs, quality, pumping, interaction, perf };
+window.__app = { westRoom, eastRoom, characters, bgm, engine, views, setView, lighting, buildMs, quality, pumping, interaction, perf };

@@ -150,6 +150,16 @@ for (const room of NH.rooms) {
   text((ix0 + ix1) / 2, oz + 2.35, '里屋', 'class="s" text-anchor="middle"');
 }
 
+// 东北屋（仓库）：一溜石灰大缸、南窗下的床
+{
+  const E = L.EAST_ROOM;
+  for (const v of E.vats) out.push(`<circle cx="${f(X(E.origin.x + v.x))}" cy="${f(Y(E.origin.z + v.z))}" r="${f(E.vat.r * S)}" fill="#d8d4c8" stroke="${C.ink}" stroke-width="0.6"/>`);
+  text(E.origin.x + 1.6, E.origin.z + 1.25, '石灰大缸（粮食）', 'class="xs"');
+  const b = E.bed;
+  rect({ x0: E.origin.x + b.x0, x1: E.origin.x + b.x0 + b.length, z0: E.origin.z + E.size.d - 0.03 - b.width, z1: E.origin.z + E.size.d - 0.03 }, `fill="#b88a6a" stroke="${C.ink}" stroke-width="0.6"`);
+  text(E.origin.x + b.x0 + b.length / 2, E.origin.z + E.size.d - 0.6, '床', 'class="xs" text-anchor="middle"');
+}
+
 const K = L.KITCHEN;
 brickBox(
   K.rect,
