@@ -60,6 +60,7 @@ const SHOTS = [
   ['west-outer-door', 'view=orbit&cam=-3.8,1.65,-4.9,-1.5,1.3,-6.21'],
   ['west-inner-bed', 'view=orbit&cam=1.1,1.95,-4.75,-1.1,1.1,-7.9'],
   ['west-inner-posters', 'view=orbit&cam=0.95,1.6,-5.6,-1.38,1.45,-7.3'],
+  ['west-inner-calendar3', 'view=orbit&cam=0.6,1.65,-6.3,-1.38,1.45,-5.2'], // 门洞南边那张挂历
   ['west-inner-candles', 'view=orbit&cam=0.1,1.95,-7.1,-0.1,1.15,-4.24'],
   ['west-inner-lamp', 'view=orbit&lamp=on&cam=1.1,1.95,-4.75,-1.1,1.1,-7.9'],
   ['west-curtain-walk', 'view=walk&cam=-1.95,1.2,-6.25,0.5,1.2,-6.25'], // 走到门洞前，门帘被撩开
