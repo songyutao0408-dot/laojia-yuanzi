@@ -130,8 +130,8 @@ for (const room of NH.rooms) {
   const ix0 = px + t2;
   const ix1 = ox + W.size.w;
   const b = W.bed;
-  rect({ x0: ix0 + 0.03, x1: ix0 + 0.03 + b.length, z0: oz + 0.04, z1: oz + 0.04 + b.width }, `fill="#d8c08a" stroke="${C.ink}" stroke-width="0.8"`);
-  text(ix0 + 0.03 + b.length / 2, oz + 0.04 + b.width / 2 + 0.15, '竹床', 'class="s" text-anchor="middle"');
+  rect({ x0: ix0 + 0.03, x1: ix1 - 0.03, z0: oz + 0.03, z1: oz + 0.03 + b.width }, `fill="#b88a6a" stroke="${C.ink}" stroke-width="0.8"`);
+  text((ix0 + ix1) / 2, oz + 0.03 + b.width / 2 + 0.15, '木床', 'class="s" text-anchor="middle"');
   const vr = W.vat.bellyRadius;
   out.push(`<circle cx="${f(X(ix0 + 0.05 + vr))}" cy="${f(Y(oz + W.size.d - 0.05 - vr))}" r="${f(vr * S)}" fill="#3f4a4a" stroke="${C.ink}" stroke-width="0.8"/>`);
   rect({ x0: ix0 + 0.15 + 2 * vr, x1: ix1 - 0.05, z0: oz + W.size.d - 0.05 - W.candles.depth, z1: oz + W.size.d - 0.05 }, `fill="#b89a48" stroke="${C.ink}" stroke-width="0.6"`);

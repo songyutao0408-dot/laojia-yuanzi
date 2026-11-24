@@ -11,7 +11,7 @@ import { createWaterVat } from '../yard/waterVat.js';
  * 西北屋室内（挂在 interior-anchor-west 上；坐标原点 = 室内西北角、地坪面，+x 东、+z 南）：
  * - 墙刷大白，年深日久发黄发脏；墙根往上 0.55 m 抹水泥；地面铺磨旧的淡红砖
  * - 一道隔墙把屋子分成西边的外屋（六成）和东边的里屋（四成），隔墙上一个小门洞，挂半截白布门帘（织着小红花），人走过去会被撩开
- * - 里屋北边一张竹床（床头顶着隔墙），床尾摞着几床八九十年代的缎子被面棉花被，床头两个枕头
+ * - 里屋北边一张老木头床，西头挨着隔墙、东头挨着东墙；铺着褥子和老粗布床单，床尾摞着几床八九十年代的缎子被面棉花被，床头两个枕头
  * - 床头隔墙上一个拉线开关，拉一下屋顶的灯泡亮（15 瓦上下的白炽灯，昏黄），再拉一下灭；这面墙上贴着三张八九十年代的女明星海报（画的，不是真人）
  * - 南墙：西南角一口水缸，往东两台做蜡烛的器具（按用户照片），东头煤球炉 + 一锅化开的蜡；南墙上一扇窗；南墙和那片顶棚被烟火熏黑
  */
@@ -172,35 +172,31 @@ function floorTex() {
   );
 }
 
-/** 竹子：黄褐色、发旧，竹节一圈深色；贴图沿长度方向 1 格 = 一节（约 0.3 m） */
-function bambooTex() {
+/** 老粗布床单：白底，蓝、红细条交织成格子，洗得发旧 */
+function sheetTex() {
   return canvasTex(
-    64,
-    128,
+    256,
+    256,
     (g, w, h) => {
-      const r = rng(37);
-      const lin = g.createLinearGradient(0, 0, w, 0);
-      lin.addColorStop(0, '#a88446');
-      lin.addColorStop(0.5, '#c9a660');
-      lin.addColorStop(1, '#a07c40');
-      g.fillStyle = lin;
+      const r = rng(43);
+      g.fillStyle = '#e8e2d4';
       g.fillRect(0, 0, w, h);
-      for (let i = 0; i < 40; i++) {
-        g.fillStyle = `rgba(${r() > 0.5 ? '90,64,30' : '220,196,140'},0.15)`;
-        g.fillRect(r() * w, 0, 1, h);
-      }
-      // 竹节
-      g.fillStyle = 'rgba(90,62,28,0.85)';
-      g.fillRect(0, 0, w, 5);
-      g.fillStyle = 'rgba(230,206,150,0.5)';
-      g.fillRect(0, 5, w, 2);
-      // 手摸、汗渍发暗
-      for (let i = 0; i < 8; i++) {
-        g.fillStyle = 'rgba(80,56,30,0.12)';
-        g.fillRect(0, r() * h, w, 6 + r() * 20);
+      const stripes = (vertical) => {
+        for (const [pos, wd, col] of [[20, 10, '58,86,140'], [36, 4, '170,50,50'], [46, 10, '58,86,140'], [148, 6, '58,86,140'], [160, 3, '170,50,50']]) {
+          g.fillStyle = `rgba(${col},0.55)`;
+          if (vertical) g.fillRect(pos, 0, wd, h);
+          else g.fillRect(0, pos, w, wd);
+        }
+      };
+      stripes(true);
+      stripes(false);
+      // 粗布的纱线疙瘩
+      for (let i = 0; i < 3000; i++) {
+        g.fillStyle = r() > 0.5 ? 'rgba(255,255,250,0.12)' : 'rgba(120,110,90,0.1)';
+        g.fillRect(r() * w, r() * h, 1 + r() * 2, 1);
       }
     },
-    { repeat: [1, 1] },
+    { repeat: [6, 3.5] }, // 褥子是 0..1 UV：约 0.45 m 一格
   );
 }
 
@@ -769,66 +765,61 @@ export function createNorthWestInterior() {
   hemTop.position.set(cx, dh + 0.03, dz);
   group.add(hemTop);
 
-  // —— 竹床：靠北墙，床头顶着隔墙 ——
+  // —— 木头床：靠北墙，西头挨着隔墙、东头挨着东墙；旧枣红漆，床头板高、床尾板低 ——
   const BD = R.bed;
-  const bx0 = IX0 + tc + 0.01;
-  const bx1 = bx0 + BD.length;
-  const bz0 = tc + 0.02;
+  const bx0 = IX0 + tc + 0.005;
+  const bx1 = IX1 - tc - 0.005;
+  const bz0 = tc + 0.01;
   const bz1 = bz0 + BD.width;
-  const bamboo = new THREE.MeshStandardMaterial({ map: bambooTex(), roughness: 0.55 });
-  /** 一根竹竿：a、b 两端，r 半径；贴图一格一节 */
-  const pole = (a, b, r) => {
-    const v = new THREE.Vector3().subVectors(b, a);
-    const len = v.length();
-    const geo = new THREE.CylinderGeometry(r, r, len, 10);
-    const uv = geo.attributes.uv;
-    for (let i = 0; i < uv.count; i++) uv.setY(i, (uv.getY(i) * len) / 0.32);
-    const m = new THREE.Mesh(geo, bamboo);
-    m.position.copy(a).addScaledVector(v, 0.5);
-    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v.normalize());
-    m.castShadow = m.receiveShadow = true;
-    group.add(m);
-    return m;
-  };
-  const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
-  const legIn = 0.05;
-  const topY = BD.height;
-  for (const x of [bx0 + legIn, bx1 - legIn]) for (const z of [bz0 + legIn, bz1 - legIn]) pole(V3(x, 0, z), V3(x, topY - 0.012, z), 0.028);
-  // 床框：两根长边、两根短边，底下一圈横撑
-  for (const z of [bz0 + legIn, bz1 - legIn]) {
-    pole(V3(bx0, topY - 0.04, z), V3(bx1, topY - 0.04, z), 0.026);
-    pole(V3(bx0 + legIn, 0.12, z), V3(bx1 - legIn, 0.12, z), 0.016);
-  }
-  for (const x of [bx0 + legIn, bx1 - legIn]) {
-    pole(V3(x, topY - 0.04, bz0), V3(x, topY - 0.04, bz1), 0.026);
-    pole(V3(x, 0.12, bz0 + legIn), V3(x, 0.12, bz1 - legIn), 0.016);
-  }
-  // 床面中间两根托撑
-  for (const f of [0.35, 0.65]) pole(V3(bx0 + (bx1 - bx0) * f, topY - 0.04, bz0), V3(bx0 + (bx1 - bx0) * f, topY - 0.04, bz1), 0.02);
-  // 床面：一根根劈开的竹片顺着床长铺
-  {
-    const n = Math.floor(BD.width / 0.045);
-    const slatGeo = new THREE.BoxGeometry(BD.length - 0.02, 0.012, 0.038);
-    const uv = slatGeo.attributes.uv;
-    // 顺着长度方向一格一节
-    const pos = slatGeo.attributes.position;
-    for (let i = 0; i < uv.count; i++) uv.setXY(i, 0.5 + pos.getZ(i) * 4, (pos.getX(i) + BD.length / 2) / 0.32);
-    const slatMat = new THREE.MeshStandardMaterial({ map: bamboo.map, roughness: 0.45 });
-    const inst = new THREE.InstancedMesh(slatGeo, slatMat, n);
-    const m4 = new THREE.Matrix4();
-    const col = new THREE.Color();
-    const rr = rng(53);
-    for (let i = 0; i < n; i++) {
-      m4.makeTranslation((bx0 + bx1) / 2 + (rr() - 0.5) * 0.04, topY - 0.006, bz0 + 0.025 + i * ((BD.width - 0.05) / (n - 1)));
-      inst.setMatrixAt(i, m4);
-      inst.setColorAt(i, col.setScalar(0.85 + rr() * 0.25));
+  const topY = BD.height; // 床板面
+  const wood = mat('wood');
+  const P = 0.065; // 床腿（立柱）见方
+  const solidOff = { solid: false };
+  // 四根立柱：床头（西）两根到床头板顶，床尾（东）两根到床尾板顶
+  for (const [x, top] of [[bx0, BD.head], [bx1 - P, BD.foot]]) {
+    for (const z of [bz0, bz1 - P]) {
+      group.add(box(x, x + P, 0, top, z, z + P, wood, solidOff));
+      group.add(box(x - 0.008, x + P + 0.008, top, top + 0.025, z - 0.008, z + P + 0.008, wood, solidOff)); // 柱头
     }
-    inst.castShadow = inst.receiveShadow = true;
-    group.add(inst);
+  }
+  // 床帮：前后两根大方子，两头两根横撑
+  group.add(box(bx0 + P, bx1 - P, topY - 0.17, topY - 0.03, bz1 - 0.05, bz1, wood, solidOff));
+  group.add(box(bx0 + P, bx1 - P, topY - 0.17, topY - 0.03, bz0, bz0 + 0.05, wood, solidOff));
+  for (const x of [bx0 + P, bx1 - P - 0.05]) group.add(box(x, x + 0.05, topY - 0.17, topY - 0.03, bz0 + P, bz1 - P, wood, solidOff));
+  // 床板：几块宽木板横着铺
+  {
+    const plank = mat('oldWood');
+    const n = 6;
+    const L = bx1 - bx0 - 2 * P;
+    for (let i = 0; i < n; i++) {
+      const x0 = bx0 + P + (i * L) / n;
+      group.add(box(x0 + 0.004, x0 + L / n - 0.004, topY - 0.03, topY, bz0 + 0.05, bz1 - 0.05, plank, solidOff));
+    }
+  }
+  // 床头板（挨着隔墙）、床尾板（挨着东墙）：框 + 中间一块芯板
+  for (const [x, top] of [[bx0, BD.head], [bx1 - P, BD.foot]]) {
+    const xc = x + P / 2;
+    group.add(box(xc - 0.018, xc + 0.018, topY + 0.04, top - 0.02, bz0 + P, bz1 - P, wood, solidOff));
+    group.add(box(xc - 0.025, xc + 0.025, top - 0.08, top - 0.02, bz0 + P, bz1 - P, wood, solidOff)); // 上横档
+    group.add(box(xc - 0.025, xc + 0.025, topY + 0.02, topY + 0.07, bz0 + P, bz1 - P, wood, solidOff)); // 下横档
+  }
+  // 褥子 + 老粗布床单（前沿垂下来一截）
+  const sheetMat = new THREE.MeshStandardMaterial({ map: sheetTex(), roughness: 0.95 });
+  {
+    const mx0 = bx0 + P + 0.01;
+    const mx1 = bx1 - P - 0.01;
+    const pad = new THREE.Mesh(new RoundedBoxGeometry(mx1 - mx0, 0.07, BD.width - 0.04, 3, 0.03), sheetMat);
+    pad.position.set((mx0 + mx1) / 2, topY + 0.035, (bz0 + bz1) / 2);
+    pad.castShadow = pad.receiveShadow = true;
+    group.add(pad);
+    const drape = new THREE.Mesh(new THREE.PlaneGeometry(mx1 - mx0, 0.16), sheetMat);
+    drape.position.set((mx0 + mx1) / 2, topY - 0.01, bz1 + 0.012);
+    drape.receiveShadow = true;
+    group.add(drape);
   }
   // 挡人：一个看不见的盒子
-  const bedBlock = box(bx0, bx1, 0, topY, bz0, bz1, new THREE.MeshBasicMaterial({ visible: false }));
-  bedBlock.name = 'bamboo-bed';
+  const bedBlock = box(bx0, bx1, 0, topY + 0.07, bz0, bz1, new THREE.MeshBasicMaterial({ visible: false }));
+  bedBlock.name = 'wooden-bed';
   group.add(bedBlock);
 
   // —— 被子摞在床尾（东头），枕头在床头（西头，挨着隔墙） ——
@@ -842,8 +833,8 @@ export function createNorthWestInterior() {
     ];
     const qw = 1.15; // 叠好的长边，顺着床宽
     const qd = 0.55;
-    let y = topY;
-    const qx = bx1 - qd / 2 - 0.05;
+    let y = topY + 0.07;
+    const qx = bx1 - P - qd / 2 - 0.04;
     const qz = (bz0 + bz1) / 2;
     covers.forEach(([base, f1, f2, seed], i) => {
       const th = 0.12 - i * 0.008;
@@ -870,7 +861,7 @@ export function createNorthWestInterior() {
     for (const dzp of [-0.32, 0.32]) {
       const p = new THREE.Mesh(new RoundedBoxGeometry(0.55, 0.1, 0.32, 3, 0.045), new THREE.MeshStandardMaterial({ map: pillowTex, roughness: 0.8 }));
       p.rotation.y = Math.PI / 2;
-      p.position.set(bx0 + 0.22, topY + 0.05, qz + dzp);
+      p.position.set(bx0 + P + 0.22, topY + 0.12, qz + dzp);
       p.castShadow = p.receiveShadow = true;
       group.add(p);
     }
