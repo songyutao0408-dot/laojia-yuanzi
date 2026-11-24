@@ -7,7 +7,7 @@ import { canvasTex, rng, reedMat, pillowTex, quiltStack, woodTex, seamlessBlob }
 /**
  * 西北屋外屋的陈设（第 11 轮，按用户描述和照片）。坐标同 northWest.js：室内原点在西北角、地坪面，+x 东、+z 南。
  * - 西边一铺大木头炕，南北通长；炕沿朝外这一面摆着一排枕头，靠西墙摞着棉被
- * - 进门正对着、靠北墙一张老式电视桌，上面一台黑白电视（拉杆天线），电视左边一座带摆锤的老座钟（指针走的是现在的时间）
+ * - 进门正对着、靠北墙一张老式电视桌，上面一台黑白电视（拉杆天线），电视左边一座老座钟（按用户照片：横放木壳、拱顶、两边镶条立柱，指针走的是现在的时间）
  * - 靠南墙一张折叠圆桌：深色桌面、斑驳，铁管腿生了锈
  * - 进门右手边（隔墙这边）一个洗脸盆架，上面一只搪瓷洋盆，架子上搭着毛巾
  * - 隔墙边、里屋门洞往北一点一台脚踏缝纫机
@@ -80,44 +80,89 @@ function tvFaceTex() {
   });
 }
 
-/** 座钟的钟面：白底、黑色阿拉伯数字、分钟刻度，铜圈 */
+/** 座钟钟面（按用户照片）：外圈银白、黑色阿拉伯数字和分钟点，中间一圈露出木头，两个上弦孔 */
 function clockFaceTex() {
-  return canvasTex(256, 256, (g, w, h) => {
+  return canvasTex(256, 256, (g, w) => {
     const c = w / 2;
-    g.fillStyle = '#b08a48';
+    const r = rng(107);
+    // 外圈：银白
+    const sg = g.createRadialGradient(c - 30, c - 30, 10, c, c, 128);
+    sg.addColorStop(0, '#f2f0ea');
+    sg.addColorStop(1, '#c8c6be');
+    g.fillStyle = sg;
     g.beginPath();
-    g.arc(c, c, 127, 0, Math.PI * 2);
+    g.arc(c, c, 128, 0, Math.PI * 2);
     g.fill();
-    g.fillStyle = '#f2ecdc';
+    // 中间露出的木头
+    g.fillStyle = '#c4703a';
     g.beginPath();
-    g.arc(c, c, 112, 0, Math.PI * 2);
+    g.arc(c, c, 66, 0, Math.PI * 2);
     g.fill();
-    g.strokeStyle = '#2a2420';
-    for (let i = 0; i < 60; i++) {
-      const a = (i / 60) * Math.PI * 2;
-      const l = i % 5 ? 6 : 12;
-      g.lineWidth = i % 5 ? 1.5 : 3;
+    for (let i = 0; i < 30; i++) {
+      g.strokeStyle = `rgba(${r() > 0.5 ? '120,56,20' : '230,150,90'},0.25)`;
+      g.lineWidth = 1 + r() * 2;
+      const y = c - 66 + r() * 132;
       g.beginPath();
-      g.moveTo(c + Math.sin(a) * 104, c - Math.cos(a) * 104);
-      g.lineTo(c + Math.sin(a) * (104 - l), c - Math.cos(a) * (104 - l));
+      g.moveTo(c - 66, y);
+      g.quadraticCurveTo(c, y + (r() - 0.5) * 20, c + 66, y);
       g.stroke();
     }
-    g.fillStyle = '#2a2420';
-    g.font = 'bold 24px serif';
+    g.strokeStyle = '#9a9890';
+    g.lineWidth = 2;
+    g.beginPath();
+    g.arc(c, c, 66, 0, Math.PI * 2);
+    g.stroke();
+    // 分钟点
+    g.fillStyle = '#2a2622';
+    for (let i = 0; i < 60; i++) {
+      if (i % 5 === 0) continue;
+      const a = (i / 60) * Math.PI * 2;
+      g.beginPath();
+      g.arc(c + Math.sin(a) * 118, c - Math.cos(a) * 118, 1.8, 0, Math.PI * 2);
+      g.fill();
+    }
+    // 数字
+    g.font = 'bold 30px Arial, sans-serif';
     g.textAlign = 'center';
     g.textBaseline = 'middle';
     for (let i = 1; i <= 12; i++) {
       const a = (i / 12) * Math.PI * 2;
-      g.fillText(String(i), c + Math.sin(a) * 80, c - Math.cos(a) * 80);
+      g.fillText(String(i), c + Math.sin(a) * 96, c - Math.cos(a) * 96);
     }
-    // 发黄
-    const yel = g.createRadialGradient(c, c, 30, c, c, 115);
-    yel.addColorStop(0, 'rgba(200,170,110,0)');
-    yel.addColorStop(1, 'rgba(200,170,110,0.25)');
-    g.fillStyle = yel;
-    g.beginPath();
-    g.arc(c, c, 112, 0, Math.PI * 2);
-    g.fill();
+    // 两个上弦孔（4 点和 8 点方向）
+    for (const sx of [-1, 1]) {
+      g.fillStyle = '#b8b8b4';
+      g.beginPath();
+      g.arc(c + sx * 38, c + 28, 11, 0, Math.PI * 2);
+      g.fill();
+      g.fillStyle = '#141414';
+      g.beginPath();
+      g.arc(c + sx * 38, c + 28, 7, 0, Math.PI * 2);
+      g.fill();
+    }
+  });
+}
+
+/** 座钟两边立柱上镶的浅色人字纹木条 */
+function inlayTex() {
+  return canvasTex(32, 256, (g, w, h) => {
+    g.fillStyle = '#c88a4a';
+    g.fillRect(0, 0, w, h);
+    for (let y = -16; y < h; y += 14) {
+      g.fillStyle = '#e8c890';
+      g.beginPath();
+      g.moveTo(4, y);
+      g.lineTo(w / 2, y + 8);
+      g.lineTo(w - 4, y);
+      g.lineTo(w - 4, y + 5);
+      g.lineTo(w / 2, y + 13);
+      g.lineTo(4, y + 5);
+      g.closePath();
+      g.fill();
+    }
+    g.fillStyle = '#7a4420';
+    g.fillRect(0, 0, 3, h);
+    g.fillRect(w - 3, 0, 3, h);
   });
 }
 
@@ -329,49 +374,79 @@ export function createOuterRoom({ tc }) {
     tube(tv, V3(0.12, 0.36, -0.04), V3(0.32, 0.7, -0.1), 0.003, chrome, 5);
     group.add(tv);
 
-    // 电视左边一座老座钟：木壳、铜圈钟面、玻璃门里一个摆锤
+    // 电视左边一座老座钟（按用户照片）：横放的木壳，中间一块拱顶，两边两根立柱镶着浅色人字纹木条，
+    // 正中一个大圆钟面、镀铬的圈、凸玻璃；钟面中间一圈露出木头，两个上弦孔
     const clock = new THREE.Group();
-    clock.position.set(D.x - 0.38, D.h, (z0 + z1) / 2);
-    const walnut = new THREE.MeshStandardMaterial({ map: woodTex([84, 48, 26], { seed: 13 }), roughness: 0.4 });
-    clock.add(box(-0.14, 0.14, 0, 0.03, -0.075, 0.075, walnut, off)); // 底座
-    clock.add(box(-0.125, 0.125, 0.03, 0.42, -0.065, 0.065, walnut, off)); // 壳
-    clock.add(box(-0.145, 0.145, 0.42, 0.45, -0.08, 0.08, walnut, off)); // 顶
-    clock.add(box(-0.06, 0.06, 0.45, 0.49, -0.05, 0.05, walnut, off)); // 顶上的小帽
-    const face = new THREE.Mesh(new THREE.CircleGeometry(0.085, 32), new THREE.MeshStandardMaterial({ map: clockFaceTex(), roughness: 0.5 }));
-    face.position.set(0, 0.32, 0.067);
+    clock.position.set(D.x - 0.4, D.h, (z0 + z1) / 2 - 0.01);
+    const cwood = new THREE.MeshStandardMaterial({ map: woodTex([196, 108, 50], { seed: 13 }), roughness: 0.32 });
+    const CD = 0.13; // 进深
+    // 中间拱顶的壳：沿 z 挤出
+    const shape = new THREE.Shape();
+    shape.moveTo(-0.13, 0.012);
+    shape.lineTo(0.13, 0.012);
+    shape.lineTo(0.13, 0.235);
+    shape.quadraticCurveTo(0, 0.3, -0.13, 0.235);
+    shape.closePath();
+    const bodyGeo = new THREE.ExtrudeGeometry(shape, { depth: CD, bevelEnabled: true, bevelThickness: 0.004, bevelSize: 0.004, bevelSegments: 2, curveSegments: 16 });
+    bodyGeo.translate(0, 0, -CD / 2);
+    // 挤出体的 UV 是按坐标来的（米），正好配世界坐标的木纹
+    const body = new THREE.Mesh(bodyGeo, cwood);
+    body.castShadow = body.receiveShadow = true;
+    clock.add(body);
+    // 两边的立柱 + 镶条 + 小脚
+    const inlay = new THREE.MeshStandardMaterial({ map: inlayTex(), roughness: 0.35 });
+    for (const sx of [-1, 1]) {
+      clock.add(box(sx > 0 ? 0.13 : -0.205, sx > 0 ? 0.205 : -0.13, 0.012, 0.215, -CD / 2 + 0.005, CD / 2 + 0.006, cwood, off));
+      const strip = new THREE.Mesh(new THREE.PlaneGeometry(0.018, 0.19), inlay);
+      strip.position.set(sx * 0.155, 0.115, CD / 2 + 0.0075);
+      clock.add(strip);
+      clock.add(box(sx * 0.17 - 0.025, sx * 0.17 + 0.025, 0, 0.012, -CD / 2 + 0.01, CD / 2 - 0.01, new THREE.MeshStandardMaterial({ color: 0x8a6a4a, roughness: 0.7 }), off));
+    }
+    // 钟面、镀铬圈、凸玻璃
+    const fc = new THREE.Vector3(0, 0.135, CD / 2 + 0.006);
+    const face = new THREE.Mesh(new THREE.CircleGeometry(0.098, 48), new THREE.MeshStandardMaterial({ map: clockFaceTex(), roughness: 0.45 }));
+    face.position.copy(fc);
     clock.add(face);
-    const brass = new THREE.MeshStandardMaterial({ color: 0xc09850, roughness: 0.3, metalness: 0.85 });
-    const bezel = new THREE.Mesh(new THREE.TorusGeometry(0.086, 0.006, 6, 32), brass);
-    bezel.position.copy(face.position);
+    const chromeM = new THREE.MeshStandardMaterial({ color: 0xd8d8d4, roughness: 0.18, metalness: 0.95 });
+    const bezel = new THREE.Mesh(new THREE.TorusGeometry(0.102, 0.008, 8, 48), chromeM);
+    bezel.position.copy(fc);
     clock.add(bezel);
+    const dome = new THREE.Mesh(
+      new THREE.SphereGeometry(0.4, 32, 8, 0, Math.PI * 2, 0, Math.asin(0.1 / 0.4)),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.04, metalness: 0.6, transparent: true, opacity: 0.16 }),
+    );
+    dome.rotation.x = Math.PI / 2;
+    dome.position.set(fc.x, fc.y, fc.z - 0.4 * Math.cos(Math.asin(0.1 / 0.4)) + 0.002);
+    dome.userData.noAO = true;
+    clock.add(dome);
+    // 侧面的小把手（开表蒙子的搭扣）
+    const latch = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.03, 0.01), chromeM);
+    latch.position.set(-0.108, fc.y, fc.z + 0.004);
+    clock.add(latch);
+    // 黑色的尖头指针
+    const handMat = new THREE.MeshStandardMaterial({ color: 0x141210, roughness: 0.4, metalness: 0.3 });
     const hand = (len, wd) => {
+      const sh = new THREE.Shape();
+      sh.moveTo(-wd * 0.3, -0.012);
+      sh.lineTo(wd * 0.3, -0.012);
+      sh.lineTo(wd * 0.3, len * 0.6);
+      sh.lineTo(wd, len * 0.72);
+      sh.lineTo(0, len);
+      sh.lineTo(-wd, len * 0.72);
+      sh.lineTo(-wd * 0.3, len * 0.6);
+      sh.closePath();
       const pv = new THREE.Group();
-      const m = new THREE.Mesh(new THREE.BoxGeometry(wd, len, 0.002).translate(0, len / 2 - 0.008, 0), new THREE.MeshStandardMaterial({ color: 0x1a1612, roughness: 0.5 }));
-      pv.add(m);
-      pv.position.set(0, 0.32, 0.07);
+      pv.add(new THREE.Mesh(new THREE.ShapeGeometry(sh), handMat));
+      pv.position.set(fc.x, fc.y, fc.z + 0.004);
       clock.add(pv);
       return pv;
     };
-    clockParts.hour = hand(0.045, 0.007);
-    clockParts.minute = hand(0.068, 0.005);
-    clockParts.second = hand(0.072, 0.0015);
-    clockParts.second.position.z = 0.072;
-    // 下半截：玻璃门里的摆锤
-    const win = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.15), new THREE.MeshStandardMaterial({ color: 0x1e1612, roughness: 0.9 }));
-    win.position.set(0, 0.135, 0.06);
-    clock.add(win);
-    const pend = new THREE.Group();
-    pend.position.set(0, 0.21, 0.064);
-    const rod = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.1, 0.002).translate(0, -0.05, 0), brass);
-    const bob = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.004, 20).rotateX(Math.PI / 2), brass);
-    bob.position.y = -0.105;
-    pend.add(rod, bob);
-    clock.add(pend);
-    clockParts.pendulum = pend;
-    const pane = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 0.16), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.05, metalness: 0.5, transparent: true, opacity: 0.12 }));
-    pane.position.set(0, 0.135, 0.068);
-    pane.userData.noAO = true;
-    clock.add(pane);
+    clockParts.hour = hand(0.05, 0.007);
+    clockParts.minute = hand(0.078, 0.006);
+    clockParts.minute.position.z += 0.001;
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.006, 12).rotateX(Math.PI / 2), handMat);
+    hub.position.set(fc.x, fc.y, fc.z + 0.007);
+    clock.add(hub);
     group.add(clock);
   }
 
@@ -532,7 +607,7 @@ export function createOuterRoom({ tc }) {
   return {
     group,
     update(dt, t) {
-      const { hour, minute, second, pendulum } = clockParts;
+      const { hour, minute } = clockParts;
       now.setTime(Date.now());
       const s = now.getSeconds() + now.getMilliseconds() / 1000;
       const m = now.getMinutes() + s / 60;
@@ -540,8 +615,6 @@ export function createOuterRoom({ tc }) {
       // 钟面朝 +z：指针绕 z 轴转（顺时针为负）
       hour.rotation.z = -(h / 12) * Math.PI * 2;
       minute.rotation.z = -(m / 60) * Math.PI * 2;
-      second.rotation.z = -(Math.floor(s) / 60) * Math.PI * 2;
-      pendulum.rotation.z = Math.sin(t * Math.PI) * 0.12; // 一秒摆一下
     },
   };
 }
