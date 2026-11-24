@@ -187,10 +187,10 @@ if (run('H')) {
 }
 // I) 西北屋：从外屋往东走，穿过挂门帘的小门洞进里屋（起点偏北 0.25 m，靠进门辅助顺进去），按 E 拉灯，再点按钮关灯
 if (run('I')) {
-  const { page, ctx } = await open([-3.6, -6.45], [-0.5, -6.45]);
-  const p = await holdUntil(page, 'KeyW', (p) => p.x > -1.9);
+  const { page, ctx } = await open([-2.4, -6.45], [1, -6.45]);
+  const p = await holdUntil(page, 'KeyW', (p) => p.x > -1.1);
   const inside = await page.evaluate(() => window.__app.westRoom.inInnerRoom(...(({ x, z }) => [x, z])(window.__app.views.fp.state.pos)));
-  check('I1 穿过门帘走进里屋', p.x > -1.9 && inside, { ...p, inside });
+  check('I1 穿过门帘走进里屋', p.x > -1.1 && inside, { ...p, inside });
   const ok = await waitButton(page, '拉灯');
   await page.keyboard.press('KeyE');
   await page.waitForTimeout(600);
@@ -202,6 +202,28 @@ if (run('I')) {
   await page.waitForTimeout(600);
   const off = !(await page.evaluate(() => window.__app.westRoom.lamp.on));
   check('I3 再点“拉灯”按钮，灯灭', ok2 && off, { ok2, off });
+  await ctx.close();
+}
+// J) 西北屋外屋：从门口往北走到电视桌跟前，按 E 开电视；再直接点电视屏幕关掉
+if (run('J')) {
+  const { page, ctx } = await open([-3.85, -5.0], [-3.85, -9]);
+  const p = await holdUntil(page, 'KeyW', (p) => p.z < -6.9);
+  const ok = await waitButton(page, '开电视');
+  await page.keyboard.press('KeyE');
+  await page.waitForTimeout(2500);
+  const on = await page.evaluate(() => window.__app.westRoom.tv.on);
+  await page.screenshot({ path: 'screenshots/test-tv-on.png' });
+  check('J1 走到电视跟前按 E，电视亮了', ok && on, { ...p, ok, on });
+  const pt = await page.evaluate(() => {
+    const app = window.__app;
+    const v = app.westRoom.tv.position().clone().project(app.engine.camera);
+    const r = app.engine.renderer.domElement.getBoundingClientRect();
+    return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height };
+  });
+  await page.mouse.click(pt.x, pt.y);
+  await page.waitForTimeout(800);
+  const off = !(await page.evaluate(() => window.__app.westRoom.tv.on));
+  check('J2 点一下电视屏幕，电视关了', off, { off, pt });
   await ctx.close();
 }
 // F) 手机（iPhone 13 模拟）：用摇杆往前走进东北屋，再到井边点“压水”按钮

@@ -8,6 +8,7 @@ import { WELL, TREES } from '../layout.js';
  * - 石榴：伸手够得着（离眼睛 2.6 m 内）才能摘；枣树高，小孩站到树下用竹竿打枣，水平 3 m 内的都能打下来
  * - 环绕/俯视模式下点果子、压水井也有效（不限距离）
  * - 西北屋里屋：站在里屋里、离灯绳 2.6 m 内出“拉灯”按钮；也可以直接点灯绳
+ * - 西北屋外屋：走到电视跟前（2 m 内）出“开电视”按钮；也可以直接点电视屏幕
  */
 const WELL_NEAR = 2.0;
 const POME_REACH = 2.6;
@@ -101,6 +102,15 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     const c = westRoom.lamp.cordPosition();
     return Math.hypot(p.x - c.x, p.z - c.z) <= 2.6; // 里屋小，进了门洞基本就够得着
   };
+  function doTv() {
+    const on = westRoom.tv.toggle();
+    ui.toast(on ? '啪一声，电视亮了，先是一阵雪花，沙沙的' : '电视关了，屏幕中间剩一个小亮点，慢慢没了');
+  }
+  const nearTv = (p) => {
+    if (!westRoom || !westRoom.inOuterRoom(p.x, p.z)) return false;
+    const c = westRoom.tv.position();
+    return Math.hypot(p.x - c.x, p.z - c.z) <= 2.0;
+  };
   function doPump() {
     pumping.pump();
     ui.toast('吱嘎——吱嘎——，水哗哗地流进桶里');
@@ -121,6 +131,7 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     const p = playerXZ();
     if (!walking()) return acts;
     if (p.distanceTo(wellPos) <= WELL_NEAR) acts.push({ label: '压水', run: doPump });
+    if (nearTv(p)) acts.push({ label: westRoom.tv.on ? '关电视' : '开电视', run: doTv });
     if (nearCord(p)) acts.push({ label: westRoom.lamp.on ? '拉灯（关）' : '拉灯', run: doLamp });
     if (characters) {
       const dp = characters.dogHeadPosition();
@@ -167,6 +178,11 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     }
     // 里屋的灯绳：走进去时人在里屋里才能点，环绕/俯视时随便点
     if (westRoom && (!walking() || westRoom.inInnerRoom(playerXZ().x, playerXZ().z))) cands.push({ kind: 'lamp', pos: westRoom.lamp.cordPosition() });
+    // 外屋的电视：走进去时人在外屋、3 m 内能点，环绕/俯视时随便点
+    if (westRoom) {
+      const tp = westRoom.tv.position(new THREE.Vector3());
+      if (!walking() || (westRoom.inOuterRoom(playerXZ().x, playerXZ().z) && Math.hypot(playerXZ().x - tp.x, playerXZ().z - tp.z) <= 3)) cands.push({ kind: 'tv', pos: tp });
+    }
     let best = null;
     let bd = walking() ? CLICK_RADIUS : 40;
     for (const c of cands) {
@@ -191,6 +207,7 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     if (best.kind === 'pump') doPump();
     else if (best.kind === 'dog') doPetDog();
     else if (best.kind === 'lamp') doLamp();
+    else if (best.kind === 'tv') doTv();
     else doPick(best);
     return true;
   }

@@ -129,6 +129,8 @@ if (cam?.length === 6) views.lookAt(cam.slice(0, 3), cam.slice(3));
 
 // ?lamp=on —— 里屋的灯一开始就开着（自检截图用）
 if (params.get('lamp') === 'on') westRoom.lamp.set(true);
+// ?tv=on —— 外屋的电视一开始就开着（自检截图用）
+if (params.get('tv') === 'on') westRoom.tv.toggle();
 
 // ?autoperf=off 关闭按帧率自动降档（自检截图用：无头浏览器帧率极低）
 const perf = params.get('autoperf') === 'off' ? null : createPerfMonitor(engine, { gtao: postfx.gtao, sun: lighting.sun });

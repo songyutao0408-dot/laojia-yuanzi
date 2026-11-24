@@ -47,7 +47,7 @@ const SHOTS = [
   ['yard-from-steps', 'view=orbit&cam=0.5,1.8,-3.3,1,1.2,4'],
   // 第 8 轮新增：水缸、连通台阶与天地神位、洋姜与青石板、秋千
   ['vat-steps', 'view=orbit&cam=0.6,1.7,1.4,-2.6,0.6,-3.6'],
-  ['shrine', 'view=orbit&cam=0.9,1.3,-1.6,0,1.0,-4'],
+  ['shrine', 'view=orbit&cam=2.4,1.3,-1.6,1.5,1.0,-4'],
   ['backyard', 'view=orbit&cam=-2.7,1.7,3.4,1.2,0.6,7.4'],
   ['swing', 'view=orbit&cam=4.7,1.6,1.0,2.7,1.4,4.2'],
   // 第 9 轮新增：父亲和大黄
@@ -57,14 +57,25 @@ const SHOTS = [
   ['father-portrait', 'view=orbit&cam=-3.1,1.5,0.3,-2.62,1.56,-0.28'], // 正对着脸的近景
   ['father-child', 'view=orbit&cam=-3.4,1.2,1.3,-2.65,1.3,-0.3'], // 小孩视线高度看父亲
   // 第 10 轮：西北屋室内（外屋看里屋门帘、里屋的炕、蜡烛器具和熏黑的南墙、拉灯）
-  ['west-outer-door', 'view=orbit&cam=-5.3,1.65,-4.9,-3.0,1.3,-6.21'],
-  ['west-inner-bed', 'view=orbit&cam=-0.4,1.95,-4.75,-2.6,1.1,-7.9'],
-  ['west-inner-posters', 'view=orbit&cam=-0.55,1.6,-5.6,-2.88,1.45,-7.3'],
-  ['west-inner-candles', 'view=orbit&cam=-1.4,1.95,-7.1,-1.6,1.15,-4.24'],
-  ['west-inner-lamp', 'view=orbit&lamp=on&cam=-0.4,1.95,-4.75,-2.6,1.1,-7.9'],
-  ['west-curtain-walk', 'view=walk&cam=-3.45,1.2,-6.25,-1,1.2,-6.25'], // 走到门洞前，门帘被撩开
-  ['west-inner-night', 'view=orbit&time=night&lamp=on&cam=-1.4,1.95,-7.1,-1.6,1.15,-4.24'],
-  ['west-window-night', 'view=orbit&time=night&lamp=on&cam=-0.6,1.5,-0.9,-1.55,1.4,-4'], // 院里看里屋的窗透出灯光
+  ['west-outer-door', 'view=orbit&cam=-3.8,1.65,-4.9,-1.5,1.3,-6.21'],
+  ['west-inner-bed', 'view=orbit&cam=1.1,1.95,-4.75,-1.1,1.1,-7.9'],
+  ['west-inner-posters', 'view=orbit&cam=0.95,1.6,-5.6,-1.38,1.45,-7.3'],
+  ['west-inner-candles', 'view=orbit&cam=0.1,1.95,-7.1,-0.1,1.15,-4.24'],
+  ['west-inner-lamp', 'view=orbit&lamp=on&cam=1.1,1.95,-4.75,-1.1,1.1,-7.9'],
+  ['west-curtain-walk', 'view=walk&cam=-1.95,1.2,-6.25,0.5,1.2,-6.25'], // 走到门洞前，门帘被撩开
+  ['west-inner-night', 'view=orbit&time=night&lamp=on&cam=0.1,1.95,-7.1,-0.1,1.15,-4.24'],
+  ['west-window-night', 'view=orbit&time=night&lamp=on&cam=0.95,1.5,-0.9,0,1.4,-4'], // 院里看里屋的窗透出灯光
+  // 第 11 轮：外屋（进门看电视桌、炕、圆桌和脸盆架、电视和座钟、缝纫机、屋里看木板门）
+  ['west-outer-wide', 'view=orbit&cam=-1.9,2.3,-4.6,-5.2,0.7,-7.6'], // 外屋东南角看整个外屋
+  ['west-outer-from-door', 'view=orbit&cam=-3.75,1.65,-4.55,-3.96,1.2,-8.46'],
+  ['west-outer-kang', 'view=orbit&cam=-3.66,2.25,-6.16,-6.46,1.05,-6.46'],
+  ['west-outer-table', 'view=orbit&cam=-5.36,2.35,-7.86,-4.26,1.15,-4.76'],
+  ['west-outer-tv', 'view=orbit&cam=-3.74,1.75,-7.16,-3.74,1.6,-8.51'],
+  ['west-outer-sewing', 'view=orbit&cam=-3.2,1.95,-6.6,-1.85,1.25,-7.36'],
+  ['west-outer-tv-on', 'view=orbit&tv=on&cam=-3.74,1.75,-7.16,-3.74,1.6,-8.51'],
+  ['west-outer-tv-night', 'view=orbit&time=night&tv=on&cam=-3.75,1.65,-4.55,-3.96,1.2,-8.46'],
+  ['west-washbasin', 'view=orbit&cam=-2.55,1.75,-5.2,-1.9,1.05,-4.56'],
+  ['west-door-inside', 'view=orbit&cam=-3.96,1.75,-6.76,-3.75,1.45,-4.24'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
   ['orbit-noon', 'view=orbit&time=noon'],
