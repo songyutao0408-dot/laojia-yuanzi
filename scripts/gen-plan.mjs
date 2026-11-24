@@ -63,7 +63,7 @@ for (const b of L.GARDEN.beds) {
 for (const w of L.EARTH_WALLS) rect(w.rect, `fill="${C.earth}" stroke="#6e5a37" stroke-width="1"`);
 
 // 北屋（墙体画成实心带，门窗洞口挖开）
-function brickBox(r, wall, openings, label, sub) {
+function brickBox(r, wall, openings, label, sub, labelX = (r.x0 + r.x1) / 2) {
   rect(r, `fill="${C.brickLight}" fill-opacity="0.25" stroke="none"`);
   const segs = [
     // [x0,z0,x1,z1] 四面墙
@@ -100,8 +100,8 @@ function brickBox(r, wall, openings, label, sub) {
       cur = Math.max(cur, o.b);
     }
   }
-  if (label) text((r.x0 + r.x1) / 2, (r.z0 + r.z1) / 2, label, 'class="b" text-anchor="middle"');
-  if (sub) text((r.x0 + r.x1) / 2, (r.z0 + r.z1) / 2 + 0.5, sub, 'class="s" text-anchor="middle"');
+  if (label) text(labelX, (r.z0 + r.z1) / 2, label, 'class="b" text-anchor="middle"');
+  if (sub) text(labelX, (r.z0 + r.z1) / 2 + 0.5, sub, 'class="s" text-anchor="middle"');
 }
 
 const NH = L.NORTH_HOUSE;
@@ -111,7 +111,32 @@ for (const room of NH.rooms) {
     { side: 's', kind: 'door', a: room.door.x - room.door.width / 2, b: room.door.x + room.door.width / 2 },
     ...room.windows.map((w) => ({ side: 's', kind: 'window', a: w.x - w.width / 2, b: w.x + w.width / 2 })),
   ];
-  brickBox(r, NH.wall, ops, room.name, `室内 ${(room.x1 - room.x0 - 1.5 * NH.wall).toFixed(1)}×${(NH.rect.z1 - NH.rect.z0 - 2 * NH.wall).toFixed(1)} m · 高 ${NH.height} m`);
+  // 西北屋隔成外屋/里屋，名字写在外屋中间
+  const lx = room.id === 'west' ? L.WEST_ROOM.origin.x + L.WEST_ROOM.partition.x / 2 : (r.x0 + r.x1) / 2;
+  brickBox(r, NH.wall, ops, room.name, `室内 ${(room.x1 - room.x0 - 1.5 * NH.wall).toFixed(1)}×${(NH.rect.z1 - NH.rect.z0 - 2 * NH.wall).toFixed(1)} m · 高 ${NH.height} m`, lx);
+}
+
+// 西北屋室内：隔墙（外屋 | 里屋）、小门洞、炕、做蜡烛的器具
+{
+  const W = L.WEST_ROOM;
+  const ox = W.origin.x;
+  const oz = W.origin.z;
+  const px = ox + W.partition.x;
+  const t2 = W.partition.thickness / 2;
+  const d = W.innerDoor;
+  rect({ x0: px - t2, x1: px + t2, z0: oz, z1: oz + d.z - d.width / 2 }, `fill="${C.brick}" stroke="none"`);
+  rect({ x0: px - t2, x1: px + t2, z0: oz + d.z + d.width / 2, z1: oz + W.size.d }, `fill="${C.brick}" stroke="none"`);
+  line(px - t2 - 0.06, oz + d.z - d.width / 2 - 0.05, px - t2 - 0.06, oz + d.z + d.width / 2 + 0.05, `stroke="#c42a30" stroke-width="2" stroke-dasharray="2 2"`);
+  const ix0 = px + t2;
+  const ix1 = ox + W.size.w;
+  rect({ x0: ix0, x1: ix1, z0: oz, z1: oz + W.kang.depth }, `fill="#d8c08a" stroke="${C.ink}" stroke-width="0.8"`);
+  text((ix0 + ix1) / 2, oz + W.kang.depth / 2 + 0.15, '炕', 'class="s" text-anchor="middle"');
+  const vr = W.vat.bellyRadius;
+  out.push(`<circle cx="${f(X(ix0 + 0.05 + vr))}" cy="${f(Y(oz + W.size.d - 0.05 - vr))}" r="${f(vr * S)}" fill="#3f4a4a" stroke="${C.ink}" stroke-width="0.8"/>`);
+  rect({ x0: ix0 + 0.15 + 2 * vr, x1: ix1 - 0.05, z0: oz + W.size.d - 0.05 - W.candles.depth, z1: oz + W.size.d - 0.05 }, `fill="#b89a48" stroke="${C.ink}" stroke-width="0.6"`);
+  text((ix0 + 2 * vr + ix1) / 2, oz + W.size.d - 0.55, '做蜡烛的器具', 'class="xs" text-anchor="middle"');
+  text((ox + px) / 2, oz + 0.9, '外屋', 'class="s" text-anchor="middle"');
+  text((ix0 + ix1) / 2, oz + 2.35, '里屋', 'class="s" text-anchor="middle"');
 }
 
 const K = L.KITCHEN;

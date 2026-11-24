@@ -31,7 +31,7 @@
 - `npm run build:single` → `dist-single/index.html`（vite-plugin-singlefile，所有资源内联，可双击打开）
 - `npm run plan` → 重新生成 `docs/plan.svg`
 - `npm run build && npm run shots` → Playwright 无头浏览器截图到 `screenshots/`（已 gitignore），并检查黑屏和页面报错；`npm run shots -- father-dog father-face` 只截指定机位。机位列表在 `scripts/screenshot.mjs` 的 `SHOTS`（俯视、环绕、门口、北屋两间室内、厨房室内、院内看大门、台阶看院子）。Playwright 用本机全局安装的版本，不在 package.json 里
-- 页面支持 `?autoperf=off`（自检脚本都带上，否则无头浏览器 2 fps 会触发自动降档）、`?music=off`（不放音乐、不出“进入院子”遮罩，自检脚本都带上），`?view=top|orbit|walk` 直接打开指定视角，`&time=dawn|noon|dusk|night` 指定时间，`&quality=low|high` 指定画质，`&cam=x,y,z,tx,ty,tz` 指定相机位置/注视点；`window.__app` 暴露 engine / views 方便调试
+- 页面支持 `?lamp=on`（里屋的灯一开始就开着）、`?autoperf=off`（自检脚本都带上，否则无头浏览器 2 fps 会触发自动降档）、`?music=off`（不放音乐、不出“进入院子”遮罩，自检脚本都带上），`?view=top|orbit|walk` 直接打开指定视角，`&time=dawn|noon|dusk|night` 指定时间，`&quality=low|high` 指定画质，`&cam=x,y,z,tx,ty,tz` 指定相机位置/注视点；`window.__app` 暴露 engine / views 方便调试
 - 部署：`.github/workflows/deploy.yml`，push 到 `main` 自动构建并发布到 GitHub Pages
   （线上地址：https://songyutao0408-dot.github.io/laojia-yuanzi/ ）；同时把单文件版放到网站 `/laojia-yuanzi.html`，并更新名为 `latest` 的 Release（附件 laojia-yuanzi.html）
 
@@ -84,13 +84,14 @@ src/
     firstPerson.js      第一人称：WASD/方向键、Shift 跑、按住鼠标拖动转头（不锁定鼠标）、上台阶、进门辅助（朝门走时自动往门洞中线靠）、视线起伏
     colliders.js        从 userData.solid 的 Mesh 生成可旋转矩形碰撞体 + 高度过滤；groundHeight(x,z) 台阶/室内地坪
     touch.js            手机：左下虚拟摇杆、滑动转头、轻点交互
-    interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千/摸摸大黄），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
-  interiors/            室内细节（以后补），见 interiors/README.md
+    interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千/摸摸大黄/里屋拉灯），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
+  interiors/            室内细节，见 interiors/README.md；挂在 interior-anchor-* 上，尺寸在 layout.WEST_ROOM 等（室内坐标）
+    northWest.js        西北屋：隔墙分外屋（六）/里屋（四），门洞白布门帘（顶点动画，人走近被撩开）；墙面旧大白 + 墙根 0.55 m 水泥墙裙（finish() 给每面墙贴两层，外屋也用）、磨旧淡红砖地面；里屋的炕（东西两头顶墙，炕席、炕沿；中间试过竹床、木头床，用户都否了）、被子、拉线开关 + 15 瓦灯泡（lamp.pull() 开关，高画质点光源带阴影）、隔墙上三张画的女明星海报、西南角水缸（复用 yard/waterVat.js）、两台做蜡烛的器具（按用户照片）+ 煤球炉、熏黑的南墙（窗洞处挖空）和顶棚
   ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针；musicButton.js 音乐开关（指北针左边，偏好存在 localStorage 'laojia-bgm-v2'）
 scripts/
   gen-plan.mjs          由 layout.js 生成 docs/plan.svg
   screenshot.mjs        自检截图
-  interaction-test.mjs  交互自检（npm run test:interact，ONLY=A..F 可只跑部分）：只用真实按键/点击/触摸，从附近自己走过去：斜着进西北屋、进厨房、井边按 E、点按钮摘石榴、点画面摘石榴、打枣、手机摇杆进东北屋、手机点压水
+  interaction-test.mjs  交互自检（npm run test:interact，ONLY=A..I 可只跑部分）：只用真实按键/点击/触摸，从附近自己走过去：斜着进西北屋、进厨房、井边按 E、点按钮摘石榴、点画面摘石榴、打枣、手机摇杆进东北屋、手机点压水、摸大黄（H）、穿过门帘进里屋拉灯（I）
 docs/
   scene-spec.md         场景权威描述
   plan.svg              俯视平面图
@@ -112,7 +113,7 @@ docs/
 - 透明/贴花/烟/远景用 `userData.noAO = true` 或透明材质，GTAO 渲染法线时会跳过它们
 - **贴图与 UV**：盒子类几何用 `core/box.js` 的世界坐标 UV（单位：米），贴图 `textureSet(..., meters)` 设置 repeat = 1/meters。不平铺的画面（瓷砖画、春联）用几何体自带 0..1 UV
 - **贴图都是运行时 canvas 生成**，首次打开有生成耗时（`window.__app.buildMs`，测试机上高画质约 4 s、低画质约 1.3 s）；分辨率总开关 `TEX.scale`（低画质 0.5）。fillMulti 回调里的 x, y 始终是设计分辨率坐标，新写贴图照常按设计尺寸写即可；新材质加进 materials.js 的 DEFS 会被自动预生成
-- 北屋/厨房室内墙面目前与外墙同为清水砖，顶棚白灰；室内装修（抹灰、刷白）留给 src/interiors/ 阶段决定
+- 室内墙面：西北屋已按用户描述做成旧大白 + 墙根 0.55 m 水泥墙裙（用户说外屋、以后别的屋也是这样）；东北屋/厨房室内目前还是清水砖，做到时照西北屋的 finish() 做
 
 ## 工作流程（用户要求）
 
@@ -131,7 +132,9 @@ docs/
 
 七步全部完成。之后追加：背景音乐（src/audio/，用户第一次点击/按键后开始循环，♪按钮开关并记住选择）。最初是代码合成的原创小曲，后按用户要求换成用户提供的 MP3（合成版在 git 历史 PR 9 里）。音乐默认开：加载完先直接试播，被浏览器自动播放策略拦下就显示“进入院子 ♪”遮罩（#enter），点一下开始。注意：无头 Chromium 不拦自动播放，而且 navigator.userActivation 一开始就是 true，测拦截路径要自己在 init script 里按 isTrusted 的输入事件模拟。
 
-之后的迭代（如北屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
+之后的迭代（各屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
+
+第 10 轮：西北屋室内第一部分（隔墙分外屋/里屋六四开、门帘、旧大白墙 + 水泥墙裙、旧砖地；里屋的炕/被子/拉线开关灯/海报/水缸/做蜡烛的器具/熏黑的南墙、南窗）。外屋陈设、东北屋、厨房室内还没做。
 
 ## 待确认 / 已做的假设
 
@@ -139,6 +142,6 @@ docs/
 
 已确认：院子 15 m × 18 m（含北屋）；北屋每间 7.5 m × 5 m；厨房与西北屋间有约 2 m 空当；厨房门窗朝东、烟囱在西北角；南侧用土墙代替邻居房子；梧桐（v5 改为约 10 m）。
 
-另已确认（v3）：西北屋窗只在门西侧、东北屋窗只在门东侧；空当西端有土墙；影背墙距大门三四米；茅厕东西约 2 m。
+另已确认（v3）：西北屋窗只在门西侧（v20 更正：里屋南墙也有一扇窗，layout 里 inner: true）、东北屋窗只在门东侧；空当西端有土墙；影背墙距大门三四米；茅厕东西约 2 m。
 
 另已确认（v4）：大门无红砖门垛；菜地种丝瓜、豆角。另已确认（v5）：梧桐约 10 m 高、冠幅半径约 5 m；北屋隔墙无门。另已确认（v7）：所有砖为很淡的旧红色；院内没有砖路（裸露黄土，不要加任何通道/砖/装饰）；梧桐即泡桐；北屋墙根 0.35 m 水泥勒脚。第 8 轮（家人补充的水缸、洋姜/青石板、连通台阶/天地神位、秋千）里样式和范围是 Claude 补的，在 spec 里标了【待确认】。

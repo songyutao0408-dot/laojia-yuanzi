@@ -14,12 +14,13 @@ import { box } from '../core/box.js';
  * @param {number} o.y1       墙顶
  * @param {Array<{center:number,width:number,bottom:number,top:number,glass?:boolean,lintel?:boolean,sill?:boolean}>} o.openings
  *        洞口（bottom/top 为绝对高度）；glass=true 在洞口中间放玻璃；lintel=true 露出水泥过梁；sill=true 砖砌窗台
+ * @param {boolean} [o.solid=true] 是否参与第一人称碰撞
  * @param {{wall:THREE.Material, glass?:THREE.Material, lintel?:THREE.Material, sill?:THREE.Material}} m
  */
 export function wallWithOpenings(o, m) {
   const g = new THREE.Group();
   const t2 = o.thickness / 2;
-  const add = (a0, a1, y0, y1, mat, extra = 0, opts) => {
+  const add = (a0, a1, y0, y1, mat, extra = 0, opts = { solid: o.solid ?? true }) => {
     if (a1 - a0 < 1e-4 || y1 - y0 < 1e-4) return;
     g.add(
       o.axis === 'x'
