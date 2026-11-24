@@ -7,7 +7,7 @@ import { WELL, TREES } from '../layout.js';
  * - 也可以直接点画面：选点击位置附近（约 90 像素内）够得着的果子或压水井
  * - 石榴：伸手够得着（离眼睛 2.6 m 内）才能摘；枣树高，小孩站到树下用竹竿打枣，水平 3 m 内的都能打下来
  * - 环绕/俯视模式下点果子、压水井也有效（不限距离）
- * - 西北屋里屋：站在里屋里、离灯绳 1.8 m 内出“拉灯”按钮；也可以直接点灯绳
+ * - 西北屋里屋：站在里屋里、离灯绳 2.6 m 内出“拉灯”按钮；也可以直接点灯绳
  */
 const WELL_NEAR = 2.0;
 const POME_REACH = 2.6;
@@ -99,7 +99,7 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
   const nearCord = (p) => {
     if (!westRoom || !westRoom.inInnerRoom(p.x, p.z)) return false;
     const c = westRoom.lamp.cordPosition();
-    return Math.hypot(p.x - c.x, p.z - c.z) <= 1.8;
+    return Math.hypot(p.x - c.x, p.z - c.z) <= 2.6; // 里屋小，进了门洞基本就够得着
   };
   function doPump() {
     pumping.pump();

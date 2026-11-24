@@ -5,15 +5,15 @@ import { box } from '../core/box.js';
 import { mat } from '../textures/index.js';
 import { Q } from '../core/quality.js';
 import { wallWithOpenings } from '../buildings/wall.js';
+import { createWaterVat } from '../yard/waterVat.js';
 
 /**
  * 西北屋室内（挂在 interior-anchor-west 上；坐标原点 = 室内西北角、地坪面，+x 东、+z 南）：
- * - 四壁抹白灰；一道隔墙把屋子分成西边的外屋（约 2/3）和东边的里屋，隔墙上一个小门洞
- * - 门洞挂半截白布门帘（织着小红花），人走过去会被撩开
- * - 里屋北边一铺炕，铺炕席，炕沿一根木头；东头靠墙叠着几床八九十年代的棉花被（大红、枣红、绿、粉的缎子被面）
- * - 炕头（隔墙这边）墙上一个拉线开关，拉一下屋顶的灯泡亮（15 瓦上下的白炽灯，昏黄），再拉一下灭
- * - 南墙下一排做蜡烛的器具：铁皮水槽里排着蜡烛模子，上面插着做好的白蜡烛；边上一个煤球炉、一锅化开的蜡
- * - 南墙和那一片顶棚被烟火熏得发黑
+ * - 墙刷大白，年深日久发黄发脏；墙根往上 0.55 m 抹水泥；地面铺磨旧的淡红砖
+ * - 一道隔墙把屋子分成西边的外屋（六成）和东边的里屋（四成），隔墙上一个小门洞，挂半截白布门帘（织着小红花），人走过去会被撩开
+ * - 里屋北边一张竹床（床头顶着隔墙），床尾摞着几床八九十年代的缎子被面棉花被，床头两个枕头
+ * - 床头隔墙上一个拉线开关，拉一下屋顶的灯泡亮（15 瓦上下的白炽灯，昏黄），再拉一下灭；这面墙上贴着三张八九十年代的女明星海报（画的，不是真人）
+ * - 南墙：西南角一口水缸，往东两台做蜡烛的器具（按用户照片），东头煤球炉 + 一锅化开的蜡；南墙上一扇窗；南墙和那片顶棚被烟火熏黑
  */
 const ROOM = { w: R.size.w, d: R.size.d, h: R.size.h };
 const PX = R.partition.x;
@@ -42,39 +42,47 @@ function rng(seed) {
   return () => ((s = (s * 16807) % 2147483647) / 2147483647);
 }
 
-/** 白灰墙：刷过好几遍的石灰水，发黄、有些水渍和蹭脏的地方（低对比，看着是白墙） */
+/** 四方连续地画一个径向渐变斑（拼接处不露缝） */
+function seamlessBlob(g, w, h, x, y, rad, rgb, a) {
+  for (const ox of [-w, 0, w]) {
+    for (const oy of [-h, 0, h]) {
+      const gr = g.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, rad);
+      gr.addColorStop(0, `rgba(${rgb},${a})`);
+      gr.addColorStop(1, `rgba(${rgb},0)`);
+      g.fillStyle = gr;
+      g.fillRect(0, 0, w, h);
+    }
+  }
+}
+
+/** 刷了大白的墙，十几年下来：发黄发灰、一片片水渍烟渍、蹭脏的印子、苍蝇屎点 */
 function plasterTex() {
   return canvasTex(
     256,
     256,
     (g, w, h) => {
       const r = rng(17);
-      g.fillStyle = '#ebe6da';
+      g.fillStyle = '#d9d3c4';
       g.fillRect(0, 0, w, h);
-      // 斑驳（四方连续：每块在上下左右各画一遍，贴图拼接处看不出缝）
-      for (let i = 0; i < 60; i++) {
-        const x0 = r() * w;
+      for (let i = 0; i < 70; i++) {
+        const c = ['196,180,140', '140,136,128', '170,160,136', '232,228,218'][Math.floor(r() * 4)];
+        seamlessBlob(g, w, h, r() * w, r() * h, 15 + r() * 70, c, 0.08 + r() * 0.12);
+      }
+      // 往下流的水渍道道
+      for (let i = 0; i < 14; i++) {
+        const x = r() * w;
+        const len = 40 + r() * 140;
         const y0 = r() * h;
-        const rad = 20 + r() * 70;
-        const c = r() > 0.5 ? '200,186,150' : '150,146,140';
-        const a = 0.08 + r() * 0.08;
-        for (const ox of [-w, 0, w]) {
-          for (const oy of [-h, 0, h]) {
-            const gr = g.createRadialGradient(x0 + ox, y0 + oy, 0, x0 + ox, y0 + oy, rad);
-            gr.addColorStop(0, `rgba(${c},${a})`);
-            gr.addColorStop(1, `rgba(${c},0)`);
-            g.fillStyle = gr;
-            g.fillRect(0, 0, w, h);
-          }
-        }
+        g.fillStyle = `rgba(160,140,100,${0.06 + r() * 0.08})`;
+        for (let k = 0; k < len; k += 2) g.fillRect((x + Math.sin(k * 0.05) * 2 + w) % w, (y0 + k) % h, 2 + r() * 2, 2);
       }
       // 刷子的道道
       for (let y = 0; y < h; y += 3) {
-        g.fillStyle = `rgba(255,255,250,${r() * 0.06})`;
+        g.fillStyle = `rgba(255,250,236,${r() * 0.05})`;
         g.fillRect(0, y, w, 2);
       }
-      for (let i = 0; i < 500; i++) {
-        g.fillStyle = `rgba(120,110,95,${0.05 + r() * 0.08})`;
+      for (let i = 0; i < 900; i++) {
+        g.fillStyle = `rgba(80,66,50,${0.06 + r() * 0.12})`;
         g.fillRect(r() * w, r() * h, 1, 1);
       }
     },
@@ -82,41 +90,272 @@ function plasterTex() {
   );
 }
 
-/** 炕席：高粱秆/苇子篾编的人字纹，发黄发旧 */
-function reedMat() {
+/** 墙根的水泥墙裙：灰色、抹子印、踢脏的印子 */
+function cementTex() {
   return canvasTex(
     256,
     256,
     (g, w, h) => {
-      const r = rng(11);
-      g.fillStyle = '#c4a466';
+      const r = rng(19);
+      g.fillStyle = '#8a8680';
       g.fillRect(0, 0, w, h);
-      const s = 16; // 一根篾子宽
-      for (let y = 0; y < h; y += s / 2) {
-        for (let x = 0; x < w; x += s) {
-          const dir = (Math.floor(x / s) + Math.floor(y / (s / 2))) % 4 < 2;
-          const k = 0.85 + r() * 0.25;
-          g.fillStyle = `rgb(${206 * k},${170 * k},${104 * k})`;
-          g.save();
-          g.translate(x + s / 2, y + s / 4);
-          g.rotate(dir ? Math.PI / 4 : -Math.PI / 4);
-          g.fillRect(-s * 0.7, -s * 0.2, s * 1.4, s * 0.4);
-          g.strokeStyle = 'rgba(80,60,30,0.35)';
-          g.strokeRect(-s * 0.7, -s * 0.2, s * 1.4, s * 0.4);
-          g.restore();
-        }
+      for (let i = 0; i < 60; i++) seamlessBlob(g, w, h, r() * w, r() * h, 10 + r() * 50, r() > 0.5 ? '70,66,62' : '150,146,138', 0.12 + r() * 0.14);
+      // 抹子抹出来的弧形印
+      for (let i = 0; i < 40; i++) {
+        const x = r() * w;
+        const y = r() * h;
+        g.strokeStyle = `rgba(${r() > 0.5 ? '160,156,148' : '100,96,90'},0.08)`;
+        g.lineWidth = 3 + r() * 5;
+        g.beginPath();
+        g.arc(x, y, 60 + r() * 80, r() * 6, r() * 6 + 0.6);
+        g.stroke();
       }
-      // 睡出来的油亮、发暗的地方
-      for (let i = 0; i < 30; i++) {
-        const gr = g.createRadialGradient(r() * w, r() * h, 0, r() * w, r() * h, 20 + r() * 60);
-        gr.addColorStop(0, 'rgba(90,60,30,0.18)');
-        gr.addColorStop(1, 'rgba(90,60,30,0)');
-        g.fillStyle = gr;
-        g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 1500; i++) {
+        g.fillStyle = r() > 0.5 ? 'rgba(40,38,34,0.25)' : 'rgba(200,196,188,0.2)';
+        g.fillRect(r() * w, r() * h, 1, 1);
       }
     },
-    { repeat: [2.6, 2.2] },
+    { repeat: [1 / 1.2, 1 / 1.2] },
   );
+}
+
+/** 地面：平铺的旧砖（24 × 11.5 cm，错缝），淡红、磨得发白，砖缝里积着土；贴图 1.2 m 见方 */
+function floorTex() {
+  return canvasTex(
+    512,
+    512,
+    (g, w, h) => {
+      const r = rng(29);
+      const S = w / 1.2; // 像素/米
+      g.fillStyle = '#86766a'; // 砖缝（积着土）
+      g.fillRect(0, 0, w, h);
+      const bw = 0.24 * S;
+      const bh = w / 10; // 10 行
+      for (let row = 0; row < 10; row++) {
+        const off = row % 2 ? bw / 2 : 0;
+        for (let i = -1; i < 6; i++) {
+          const x = i * bw + off;
+          const k = 0.88 + r() * 0.2;
+          const worn = r();
+          const base = [186 * k, 124 * k, 98 * k];
+          const draw = (dx) => {
+            g.fillStyle = `rgb(${base[0]},${base[1]},${base[2]})`;
+            g.fillRect(x + dx + 2, row * bh + 2, bw - 4, bh - 4);
+            // 磨得发白、发亮的一块
+            const gr = g.createRadialGradient(x + dx + bw / 2, row * bh + bh / 2, 0, x + dx + bw / 2, row * bh + bh / 2, bw * 0.6);
+            gr.addColorStop(0, `rgba(214,176,150,${0.25 + worn * 0.35})`);
+            gr.addColorStop(1, 'rgba(214,176,150,0)');
+            g.fillStyle = gr;
+            g.fillRect(x + dx + 2, row * bh + 2, bw - 4, bh - 4);
+            // 坑坑洼洼、缺角
+            for (let n = 0; n < 14; n++) {
+              g.fillStyle = r() > 0.5 ? 'rgba(90,60,50,0.25)' : 'rgba(230,210,190,0.2)';
+              g.fillRect(x + dx + 2 + r() * (bw - 6), row * bh + 2 + r() * (bh - 6), 1 + r() * 4, 1 + r() * 3);
+            }
+            if (r() > 0.7) {
+              g.fillStyle = '#86766a';
+              g.beginPath();
+              const cx = x + dx + (r() > 0.5 ? 2 : bw - 2);
+              const cy = row * bh + (r() > 0.5 ? 2 : bh - 2);
+              g.arc(cx, cy, 3 + r() * 5, 0, Math.PI * 2);
+              g.fill();
+            }
+          };
+          draw(0);
+          if (x + bw > w) draw(-w);
+        }
+      }
+      // 一层浮土、走出来的发暗的道
+      for (let i = 0; i < 40; i++) seamlessBlob(g, w, h, r() * w, r() * h, 30 + r() * 120, r() > 0.5 ? '130,104,84' : '200,170,140', 0.06 + r() * 0.1);
+    },
+    { repeat: [1 / 1.2, 1 / 1.2] },
+  );
+}
+
+/** 竹子：黄褐色、发旧，竹节一圈深色；贴图沿长度方向 1 格 = 一节（约 0.3 m） */
+function bambooTex() {
+  return canvasTex(
+    64,
+    128,
+    (g, w, h) => {
+      const r = rng(37);
+      const lin = g.createLinearGradient(0, 0, w, 0);
+      lin.addColorStop(0, '#a88446');
+      lin.addColorStop(0.5, '#c9a660');
+      lin.addColorStop(1, '#a07c40');
+      g.fillStyle = lin;
+      g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 40; i++) {
+        g.fillStyle = `rgba(${r() > 0.5 ? '90,64,30' : '220,196,140'},0.15)`;
+        g.fillRect(r() * w, 0, 1, h);
+      }
+      // 竹节
+      g.fillStyle = 'rgba(90,62,28,0.85)';
+      g.fillRect(0, 0, w, 5);
+      g.fillStyle = 'rgba(230,206,150,0.5)';
+      g.fillRect(0, 5, w, 2);
+      // 手摸、汗渍发暗
+      for (let i = 0; i < 8; i++) {
+        g.fillStyle = 'rgba(80,56,30,0.12)';
+        g.fillRect(0, r() * h, w, 6 + r() * 20);
+      }
+    },
+    { repeat: [1, 1] },
+  );
+}
+
+/**
+ * 八九十年代的女明星海报（画的，不对应任何真人）：影楼布景色的底子，大波浪烫发、红嘴唇、垫肩衣服，
+ * 角上印着几个字；纸已经发黄，四角压着透明胶条。
+ */
+function posterTex({ bg1, bg2, dress, hair, tilt, text, seed }) {
+  return canvasTex(256, 370, (g, w, h) => {
+    const r = rng(seed);
+    g.filter = 'blur(0.7px)'; // 印刷品的柔和感
+    const lin = g.createLinearGradient(0, 0, 0, h);
+    lin.addColorStop(0, bg1);
+    lin.addColorStop(1, bg2);
+    g.fillStyle = lin;
+    g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 10; i++) {
+      g.fillStyle = `rgba(255,255,255,${0.05 + r() * 0.1})`;
+      g.beginPath();
+      g.arc(r() * w, r() * h * 0.6, 10 + r() * 30, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.save();
+    g.translate(w / 2, h * 0.42);
+    g.rotate(tilt);
+    // 头发：后面一大团蓬松卷发
+    g.fillStyle = hair;
+    for (let i = 0; i < 70; i++) {
+      const a = r() * Math.PI * 2;
+      const rad = 50 + r() * 40;
+      g.beginPath();
+      g.arc(Math.cos(a) * rad * 0.8, Math.sin(a) * rad * 0.9 + 25, 18 + r() * 14, 0, Math.PI * 2);
+      g.fill();
+    }
+    // 肩膀、垫肩衣服
+    g.fillStyle = dress;
+    g.beginPath();
+    g.moveTo(-110, 200);
+    g.quadraticCurveTo(-100, 95, -40, 85);
+    g.lineTo(40, 85);
+    g.quadraticCurveTo(100, 95, 110, 200);
+    g.closePath();
+    g.fill();
+    // 脖子、V 领
+    const skin = '#f0c8a6';
+    g.fillStyle = skin;
+    g.fillRect(-16, 40, 32, 50);
+    g.beginPath();
+    g.moveTo(-26, 86);
+    g.lineTo(0, 130);
+    g.lineTo(26, 86);
+    g.fill();
+    // 脸
+    const fg = g.createRadialGradient(-8, -6, 4, 0, 0, 52);
+    fg.addColorStop(0, '#f8dcc0');
+    fg.addColorStop(1, '#e2ae8c');
+    g.fillStyle = fg;
+    g.beginPath();
+    g.ellipse(0, 0, 38, 50, 0, 0, Math.PI * 2);
+    g.fill();
+    // 腮红
+    for (const sx of [-1, 1]) {
+      const bg = g.createRadialGradient(sx * 20, 14, 0, sx * 20, 14, 16);
+      bg.addColorStop(0, 'rgba(230,120,120,0.35)');
+      bg.addColorStop(1, 'rgba(230,120,120,0)');
+      g.fillStyle = bg;
+      g.fillRect(-40, -10, 80, 50);
+    }
+    // 刘海
+    g.fillStyle = hair;
+    for (let i = 0; i < 9; i++) {
+      g.beginPath();
+      g.arc(-34 + i * 8.5, -42 + Math.sin(i) * 4, 13, 0, Math.PI * 2);
+      g.fill();
+    }
+    // 眉、眼、鼻、嘴
+    g.strokeStyle = '#3a2620';
+    g.lineWidth = 2.2;
+    for (const sx of [-1, 1]) {
+      g.beginPath();
+      g.moveTo(sx * 7, -14);
+      g.quadraticCurveTo(sx * 17, -21, sx * 28, -15);
+      g.stroke();
+      g.fillStyle = '#fff8f0';
+      g.beginPath();
+      g.ellipse(sx * 16, -6, 8, 3.6, 0, 0, Math.PI * 2);
+      g.fill();
+      g.fillStyle = '#2a1a14';
+      g.beginPath();
+      g.arc(sx * 15, -6, 3.4, 0, Math.PI * 2);
+      g.fill();
+      g.strokeStyle = '#1e1410';
+      g.lineWidth = 1.6;
+      g.beginPath();
+      g.moveTo(sx * 7, -7);
+      g.quadraticCurveTo(sx * 16, -12, sx * 25, -6);
+      g.stroke();
+    }
+    g.strokeStyle = 'rgba(170,110,90,0.6)';
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.moveTo(-2, 0);
+    g.quadraticCurveTo(-5, 14, 0, 16);
+    g.stroke();
+    g.fillStyle = '#c4283a';
+    g.beginPath();
+    g.moveTo(-12, 28);
+    g.quadraticCurveTo(0, 22, 12, 28);
+    g.quadraticCurveTo(0, 37, -12, 28);
+    g.fill();
+    // 耳环
+    g.fillStyle = '#f4ecd8';
+    for (const sx of [-1, 1]) {
+      g.beginPath();
+      g.arc(sx * 37, 14, 3.5, 0, Math.PI * 2);
+      g.fill();
+    }
+    // 头发上的光泽
+    g.strokeStyle = 'rgba(255,240,220,0.18)';
+    g.lineWidth = 3;
+    for (let i = 0; i < 12; i++) {
+      g.beginPath();
+      g.arc(-30 + r() * 60, -30 + r() * 40, 30 + r() * 30, -2.4 + r(), -1.4 + r());
+      g.stroke();
+    }
+    g.restore();
+    g.filter = 'none';
+    // 印的字
+    g.fillStyle = 'rgba(255,240,120,0.95)';
+    g.strokeStyle = 'rgba(160,20,30,0.9)';
+    g.lineWidth = 3;
+    g.font = 'bold 34px "KaiTi", "STKaiti", serif';
+    g.textAlign = 'center';
+    for (let i = 0; i < text.length; i++) {
+      g.strokeText(text[i], w - 28, 46 + i * 38);
+      g.fillText(text[i], w - 28, 46 + i * 38);
+    }
+    // 纸发黄、边上磨毛
+    g.fillStyle = 'rgba(210,180,110,0.22)';
+    g.fillRect(0, 0, w, h);
+    const edge = g.createRadialGradient(w / 2, h / 2, h * 0.35, w / 2, h / 2, h * 0.75);
+    edge.addColorStop(0, 'rgba(120,90,40,0)');
+    edge.addColorStop(1, 'rgba(120,90,40,0.35)');
+    g.fillStyle = edge;
+    g.fillRect(0, 0, w, h);
+    // 四角的透明胶条
+    g.fillStyle = 'rgba(240,220,160,0.55)';
+    for (const [x, y, a] of [[0, 0, 0.7], [w, 0, -0.7], [0, h, -0.7], [w, h, 0.7]]) {
+      g.save();
+      g.translate(x, y);
+      g.rotate(a);
+      g.fillRect(-26, -7, 52, 14);
+      g.restore();
+    }
+  });
 }
 
 /** 缎子被面：底色 + 大朵牡丹 + 叶子，四边一圈白被里 */
@@ -209,7 +448,7 @@ function curtainTex() {
 }
 
 /** 熏黑的墙：下面淡、上面浓，煤炉和蜡烛器具上方各一大片，往上散开 */
-function sootTex(plumes, { top = 0.6, seed = 31 } = {}) {
+function sootTex(plumes, { top = 0.6, seed = 31, holes = [] } = {}) {
   return canvasTex(256, 256, (g, w, h) => {
     const r = rng(seed);
     // 越往上越黑（烟往上走，贴着顶棚散开）
@@ -241,6 +480,8 @@ function sootTex(plumes, { top = 0.6, seed = 31 } = {}) {
       g.fillStyle = r() > 0.5 ? 'rgba(255,250,240,0.04)' : 'rgba(10,8,6,0.06)';
       g.fillRect(r() * w, r() * h, 2 + r() * 6, 2 + r() * 6);
     }
+    // 窗洞处挖空（holes 为 0..1 的 [u0, v0, u1, v1]，v 从上往下）
+    for (const [u0, v0, u1, v1] of holes) g.clearRect(u0 * w, v0 * h, (u1 - u0) * w, (v1 - v0) * h);
   });
 }
 
@@ -453,42 +694,59 @@ export function createNorthWestInterior() {
     waxMelt: new THREE.MeshStandardMaterial({ color: 0xefe2bc, roughness: 0.25 }),
   };
 
-  // —— 四壁抹白灰（贴在砖墙内侧的一层） ——
-  const t = 0.012;
-  const coat = (o) => group.add(wallWithOpenings({ ...o, thickness: t, y0: 0, y1: ROOM.h, solid: false }, { wall: plaster }));
-  const doorX = NH.rooms[0].door.x - R.origin.x;
-  const win = NH.rooms[0].windows[0];
-  coat({ axis: 'x', from: 0, to: ROOM.w, at: t / 2 });
-  coat({
-    axis: 'x',
-    from: 0,
-    to: ROOM.w,
-    at: SOUTH - t / 2,
-    openings: [
-      { center: doorX, width: NH.rooms[0].door.width, bottom: 0, top: NH.rooms[0].door.height },
-      { center: win.x - R.origin.x, width: win.width, bottom: win.sill, top: win.sill + win.height },
-    ],
-  });
-  coat({ axis: 'z', from: t, to: SOUTH - t, at: t / 2 });
-  coat({ axis: 'z', from: t, to: SOUTH - t, at: ROOM.w - t / 2 });
+  // —— 墙面：刷大白（发黄发脏），墙根往上 0.55 m 抹水泥 ——
+  const t = 0.012; // 白灰层厚
+  const tc = 0.022; // 水泥墙裙比白灰面凸出一点
+  const DADO = R.dado;
+  const cement = new THREE.MeshStandardMaterial({ map: cementTex(), roughness: 0.95 });
+  const room0 = NH.rooms[0];
+  const doorX = room0.door.x - R.origin.x;
+  const southOps = [
+    { center: doorX, width: room0.door.width, bottom: 0, top: room0.door.height },
+    ...room0.windows.map((w) => ({ center: w.x - R.origin.x, width: w.width, bottom: w.sill, top: w.sill + w.height })),
+  ];
+  /** 一面墙的内表面：at 为墙面位置，dir 为朝屋里的方向（+1/-1），ops 为洞口 */
+  const finish = (axis, from, to, at, dir, ops = []) => {
+    const opsUp = ops.filter((o) => o.top > DADO).map((o) => ({ ...o, bottom: Math.max(o.bottom, DADO) }));
+    const opsDado = ops.filter((o) => o.bottom < DADO).map((o) => ({ ...o, top: Math.min(o.top, DADO) }));
+    group.add(wallWithOpenings({ axis, from, to, at: at + (dir * t) / 2, thickness: t, y0: DADO, y1: ROOM.h, openings: opsUp, solid: false }, { wall: plaster }));
+    group.add(wallWithOpenings({ axis, from, to, at: at + (dir * tc) / 2, thickness: tc, y0: 0, y1: DADO, openings: opsDado, solid: false }, { wall: cement }));
+    // 墙裙上沿：抹出来的一道小斜坡收口
+    group.add(wallWithOpenings({ axis, from, to, at: at + (dir * (tc + 0.004)) / 2, thickness: tc + 0.004, y0: DADO - 0.012, y1: DADO, openings: opsDado, solid: false }, { wall: cement }));
+  };
+  finish('x', 0, ROOM.w, 0, +1); // 北墙
+  finish('x', 0, ROOM.w, SOUTH, -1, southOps); // 南墙（门、两扇窗）
+  // 门窗洞口的内侧一半（墙厚 0.24 m 里靠屋里的 0.11 m）也抹白灰
+  for (const o of southOps) {
+    const a0 = o.center - o.width / 2;
+    const a1 = o.center + o.width / 2;
+    const d0 = SOUTH;
+    const d1 = SOUTH + 0.11;
+    for (const a of [a0, a1]) group.add(box(a - (a === a0 ? 0 : t), a + (a === a0 ? t : 0), o.bottom, o.top, d0, d1, plaster, { solid: false }));
+    group.add(box(a0, a1, o.top - t, o.top, d0, d1, plaster, { solid: false }));
+    if (o.bottom > 0) group.add(box(a0 - 0.02, a1 + 0.02, o.bottom - 0.02, o.bottom, d0 - 0.03, d1, cement, { solid: false })); // 窗台抹水泥
+  }
+  finish('z', tc, SOUTH - tc, 0, +1); // 西墙
+  finish('z', tc, SOUTH - tc, ROOM.w, -1); // 东墙（两屋之间的隔墙）
 
-  // —— 隔墙（抹白灰），上面一个小门洞 ——
+  // —— 隔墙（外屋六、里屋四），上面一个小门洞 ——
   const dz = R.innerDoor.z;
   const dw = R.innerDoor.width;
   const dh = R.innerDoor.height;
-  group.add(
-    wallWithOpenings(
-      { axis: 'z', from: t, to: SOUTH - t, at: PX, thickness: PT, y0: 0, y1: ROOM.h, openings: [{ center: dz, width: dw, bottom: 0, top: dh }] },
-      { wall: plaster },
-    ),
-  );
+  const doorOp = [{ center: dz, width: dw, bottom: 0, top: dh }];
+  group.add(wallWithOpenings({ axis: 'z', from: tc, to: SOUTH - tc, at: PX, thickness: PT, y0: 0, y1: ROOM.h, openings: doorOp }, { wall: plaster }));
+  finish('z', tc, SOUTH - tc, PX - PT / 2, -1, doorOp); // 外屋那面
+  finish('z', tc, SOUTH - tc, PX + PT / 2, +1, doorOp); // 里屋那面
   // 门洞上的过木
   group.add(box(PX - PT / 2 - 0.004, PX + PT / 2 + 0.004, dh, dh + 0.08, dz - dw / 2 - 0.1, dz + dw / 2 + 0.1, mats.wood, { solid: false }));
+
+  // —— 地面：磨旧的淡红砖 ——
+  group.add(box(0, ROOM.w, -0.01, 0.004, 0, SOUTH, new THREE.MeshStandardMaterial({ map: floorTex(), roughness: 0.9 }), { solid: false, shadow: false }));
 
   // —— 门帘：外屋这边，一根细竹竿挑着 ——
   const cw = dw + 0.14;
   const ch = R.curtain.drop;
-  const cx = PX - PT / 2 - 0.025;
+  const cx = PX - PT / 2 - tc - 0.02;
   const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, cw + 0.1, 8), new THREE.MeshStandardMaterial({ color: 0x9a8058, roughness: 0.8 }));
   rod.rotation.x = Math.PI / 2;
   rod.position.set(cx, dh + 0.03, dz);
@@ -511,24 +769,69 @@ export function createNorthWestInterior() {
   hemTop.position.set(cx, dh + 0.03, dz);
   group.add(hemTop);
 
-  // —— 炕 ——
-  const K = R.kang;
-  const kang = box(IX0, IX1, 0, K.height, 0, K.depth, new THREE.MeshStandardMaterial({ map: plasterMap, color: 0xd2c6b2, roughness: 1 }));
-  kang.name = 'kang';
-  group.add(kang);
-  // 炕席
-  const reed = new THREE.MeshStandardMaterial({ map: reedMat(), roughness: 0.85 });
-  const mt = new THREE.Mesh(new THREE.BoxGeometry(IX1 - IX0 - 0.02, 0.006, K.depth - 0.06), reed);
-  mt.position.set((IX0 + IX1) / 2, K.height + 0.003, K.depth / 2 - 0.02);
-  mt.receiveShadow = true;
-  group.add(mt);
-  // 炕沿：一根磨得发亮的木头
-  const edgeMat = new THREE.MeshStandardMaterial({ color: 0x5a3a24, roughness: 0.45 });
-  group.add(box(IX0, IX1, K.height - 0.07, K.height + 0.02, K.depth - 0.1, K.depth + 0.01, edgeMat, { solid: false }));
-  // 炕脸下沿踢脚的一道泥灰（脏）
-  group.add(box(IX0, IX1, 0, 0.12, K.depth, K.depth + 0.006, new THREE.MeshStandardMaterial({ color: 0x6e655a, roughness: 1 }), { solid: false }));
+  // —— 竹床：靠北墙，床头顶着隔墙 ——
+  const BD = R.bed;
+  const bx0 = IX0 + tc + 0.01;
+  const bx1 = bx0 + BD.length;
+  const bz0 = tc + 0.02;
+  const bz1 = bz0 + BD.width;
+  const bamboo = new THREE.MeshStandardMaterial({ map: bambooTex(), roughness: 0.55 });
+  /** 一根竹竿：a、b 两端，r 半径；贴图一格一节 */
+  const pole = (a, b, r) => {
+    const v = new THREE.Vector3().subVectors(b, a);
+    const len = v.length();
+    const geo = new THREE.CylinderGeometry(r, r, len, 10);
+    const uv = geo.attributes.uv;
+    for (let i = 0; i < uv.count; i++) uv.setY(i, (uv.getY(i) * len) / 0.32);
+    const m = new THREE.Mesh(geo, bamboo);
+    m.position.copy(a).addScaledVector(v, 0.5);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v.normalize());
+    m.castShadow = m.receiveShadow = true;
+    group.add(m);
+    return m;
+  };
+  const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  const legIn = 0.05;
+  const topY = BD.height;
+  for (const x of [bx0 + legIn, bx1 - legIn]) for (const z of [bz0 + legIn, bz1 - legIn]) pole(V3(x, 0, z), V3(x, topY - 0.012, z), 0.028);
+  // 床框：两根长边、两根短边，底下一圈横撑
+  for (const z of [bz0 + legIn, bz1 - legIn]) {
+    pole(V3(bx0, topY - 0.04, z), V3(bx1, topY - 0.04, z), 0.026);
+    pole(V3(bx0 + legIn, 0.12, z), V3(bx1 - legIn, 0.12, z), 0.016);
+  }
+  for (const x of [bx0 + legIn, bx1 - legIn]) {
+    pole(V3(x, topY - 0.04, bz0), V3(x, topY - 0.04, bz1), 0.026);
+    pole(V3(x, 0.12, bz0 + legIn), V3(x, 0.12, bz1 - legIn), 0.016);
+  }
+  // 床面中间两根托撑
+  for (const f of [0.35, 0.65]) pole(V3(bx0 + (bx1 - bx0) * f, topY - 0.04, bz0), V3(bx0 + (bx1 - bx0) * f, topY - 0.04, bz1), 0.02);
+  // 床面：一根根劈开的竹片顺着床长铺
+  {
+    const n = Math.floor(BD.width / 0.045);
+    const slatGeo = new THREE.BoxGeometry(BD.length - 0.02, 0.012, 0.038);
+    const uv = slatGeo.attributes.uv;
+    // 顺着长度方向一格一节
+    const pos = slatGeo.attributes.position;
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, 0.5 + pos.getZ(i) * 4, (pos.getX(i) + BD.length / 2) / 0.32);
+    const slatMat = new THREE.MeshStandardMaterial({ map: bamboo.map, roughness: 0.45 });
+    const inst = new THREE.InstancedMesh(slatGeo, slatMat, n);
+    const m4 = new THREE.Matrix4();
+    const col = new THREE.Color();
+    const rr = rng(53);
+    for (let i = 0; i < n; i++) {
+      m4.makeTranslation((bx0 + bx1) / 2 + (rr() - 0.5) * 0.04, topY - 0.006, bz0 + 0.025 + i * ((BD.width - 0.05) / (n - 1)));
+      inst.setMatrixAt(i, m4);
+      inst.setColorAt(i, col.setScalar(0.85 + rr() * 0.25));
+    }
+    inst.castShadow = inst.receiveShadow = true;
+    group.add(inst);
+  }
+  // 挡人：一个看不见的盒子
+  const bedBlock = box(bx0, bx1, 0, topY, bz0, bz1, new THREE.MeshBasicMaterial({ visible: false }));
+  bedBlock.name = 'bamboo-bed';
+  group.add(bedBlock);
 
-  // —— 被子：东头靠后墙叠着 ——
+  // —— 被子摞在床尾（东头），枕头在床头（西头，挨着隔墙） ——
   {
     const covers = [
       ['#b3192a', '#e86a86', '#f3a6b4', 3],
@@ -537,21 +840,21 @@ export function createNorthWestInterior() {
       ['#d1547a', '#ffffff', '#f5b8c8', 9],
       ['#1f4f8a', '#e8506a', '#f4d27a', 13],
     ];
-    const qw = 1.15;
+    const qw = 1.15; // 叠好的长边，顺着床宽
     const qd = 0.55;
-    let y = K.height + 0.006;
-    const cx0 = IX1 - qw / 2 - 0.08;
+    let y = topY;
+    const qx = bx1 - qd / 2 - 0.05;
+    const qz = (bz0 + bz1) / 2;
     covers.forEach(([base, f1, f2, seed], i) => {
       const th = 0.12 - i * 0.008;
       const geo = new RoundedBoxGeometry(qw - i * 0.02, th, qd - i * 0.01, 3, 0.035);
       const q = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: quiltTex(base, f1, f2, seed), roughness: 0.6 }));
-      q.position.set(cx0 + (i % 2 ? 0.012 : -0.01), y + th / 2, qd / 2 + 0.06 + (i % 2) * 0.01);
-      q.rotation.y = (i % 2 ? 1 : -1) * 0.012;
+      q.position.set(qx + (i % 2 ? 0.01 : -0.008), y + th / 2, qz + (i % 2 ? 0.012 : -0.01));
+      q.rotation.y = Math.PI / 2 + (i % 2 ? 1 : -1) * 0.012;
       q.castShadow = q.receiveShadow = true;
       group.add(q);
       y += th - 0.004;
     });
-    // 两个枕头摞在被子上
     const pillowTex = canvasTex(128, 64, (g, w, h) => {
       g.fillStyle = '#f0ebe0';
       g.fillRect(0, 0, w, h);
@@ -564,19 +867,38 @@ export function createNorthWestInterior() {
       g.textBaseline = 'middle';
       g.fillText('喜', w / 2, h / 2);
     });
-    for (let i = 0; i < 2; i++) {
+    for (const dzp of [-0.32, 0.32]) {
       const p = new THREE.Mesh(new RoundedBoxGeometry(0.55, 0.1, 0.32, 3, 0.045), new THREE.MeshStandardMaterial({ map: pillowTex, roughness: 0.8 }));
-      p.position.set(cx0 - 0.15 + i * 0.32, y + 0.05, 0.25);
+      p.rotation.y = Math.PI / 2;
+      p.position.set(bx0 + 0.22, topY + 0.05, qz + dzp);
       p.castShadow = p.receiveShadow = true;
       group.add(p);
     }
+  }
+
+  // —— 开关这面墙（隔墙东面）上的海报 ——
+  {
+    const looks = [
+      { bg1: '#5f8fc8', bg2: '#c8dcef', dress: '#c42a3a', hair: '#1a1210', tilt: -0.08, text: '芳华', seed: 61 },
+      { bg1: '#e48aa6', bg2: '#f6d6c4', dress: '#f4f0e8', hair: '#241812', tilt: 0.1, text: '倩影', seed: 67 },
+      { bg1: '#3e8a7a', bg2: '#d8e6c0', dress: '#6a3a8a', hair: '#1c1410', tilt: -0.04, text: '风采', seed: 71 },
+    ];
+    R.posters.forEach((ps, i) => {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(ps.w, ps.h), new THREE.MeshStandardMaterial({ map: posterTex(looks[i % looks.length]), roughness: 0.7 }));
+      m.rotation.y = Math.PI / 2;
+      m.rotation.x = (i % 2 ? 1 : -1) * 0.015;
+      m.position.set(IX0 + t + 0.003, ps.y, ps.z);
+      m.receiveShadow = true;
+      m.userData.noAO = true;
+      group.add(m);
+    });
   }
 
   // —— 拉线开关 + 灯泡 ——
   const S = R.pullSwitch;
   const wireMat = new THREE.MeshStandardMaterial({ color: 0x2a2624, roughness: 0.7 });
   const sw = new THREE.Group();
-  sw.position.set(IX0, S.y, S.z);
+  sw.position.set(IX0 + t, S.y, S.z);
   const swBox = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.035, 0.035, 18), new THREE.MeshStandardMaterial({ color: 0xe8e2d2, roughness: 0.4 }));
   swBox.rotation.z = -Math.PI / 2;
   swBox.position.x = 0.018;
@@ -602,8 +924,8 @@ export function createNorthWestInterior() {
     group.add(m);
   };
   const ceil = ROOM.h - 0.004;
-  const p0 = new THREE.Vector3(IX0 + 0.006, S.y + 0.03, S.z);
-  const p1 = new THREE.Vector3(IX0 + 0.006, ceil, S.z);
+  const p0 = new THREE.Vector3(IX0 + t + 0.004, S.y + 0.03, S.z);
+  const p1 = new THREE.Vector3(IX0 + t + 0.004, ceil, S.z);
   const p2 = new THREE.Vector3(B.x, ceil, S.z);
   const p3 = new THREE.Vector3(B.x, ceil, B.z);
   line(p0, p1);
@@ -655,27 +977,33 @@ export function createNorthWestInterior() {
 
   // —— 南墙下做蜡烛的器具：两台挨着摆，一根胶皮水管从墙上挂下来接到槽子上 ——
   mats.candle = new THREE.MeshStandardMaterial({ color: 0xf4efe2, roughness: 0.5, emissive: 0x2a2418, emissiveIntensity: 0.15 });
-  const zc = SOUTH - 0.05 - R.candles.depth / 2;
+  // 西南角（进门右手边）一口水缸，里面有水
+  const VT = R.vat;
+  const vat = createWaterVat({ ...VT, x: IX0 + tc + VT.bellyRadius + 0.03, z: SOUTH - tc - VT.bellyRadius - 0.03 }, { leanLid: false });
+  vat.name = 'inner-vat';
+  group.add(vat);
+  const zc = SOUTH - tc - 0.04 - R.candles.depth / 2;
   const machines = [];
-  const Lm = 0.85;
+  const Lm = R.candles.length;
+  const mx0 = vat.position.x + VT.bellyRadius + 0.05;
   const tops = [0xe8dfc2, 0xe2bc52]; // 一台刚浇了蜡（发黄）
   for (let i = 0; i < 2; i++) {
     const m = candleMachine(Lm, mats, { seed: 5 + i * 4, topWax: tops[i] });
-    m.position.set(IX0 + 0.05 + Lm / 2 + i * (Lm + 0.04), 0, zc);
+    m.position.set(mx0 + Lm / 2 + i * (Lm + 0.03), 0, zc);
     group.add(m);
     machines.push(m);
   }
   {
     // 槽子东头一截铜管，接胶皮水管（往槽里灌凉水）；水管从墙上的钉子上搭下来
-    const px = machines[0].position.x + Lm / 2 - 0.05;
+    const px = machines[0].position.x - Lm / 2 + 0.05; // 西头，不挡窗户
     const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.14, 8), new THREE.MeshStandardMaterial({ color: 0x8a6a34, roughness: 0.4, metalness: 0.7 }));
     pipe.position.set(px, 0.8 + 0.07, zc - 0.08);
-    pipe.rotation.z = 0.3;
+    pipe.rotation.z = -0.3;
     group.add(pipe);
-    const nailX = px - 0.3;
+    const nailX = px - 0.22;
     const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(px - 0.02, 0.94, zc - 0.08),
-      new THREE.Vector3(px - 0.07, 1.18, zc - 0.03),
+      new THREE.Vector3(px + 0.02, 0.94, zc - 0.08),
+      new THREE.Vector3(px - 0.04, 1.18, zc - 0.03),
       new THREE.Vector3(nailX + 0.07, 1.4, SOUTH - 0.05),
       new THREE.Vector3(nailX, 1.45, SOUTH - 0.025),
       new THREE.Vector3(nailX - 0.08, 1.36, SOUTH - 0.03),
@@ -689,14 +1017,14 @@ export function createNorthWestInterior() {
     group.add(nail);
   }
   const stove = stoveWithPot(mats);
-  stove.position.set(IX1 - 0.2, 0, SOUTH - 0.24);
+  stove.position.set(IX1 - tc - 0.17, 0, SOUTH - tc - 0.22);
   group.add(stove);
   // 地上几滩踩扁的蜡
   {
     const r = rng(41);
     for (let i = 0; i < 10; i++) {
       const s = new THREE.Mesh(new THREE.CircleGeometry(0.02 + r() * 0.04, 10).rotateX(-Math.PI / 2), mats.waxOld);
-      s.position.set(IX0 + 0.2 + r() * (IX1 - IX0 - 0.4), 0.002, SOUTH - 0.45 - r() * 0.5);
+      s.position.set(mx0 + r() * (IX1 - mx0 - 0.3), 0.006, SOUTH - 0.45 - r() * 0.5);
       s.scale.set(1, 1, 0.6 + r() * 0.6);
       s.receiveShadow = true;
       group.add(s);
@@ -709,7 +1037,13 @@ export function createNorthWestInterior() {
   const sootWall = new THREE.Mesh(
     new THREE.PlaneGeometry(wallW, ROOM.h),
     new THREE.MeshStandardMaterial({
-      map: sootTex([[u(stove.position.x), 1], [u(machines[0].position.x), 0.75], [u(machines[1].position.x), 0.8]], { top: 0.75 }),
+      map: sootTex([[u(stove.position.x), 1], [u(machines[0].position.x), 0.75], [u(machines[1].position.x), 0.8]], {
+        top: 0.75,
+        holes: room0.windows
+          .map((w) => ({ x0: w.x - R.origin.x - w.width / 2, x1: w.x - R.origin.x + w.width / 2, y0: w.sill, y1: w.sill + w.height }))
+          .filter((w) => w.x1 > IX0)
+          .map((w) => [u(w.x1), 1 - w.y1 / ROOM.h, u(w.x0), 1 - w.y0 / ROOM.h]),
+      }),
       transparent: true,
       depthWrite: false,
       roughness: 1,
@@ -718,7 +1052,7 @@ export function createNorthWestInterior() {
     }),
   );
   sootWall.rotation.y = Math.PI;
-  sootWall.position.set((IX0 + IX1) / 2, ROOM.h / 2, SOUTH - t - 0.002);
+  sootWall.position.set((IX0 + IX1) / 2, ROOM.h / 2, SOUTH - t - 0.003);
   sootWall.userData.noAO = true;
   group.add(sootWall);
   const sootCeil = new THREE.Mesh(

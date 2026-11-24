@@ -54,6 +54,7 @@ export function createNightLights() {
     const d = room.door;
     addSpill(d.x, NH.floor + 1.9, zIn, d.x, NH.rect.z1 + 2.2, 7);
     for (const w of room.windows) {
+      if (w.inner) continue; // 里屋的窗：屋里的灯拉开了才透光（点光源本身会从窗户照出去）
       const y0 = NH.floor + w.sill;
       // 窗玻璃后面的暖光面
       const glow = new THREE.Mesh(new THREE.PlaneGeometry(w.width - 0.08, w.height - 0.08), glowMat);

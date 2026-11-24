@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { WATER_VAT as V } from '../layout.js';
+import { WATER_VAT } from '../layout.js';
 import { canvas, makeFbm, fillPixels, clamp01, mixRGB } from '../textures/canvas.js';
 
 /**
@@ -34,10 +34,14 @@ function vatTexture() {
   return t;
 }
 
-export function createWaterVat() {
+/**
+ * V：尺寸（height、rimRadius、bellyRadius、baseRadius，可选 x、z 位置），默认是院子里那口；
+ * leanLid：另一块缸盖斜靠在缸身西侧（屋里墙角那口不靠）
+ */
+export function createWaterVat(V = WATER_VAT, { leanLid = true } = {}) {
   const g = new THREE.Group();
   g.name = 'water-vat';
-  g.position.set(V.x, 0, V.z);
+  g.position.set(V.x ?? 0, 0, V.z ?? 0);
   const H = V.height;
   // 外轮廓（从缸底中心往上到口沿外卷，再翻进缸里往下）
   const outer = [
@@ -85,6 +89,7 @@ export function createWaterVat() {
   handle.position.set(Math.sin(0.4 + Math.PI / 2) * 0.18, H + 0.04, Math.cos(0.4 + Math.PI / 2) * 0.18);
   handle.rotation.y = 0.4;
   g.add(handle);
+  if (!leanLid) return g;
   const lid2 = new THREE.Mesh(half, woodMat);
   // 靠在缸身西侧
   lid2.position.set(-V.bellyRadius - 0.03, H * 0.42, 0.05);
