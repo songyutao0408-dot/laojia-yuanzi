@@ -7,7 +7,7 @@ import { canvasTex, rng, reedMat, pillowTex, quiltStack, woodTex, seamlessBlob }
 /**
  * 西北屋外屋的陈设（第 11 轮，按用户描述和照片）。坐标同 northWest.js：室内原点在西北角、地坪面，+x 东、+z 南。
  * - 西边一铺大木头炕，南北通长；炕沿朝外这一面摆着一排枕头，靠西墙摞着棉被
- * - 进门正对着、靠北墙一张老式电视桌，上面一台黑白电视（拉杆天线），电视左边一座老座钟（按用户照片：横放木壳、拱顶、两边镶条立柱，指针走的是现在的时间）
+ * - 进门正对着、靠北墙一张老式电视桌，上面一台黑白电视（拉杆天线；tv.toggle() 开关：亮线 → 雪花 → 黑白测试图），电视左边一座老座钟（按用户照片：横放木壳、拱顶、两边镶条立柱，指针走的是现在的时间）
  * - 靠南墙一张折叠圆桌：深色桌面、斑驳，铁管腿生了锈
  * - 进门右手边（隔墙这边）一个洗脸盆架，上面一只搪瓷洋盆，架子上搭着毛巾
  * - 隔墙边、里屋门洞往北一点一台脚踏缝纫机
@@ -193,31 +193,111 @@ function tableTopTex() {
   });
 }
 
-/** 搪瓷洋盆盆底：白瓷底上一朵大红牡丹、两片绿叶 */
-function basinBottomTex() {
-  return canvasTex(256, 256, (g, w, h) => {
-    g.fillStyle = '#f4f1ea';
-    g.fillRect(0, 0, w, h);
-    const c = w / 2;
-    g.fillStyle = '#3f8a4a';
-    for (const a of [0.6, 2.4, 4.2]) {
-      g.beginPath();
-      g.ellipse(c + Math.cos(a) * 58, c + Math.sin(a) * 58, 40, 16, a, 0, Math.PI * 2);
-      g.fill();
-    }
-    for (let ring = 3; ring >= 1; ring--) {
-      g.fillStyle = ring % 2 ? '#d02a3a' : '#f06a7a';
-      for (let k = 0; k < 8; k++) {
-        const a = (k / 8) * Math.PI * 2 + ring;
-        g.beginPath();
-        g.arc(c + Math.cos(a) * ring * 14, c + Math.sin(a) * ring * 14, ring * 13, 0, Math.PI * 2);
-        g.fill();
-      }
-    }
-    g.fillStyle = '#f2d36a';
+/** 剪纸样的红色小花样（洋盆内外壁上一圈一圈的那种） */
+function cutFlower(g, x, y, k, color) {
+  g.fillStyle = color;
+  // 中间一朵、两边两片斜叶
+  g.beginPath();
+  g.ellipse(x, y, 5 * k, 9 * k, 0, 0, Math.PI * 2);
+  g.fill();
+  for (const sx of [-1, 1]) {
     g.beginPath();
-    g.arc(c, c, 10, 0, Math.PI * 2);
+    g.ellipse(x + sx * 12 * k, y + 2 * k, 4 * k, 10 * k, sx * 0.7, 0, Math.PI * 2);
     g.fill();
+    g.fillRect(x + sx * 20 * k - 4 * k, y - 1 * k, 8 * k, 3 * k);
+  }
+}
+/** 红色“囍”字（剪纸体，圆圈里） */
+function xiChar(g, x, y, size, color) {
+  g.save();
+  g.fillStyle = color;
+  g.strokeStyle = color;
+  g.lineWidth = 2;
+  g.beginPath();
+  g.arc(x, y, size * 0.62, 0, Math.PI * 2);
+  g.stroke();
+  g.font = `bold ${size}px "KaiTi", "STKaiti", serif`;
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText('囍', x, y + 1);
+  g.restore();
+}
+
+/**
+ * 洋瓷脸盆（按用户照片）：白搪瓷，口沿一圈大红边；内壁上沿一圈红色“囍”字和剪纸花样；
+ * 外壁一圈红色叶子花样。贴图 u 绕一圈，v 按车床轮廓的点：0..0.4 外壁（下到上）、0.4..0.6 口沿、0.6..1 内壁（上到下）。
+ */
+function basinWallTex() {
+  return canvasTex(1024, 256, (g, w, h) => {
+    const RED = '#d42a2e';
+    g.fillStyle = '#f6f4ee';
+    g.fillRect(0, 0, w, h);
+    const Y = (v) => (1 - v) * h;
+    // 口沿红边
+    g.fillStyle = RED;
+    g.fillRect(0, Y(0.62), w, Y(0.4) - Y(0.62));
+    // 内壁上沿：一圈“囍”和剪纸花交替
+    const n = 9;
+    for (let i = 0; i < n; i++) {
+      const x = ((i + 0.5) / n) * w;
+      xiChar(g, x, Y(0.71), 30, RED);
+      cutFlower(g, x + w / n / 2, Y(0.71), 1.2, RED);
+    }
+    g.fillStyle = RED;
+    g.fillRect(0, Y(0.78), w, 3);
+    // 外壁：一圈叶子花样
+    for (let i = 0; i < 12; i++) {
+      const x = ((i + 0.5) / 12) * w;
+      cutFlower(g, x, Y(0.2), 1.5, RED);
+      g.fillStyle = RED;
+      g.fillRect(x + 28, Y(0.2) - 6, 14, 3);
+      g.fillRect(x + 28, Y(0.2) + 2, 14, 3);
+    }
+  });
+}
+
+/** 洋盆盆底：中间一幅彩色的画（一对红金鱼、荷叶），四周一圈红线 */
+function basinBottomTex() {
+  return canvasTex(256, 256, (g, w) => {
+    const c = w / 2;
+    g.fillStyle = '#f6f4ee';
+    g.fillRect(0, 0, w, w);
+    g.strokeStyle = '#d42a2e';
+    g.lineWidth = 4;
+    g.beginPath();
+    g.arc(c, c, 110, 0, Math.PI * 2);
+    g.stroke();
+    // 荷叶
+    g.fillStyle = '#3f8a5a';
+    g.beginPath();
+    g.ellipse(c + 30, c + 30, 46, 30, 0.4, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = '#5aa0c8';
+    g.beginPath();
+    g.ellipse(c - 40, c + 40, 30, 14, -0.3, 0, Math.PI * 2);
+    g.fill();
+    // 两条金鱼
+    const fish = (x, y, a, col) => {
+      g.save();
+      g.translate(x, y);
+      g.rotate(a);
+      g.fillStyle = col;
+      g.beginPath();
+      g.ellipse(0, 0, 26, 15, 0, 0, Math.PI * 2);
+      g.fill();
+      g.beginPath();
+      g.moveTo(22, 0);
+      g.quadraticCurveTo(50, -26, 46, 0);
+      g.quadraticCurveTo(50, 26, 22, 0);
+      g.fill();
+      g.fillStyle = '#1a1a1a';
+      g.beginPath();
+      g.arc(-14, -4, 3, 0, Math.PI * 2);
+      g.fill();
+      g.restore();
+    };
+    fish(c - 20, c - 30, -0.4, '#e8501e');
+    fish(c + 10, c + 2, 2.6, '#d42a2e');
   });
 }
 
@@ -254,6 +334,165 @@ function towelTex() {
     g.fillRect(0, 14, w, 6);
     g.fillRect(0, h - 20, w, 6);
   });
+}
+
+/* ---------- 电视开机 ---------- */
+/** 开/关电视的声音：咔哒一下，开机再带一阵“沙沙”的雪花声 */
+let audioCtx = null;
+function tvSound(on) {
+  try {
+    audioCtx ??= new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = audioCtx;
+    const t = ctx.currentTime;
+    const len = on ? 1.4 : 0.04;
+    const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * len), ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) {
+      const k = i / d.length;
+      // 开头一声咔哒，后面是越来越小的沙沙声
+      d[i] = (Math.random() * 2 - 1) * (i < ctx.sampleRate * 0.02 ? 1 : on ? 0.25 * Math.pow(1 - k, 2) : 0);
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const f = ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.value = 3000;
+    f.Q.value = 0.7;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.35;
+    src.connect(f).connect(gain).connect(ctx.destination);
+    src.start(t);
+  } catch {
+    /* 没有声音也不影响 */
+  }
+}
+
+/**
+ * 黑白电视的画面（canvas，每秒画 15 次）：开机先一道亮线拉开，然后一阵雪花，再出一幅黑白测试图
+ * （灰阶条、圆和格子），一直带着点雪花、偶尔滚过一道暗带、亮度微微闪。
+ */
+function createTvScreen() {
+  const W = 192;
+  const H = 192;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d');
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const noise = g.createImageData(W, H);
+  const card = document.createElement('canvas');
+  card.width = W;
+  card.height = H;
+  {
+    const k = card.getContext('2d');
+    k.fillStyle = '#7a7a7a';
+    k.fillRect(0, 0, W, H);
+    // 格子
+    k.strokeStyle = '#d8d8d8';
+    k.lineWidth = 1;
+    for (let x = 0; x <= W; x += 16) {
+      k.beginPath();
+      k.moveTo(x, 0);
+      k.lineTo(x, H);
+      k.stroke();
+    }
+    for (let y = 0; y <= H; y += 16) {
+      k.beginPath();
+      k.moveTo(0, y);
+      k.lineTo(W, y);
+      k.stroke();
+    }
+    // 中间大圆
+    k.fillStyle = '#3a3a3a';
+    k.beginPath();
+    k.arc(W / 2, H / 2, 72, 0, Math.PI * 2);
+    k.fill();
+    // 圆里的灰阶条
+    k.save();
+    k.beginPath();
+    k.arc(W / 2, H / 2, 70, 0, Math.PI * 2);
+    k.clip();
+    for (let i = 0; i < 8; i++) {
+      const v = Math.round(255 - i * 32);
+      k.fillStyle = `rgb(${v},${v},${v})`;
+      k.fillRect(W / 2 - 70 + i * 17.5, H / 2 - 30, 17.5, 40);
+    }
+    k.fillStyle = '#111';
+    k.fillRect(W / 2 - 70, H / 2 + 10, 140, 18);
+    k.fillStyle = '#eee';
+    for (let x = W / 2 - 64; x < W / 2 + 64; x += 8) k.fillRect(x, H / 2 + 13, 3, 12);
+    k.restore();
+    k.strokeStyle = '#f0f0f0';
+    k.lineWidth = 3;
+    k.beginPath();
+    k.arc(W / 2, H / 2, 72, 0, Math.PI * 2);
+    k.stroke();
+    k.beginPath();
+    k.moveTo(W / 2, H / 2 - 72);
+    k.lineTo(W / 2, H / 2 + 72);
+    k.moveTo(W / 2 - 72, H / 2);
+    k.lineTo(W / 2 + 72, H / 2);
+    k.lineWidth = 1.5;
+    k.stroke();
+  }
+  let acc = 0;
+  let since = 0;
+  let t0 = 0;
+  /** t：开机后过了多少秒 */
+  function draw(t) {
+    const d = noise.data;
+    const snow = t < 0.35 ? 0 : t < 1.4 ? 1 : 0.22; // 雪花有多重
+    if (t >= 1.4) {
+      g.globalAlpha = 1;
+      g.drawImage(card, 0, Math.sin(t * 0.7) * 1.5);
+    } else {
+      g.fillStyle = '#000';
+      g.fillRect(0, 0, W, H);
+    }
+    if (snow > 0) {
+      for (let i = 0; i < d.length; i += 4) {
+        const v = Math.random() * 255;
+        d[i] = d[i + 1] = d[i + 2] = v;
+        d[i + 3] = 255 * snow;
+      }
+      // putImageData 不混合：先画到临时画布再叠上去
+      tmpCtx.putImageData(noise, 0, 0);
+      g.drawImage(tmp, 0, 0);
+    }
+    if (t < 0.35) {
+      // 开机：中间一道亮线往上下拉开
+      const hh = (t / 0.35) * H;
+      g.fillStyle = '#fff';
+      g.fillRect(0, H / 2 - hh / 2, W, Math.max(2, hh));
+    }
+    // 滚过的暗带
+    const by = ((t * 30) % (H * 3)) - H;
+    g.fillStyle = 'rgba(0,0,0,0.18)';
+    g.fillRect(0, by, W, 24);
+    // 扫描线
+    g.fillStyle = 'rgba(0,0,0,0.12)';
+    for (let y = 0; y < H; y += 3) g.fillRect(0, y, W, 1);
+    tex.needsUpdate = true;
+  }
+  const tmp = document.createElement('canvas');
+  tmp.width = W;
+  tmp.height = H;
+  const tmpCtx = tmp.getContext('2d');
+  return {
+    tex,
+    start() {
+      t0 = performance.now();
+      acc = 1;
+    },
+    update(dt) {
+      since = (performance.now() - t0) / 1000; // 按真实时间走（帧率低也不拖长雪花）
+      acc += dt;
+      if (acc < 1 / 15) return;
+      acc = 0;
+      draw(since);
+    },
+  };
 }
 
 /* ---------- 小工具 ---------- */
@@ -311,6 +550,7 @@ export function createOuterRoom({ tc }) {
 
   // —— 进门正对着、靠北墙的电视桌 ——
   const clockParts = {};
+  const tvParts = {};
   {
     const D = O.tvDesk;
     const x0 = D.x - D.w / 2;
@@ -322,7 +562,8 @@ export function createOuterRoom({ tc }) {
     group.add(box(x0 + 0.02, x1 - 0.02, 0, 0.07, z0 + 0.02, z1 - 0.04, woodD, off)); // 底座
     group.add(box(x0 + 0.01, x1 - 0.01, 0.07, D.h - 0.03, z0, z1 - 0.02, wood)); // 柜体（挡人）
     group.add(box(x0 - 0.015, x1 + 0.015, D.h - 0.03, D.h, z0, z1 + 0.01, wood, off)); // 台面
-    const cw = 0.4; // 两边柜门宽
+    const cw = 0.5; // 两边柜门宽
+    const sy = D.h * 0.52; // 中间敞口格的隔板高
     const fz = z1 - 0.02; // 正面
     const knob = new THREE.MeshStandardMaterial({ color: 0xb8a070, roughness: 0.35, metalness: 0.8 });
     for (const [a0, a1, kx] of [[x0 + 0.02, x0 + cw, x0 + cw - 0.05], [x1 - cw, x1 - 0.02, x1 - cw + 0.05]]) {
@@ -335,16 +576,16 @@ export function createOuterRoom({ tc }) {
     // 中间：上面一格敞口、下面一个抽屉
     const m0 = x0 + cw;
     const m1 = x1 - cw;
-    group.add(box(m0 + 0.01, m1 - 0.01, 0.36, D.h - 0.06, fz - 0.3, fz - 0.29, new THREE.MeshStandardMaterial({ color: 0x2e2418, roughness: 0.9 }), off)); // 敞口格的里面（暗）
-    group.add(box(m0, m1, 0.34, 0.37, fz - 0.3, fz + 0.005, wood, off)); // 隔板
-    group.add(box(m0 + 0.01, m1 - 0.01, 0.1, 0.33, fz, fz + 0.015, wood, off)); // 抽屉脸
-    group.add(box(D.x - 0.06, D.x + 0.06, 0.2, 0.225, fz + 0.015, fz + 0.03, knob, off)); // 抽屉拉手
+    group.add(box(m0 + 0.01, m1 - 0.01, sy + 0.02, D.h - 0.06, fz - 0.3, fz - 0.29, new THREE.MeshStandardMaterial({ color: 0x2e2418, roughness: 0.9 }), off)); // 敞口格的里面（暗）
+    group.add(box(m0, m1, sy - 0.01, sy + 0.02, fz - 0.3, fz + 0.005, wood, off)); // 隔板
+    group.add(box(m0 + 0.01, m1 - 0.01, 0.1, sy - 0.02, fz, fz + 0.015, wood, off)); // 抽屉脸
+    group.add(box(D.x - 0.06, D.x + 0.06, (0.1 + sy) / 2 - 0.012, (0.1 + sy) / 2 + 0.012, fz + 0.015, fz + 0.03, knob, off)); // 抽屉拉手
     // 敞口格里一摞旧报纸
-    group.add(box(m0 + 0.06, m1 - 0.08, 0.37, 0.43, fz - 0.27, fz - 0.06, new THREE.MeshStandardMaterial({ color: 0xcfc6a8, roughness: 1 }), off));
+    group.add(box(m0 + 0.06, m1 - 0.08, sy + 0.02, sy + 0.08, fz - 0.27, fz - 0.06, new THREE.MeshStandardMaterial({ color: 0xcfc6a8, roughness: 1 }), off));
 
     // 黑白电视（14 寸左右）：灰色金属壳，后面一个大屁股，顶上拉杆天线
     const tv = new THREE.Group();
-    tv.position.set(D.x + 0.18, D.h, (z0 + z1) / 2 + 0.02);
+    tv.position.set(D.x + 0.22, D.h, (z0 + z1) / 2 + 0.02);
     const shell = new THREE.MeshStandardMaterial({ color: 0x6e7072, roughness: 0.45, metalness: 0.4 });
     const front = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.1), [shell, shell, shell, shell, new THREE.MeshStandardMaterial({ map: tvFaceTex(), roughness: 0.35, metalness: 0.2 }), shell]);
     front.position.set(0, 0.21, 0.1);
@@ -360,11 +601,24 @@ export function createOuterRoom({ tc }) {
       k.position.set(0.21, y, 0.16);
       tv.add(k);
     }
+    // 开着的时候的画面：盖在屏幕上，平时藏起来
+    const screen = createTvScreen();
+    const lit = new THREE.Mesh(new THREE.PlaneGeometry(0.305, 0.315), new THREE.MeshBasicMaterial({ map: screen.tex, color: 0xd8dcd8 }));
+    lit.position.set(-0.055, 0.21, 0.1505);
+    lit.visible = false;
+    lit.userData.noAO = true;
+    tv.add(lit);
+    const glow = new THREE.PointLight(0xd8e2ff, 0.9, 3, 2);
+    glow.position.set(-0.05, 0.22, 0.45);
+    glow.visible = false;
+    tv.add(glow);
+    Object.assign(tvParts, { tv, lit, glow, screen });
     // 屏幕上一层亮面（玻璃的反光）
     const glass = new THREE.Mesh(new THREE.PlaneGeometry(0.31, 0.31), new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.08, metalness: 0.6, transparent: true, opacity: 0.25 }));
     glass.position.set(-0.05, 0.21, 0.152);
     glass.userData.noAO = true;
     tv.add(glass);
+    tvParts.glass = glass;
     // 拉杆天线：一个小底座，两根拉杆叉开
     const base = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 0.02, 12), iron);
     base.position.set(0.12, 0.35, -0.04);
@@ -377,7 +631,7 @@ export function createOuterRoom({ tc }) {
     // 电视左边一座老座钟（按用户照片）：横放的木壳，中间一块拱顶，两边两根立柱镶着浅色人字纹木条，
     // 正中一个大圆钟面、镀铬的圈、凸玻璃；钟面中间一圈露出木头，两个上弦孔
     const clock = new THREE.Group();
-    clock.position.set(D.x - 0.4, D.h, (z0 + z1) / 2 - 0.01);
+    clock.position.set(D.x - 0.42, D.h, (z0 + z1) / 2 - 0.01);
     const cwood = new THREE.MeshStandardMaterial({ map: woodTex([196, 108, 50], { seed: 13 }), roughness: 0.32 });
     const CD = 0.13; // 进深
     // 中间拱顶的壳：沿 z 挤出
@@ -512,18 +766,24 @@ export function createOuterRoom({ tc }) {
       t2.castShadow = true;
       ws.add(t2);
     }
-    // 搪瓷洋盆：白瓷、深蓝口沿，盆底一朵牡丹，盛着半盆水
-    const prof = [[0.11, 0], [0.13, 0.01], [0.17, 0.09], [0.18, 0.1]].map(([r, y]) => new THREE.Vector2(r, y));
-    const enamel = new THREE.MeshStandardMaterial({ color: 0xf2efe8, roughness: 0.2, side: THREE.DoubleSide });
-    const basin = new THREE.Mesh(new THREE.LatheGeometry(prof, 32), enamel);
+    // 洋瓷脸盆（按用户照片）：白搪瓷、大红口沿，内壁一圈“囍”和剪纸花，外壁一圈红叶子，盆底一对金鱼；盛着半盆水
+    // 车床轮廓：外壁（下→上，5 个点）→ 口沿 → 内壁（上→下，5 个点），对应 basinWallTex 的 v
+    const prof = [
+      [0.11, 0], [0.125, 0.006], [0.148, 0.04], [0.168, 0.078], [0.18, 0.098],
+      [0.188, 0.106],
+      [0.176, 0.1], [0.163, 0.08], [0.143, 0.045], [0.123, 0.016], [0.105, 0.008],
+    ].map(([r, y]) => new THREE.Vector2(r, y));
+    const enamel = new THREE.MeshStandardMaterial({ map: basinWallTex(), roughness: 0.18, side: THREE.DoubleSide });
+    const basin = new THREE.Mesh(new THREE.LatheGeometry(prof, 48), enamel);
     basin.position.y = ringY - 0.02;
     basin.castShadow = true;
-    const bottom = new THREE.Mesh(new THREE.CircleGeometry(0.11, 32).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: basinBottomTex(), roughness: 0.2 }));
-    bottom.position.y = ringY - 0.018;
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.006, 6, 32).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x1e3a6e, roughness: 0.3 }));
-    rim.position.y = ringY + 0.08;
-    const water = new THREE.Mesh(new THREE.CircleGeometry(0.15, 32).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x8aa0a0, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.35 }));
-    water.position.y = ringY + 0.035;
+    const bottom = new THREE.Mesh(new THREE.CircleGeometry(0.106, 40).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: basinBottomTex(), roughness: 0.18 }));
+    bottom.position.y = ringY - 0.011;
+    // 口沿卷边
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.185, 0.005, 6, 48).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xc8282c, roughness: 0.25 }));
+    rim.position.y = ringY + 0.085;
+    const water = new THREE.Mesh(new THREE.CircleGeometry(0.15, 40).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x9ab0b0, roughness: 0.04, metalness: 0.1, transparent: true, opacity: 0.22 }));
+    water.position.y = ringY + 0.03;
     water.userData.noAO = true;
     ws.add(basin, bottom, rim, water);
     group.add(ws);
@@ -604,9 +864,32 @@ export function createOuterRoom({ tc }) {
   }
 
   const now = new Date();
+  let tvOn = false;
+  const tvPos = new THREE.Vector3();
   return {
     group,
+    tv: {
+      get on() {
+        return tvOn;
+      },
+      /** 按一下电视的开关：屏幕亮 / 灭 */
+      toggle() {
+        tvOn = !tvOn;
+        tvParts.lit.visible = tvOn;
+        tvParts.glow.visible = tvOn;
+        tvParts.glass.visible = !tvOn; // 开着时不要玻璃反光（屏幕前那盏小灯会在玻璃上照出一个亮点）
+        if (tvOn) tvParts.screen.start();
+        tvSound(tvOn);
+        return tvOn;
+      },
+      /** 屏幕中心的世界坐标 */
+      position: (target = tvPos) => tvParts.lit.getWorldPosition(target),
+    },
     update(dt, t) {
+      if (tvOn) {
+        tvParts.screen.update(dt);
+        tvParts.glow.intensity = 0.9 * (0.85 + Math.random() * 0.15);
+      }
       const { hour, minute } = clockParts;
       now.setTime(Date.now());
       const s = now.getSeconds() + now.getMilliseconds() / 1000;

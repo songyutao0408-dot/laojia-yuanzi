@@ -97,8 +97,8 @@
 <rect x="452.5" y="368" width="52.5" height="12" fill="#b5523b" stroke="none"/>
 <rect x="130" y="130" width="12" height="250" fill="#b5523b" stroke="none"/>
 <rect x="493" y="130" width="12" height="250" fill="#b5523b" stroke="none"/>
-<text x="291.1" y="255" class="b" text-anchor="middle">西北屋</text>
-<text x="291.1" y="280" class="s" text-anchor="middle">室内 7.1×4.5 m · 高 3.5 m</text>
+<text x="286.6" y="255" class="b" text-anchor="middle">西北屋</text>
+<text x="286.6" y="280" class="s" text-anchor="middle">室内 7.1×4.5 m · 高 3.5 m</text>
 <rect x="505" y="130" width="375" height="250" fill="#d98a6c" fill-opacity="0.25" stroke="none"/>
 <rect x="505" y="130" width="375" height="12" fill="#b5523b" stroke="none"/>
 <rect x="505" y="368" width="165" height="12" fill="#b5523b" stroke="none"/>
@@ -119,15 +119,15 @@
 <circle cx="380" cy="349" r="16.5" fill="#3f4a4a" stroke="#2b2b2b" stroke-width="0.8"/>
 <rect x="401.5" y="349.5" width="95" height="16" fill="#b89a48" stroke="#2b2b2b" stroke-width="0.6"/>
 <text x="446.5" y="340.5" class="xs" text-anchor="middle">做蜡烛的器具</text>
-<rect x="143.1" y="143.1" width="90" height="223.8" fill="#a8784a" stroke="#2b2b2b" stroke-width="0.8"/>
-<text x="188.1" y="285" class="s" text-anchor="middle">木头炕</text>
-<rect x="274.5" y="143.1" width="65" height="22.5" fill="#d0a060" stroke="#2b2b2b" stroke-width="0.6"/>
-<text x="307" y="180.6" class="xs" text-anchor="middle">电视桌</text>
+<rect x="143.1" y="143.1" width="81" height="223.8" fill="#a8784a" stroke="#2b2b2b" stroke-width="0.8"/>
+<text x="183.6" y="285" class="s" text-anchor="middle">木头炕</text>
+<rect x="257" y="143.1" width="80" height="24" fill="#d0a060" stroke="#2b2b2b" stroke-width="0.6"/>
+<text x="297" y="182.1" class="xs" text-anchor="middle">电视桌</text>
 <circle cx="262" cy="334.5" r="20" fill="#5c3a24" stroke="#2b2b2b" stroke-width="0.6"/>
 <circle cx="335" cy="328" r="10" fill="#6f9a86" stroke="#2b2b2b" stroke-width="0.6"/>
 <rect x="324.9" y="189" width="23" height="46" fill="#aa6030" stroke="#2b2b2b" stroke-width="0.6"/>
 <text x="304" y="217" class="xs" text-anchor="end">缝纫机</text>
-<text x="291.1" y="307" class="s" text-anchor="middle">外屋</text>
+<text x="286.6" y="307" class="s" text-anchor="middle">外屋</text>
 <text x="430" y="259.5" class="s" text-anchor="middle">里屋</text>
 <rect x="130" y="480" width="150" height="250" fill="#d98a6c" fill-opacity="0.25" stroke="none"/>
 <rect x="130" y="480" width="150" height="12" fill="#b5523b" stroke="none"/>

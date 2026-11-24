@@ -71,6 +71,9 @@ const SHOTS = [
   ['west-outer-table', 'view=orbit&cam=-5.36,2.35,-7.86,-4.26,1.15,-4.76'],
   ['west-outer-tv', 'view=orbit&cam=-3.96,1.55,-7.16,-3.96,1.4,-8.51'],
   ['west-outer-sewing', 'view=orbit&cam=-4.66,1.95,-6.56,-3.36,1.25,-7.36'],
+  ['west-outer-tv-on', 'view=orbit&tv=on&cam=-3.96,1.55,-7.16,-3.96,1.4,-8.51'],
+  ['west-outer-tv-night', 'view=orbit&time=night&tv=on&cam=-3.75,1.65,-4.55,-3.96,1.2,-8.46'],
+  ['west-washbasin', 'view=orbit&cam=-3.95,1.75,-5.6,-3.4,1.05,-5.04'],
   ['west-door-inside', 'view=orbit&cam=-3.96,1.75,-6.76,-3.75,1.45,-4.24'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],

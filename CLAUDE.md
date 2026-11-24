@@ -31,7 +31,7 @@
 - `npm run build:single` → `dist-single/index.html`（vite-plugin-singlefile，所有资源内联，可双击打开）
 - `npm run plan` → 重新生成 `docs/plan.svg`
 - `npm run build && npm run shots` → Playwright 无头浏览器截图到 `screenshots/`（已 gitignore），并检查黑屏和页面报错；`npm run shots -- father-dog father-face` 只截指定机位。机位列表在 `scripts/screenshot.mjs` 的 `SHOTS`（俯视、环绕、门口、北屋两间室内、厨房室内、院内看大门、台阶看院子）。Playwright 用本机全局安装的版本，不在 package.json 里
-- 页面支持 `?lamp=on`（里屋的灯一开始就开着）、`?autoperf=off`（自检脚本都带上，否则无头浏览器 2 fps 会触发自动降档）、`?music=off`（不放音乐、不出“进入院子”遮罩，自检脚本都带上），`?view=top|orbit|walk` 直接打开指定视角，`&time=dawn|noon|dusk|night` 指定时间，`&quality=low|high` 指定画质，`&cam=x,y,z,tx,ty,tz` 指定相机位置/注视点；`window.__app` 暴露 engine / views 方便调试
+- 页面支持 `?lamp=on`（里屋的灯一开始就开着）、`?tv=on`（外屋电视开着）、`?autoperf=off`（自检脚本都带上，否则无头浏览器 2 fps 会触发自动降档）、`?music=off`（不放音乐、不出“进入院子”遮罩，自检脚本都带上），`?view=top|orbit|walk` 直接打开指定视角，`&time=dawn|noon|dusk|night` 指定时间，`&quality=low|high` 指定画质，`&cam=x,y,z,tx,ty,tz` 指定相机位置/注视点；`window.__app` 暴露 engine / views 方便调试
 - 部署：`.github/workflows/deploy.yml`，push 到 `main` 自动构建并发布到 GitHub Pages
   （线上地址：https://songyutao0408-dot.github.io/laojia-yuanzi/ ）；同时把单文件版放到网站 `/laojia-yuanzi.html`，并更新名为 `latest` 的 Release（附件 laojia-yuanzi.html）
 
@@ -84,16 +84,16 @@ src/
     firstPerson.js      第一人称：WASD/方向键、Shift 跑、按住鼠标拖动转头（不锁定鼠标）、上台阶、进门辅助（朝门走时自动往门洞中线靠）、视线起伏
     colliders.js        从 userData.solid 的 Mesh 生成可旋转矩形碰撞体 + 高度过滤；groundHeight(x,z) 台阶/室内地坪
     touch.js            手机：左下虚拟摇杆、滑动转头、轻点交互
-    interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千/摸摸大黄/里屋拉灯），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
+    interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千/摸摸大黄/里屋拉灯/外屋开电视），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
   interiors/            室内细节，见 interiors/README.md；挂在 interior-anchor-* 上，尺寸在 layout.WEST_ROOM 等（室内坐标）
     common.js           室内共用：canvasTex、rng、seamlessBlob、炕席、被面、枕头、一摞被子 quiltStack、木纹 woodTex、海报
-    northWestOuter.js   西北屋外屋陈设（尺寸在 WEST_ROOM.outer）：大木头炕（枕头朝外、靠墙摞被）、电视桌 + 黑白电视（拉杆天线）+ 座钟（按用户照片：横放木壳、拱顶、镶条立柱，指针走现在的时间）、斑驳圆桌、洗脸盆架 + 搪瓷洋盆 + 毛巾、脚踏缝纫机
+    northWestOuter.js   西北屋外屋陈设（尺寸在 WEST_ROOM.outer）：大木头炕（枕头朝外、靠墙摞被）、电视桌 + 黑白电视（拉杆天线；tv.toggle() 开关：亮线 → 雪花 → 黑白测试图，屏幕前一盏小点光源）+ 座钟（按用户照片：横放木壳、拱顶、镶条立柱，指针走现在的时间）、斑驳圆桌、洗脸盆架 + 洋瓷脸盆（红口沿、囍字，按用户照片）+ 毛巾、脚踏缝纫机
     northWest.js        西北屋：隔墙分外屋（六）/里屋（四），门洞白布门帘（顶点动画，人走近被撩开）；墙面旧大白 + 墙根 0.55 m 水泥墙裙（finish() 给每面墙贴两层，外屋也用）、磨旧淡红砖地面；里屋的炕（东西两头顶墙，炕席、炕沿；中间试过竹床、木头床，用户都否了）、被子、拉线开关 + 15 瓦灯泡（lamp.pull() 开关，高画质点光源带阴影）、隔墙上三张画的女明星海报、西南角水缸（复用 yard/waterVat.js）、两台做蜡烛的器具（按用户照片）+ 煤球炉、熏黑的南墙（窗洞处挖空）和顶棚
   ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针；musicButton.js 音乐开关（指北针左边，偏好存在 localStorage 'laojia-bgm-v2'）
 scripts/
   gen-plan.mjs          由 layout.js 生成 docs/plan.svg
   screenshot.mjs        自检截图
-  interaction-test.mjs  交互自检（npm run test:interact，ONLY=A..I 可只跑部分）：只用真实按键/点击/触摸，从附近自己走过去：斜着进西北屋、进厨房、井边按 E、点按钮摘石榴、点画面摘石榴、打枣、手机摇杆进东北屋、手机点压水、摸大黄（H）、穿过门帘进里屋拉灯（I）
+  interaction-test.mjs  交互自检（npm run test:interact，ONLY=A..J 可只跑部分）：只用真实按键/点击/触摸，从附近自己走过去：斜着进西北屋、进厨房、井边按 E、点按钮摘石榴、点画面摘石榴、打枣、手机摇杆进东北屋、手机点压水、摸大黄（H）、穿过门帘进里屋拉灯（I）、外屋走到电视跟前开电视/点屏幕关（J）
 docs/
   scene-spec.md         场景权威描述
   plan.svg              俯视平面图

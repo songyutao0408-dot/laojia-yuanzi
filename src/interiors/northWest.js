@@ -788,6 +788,14 @@ export function createNorthWestInterior() {
       /** 灯绳下头小木坠的世界坐标 */
       cordPosition: (target = new THREE.Vector3()) => bead.getWorldPosition(target),
     },
+    /** 外屋的黑白电视：tv.on、tv.toggle()、tv.position() */
+    tv: outer.tv,
+    /** 世界坐标 (x, z) 是否在外屋里 */
+    inOuterRoom(x, z) {
+      const lx = x - R.origin.x;
+      const lz = z - R.origin.z;
+      return lx > 0 && lx < PX - PT / 2 && lz > 0 && lz < SOUTH;
+    },
     /** 世界坐标 (x, z) 是否在里屋里 */
     inInnerRoom(x, z) {
       const lx = x - R.origin.x;

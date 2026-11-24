@@ -204,6 +204,28 @@ if (run('I')) {
   check('I3 再点“拉灯”按钮，灯灭', ok2 && off, { ok2, off });
   await ctx.close();
 }
+// J) 西北屋外屋：从门口往北走到电视桌跟前，按 E 开电视；再直接点电视屏幕关掉
+if (run('J')) {
+  const { page, ctx } = await open([-3.85, -5.0], [-3.85, -9]);
+  const p = await holdUntil(page, 'KeyW', (p) => p.z < -6.9);
+  const ok = await waitButton(page, '开电视');
+  await page.keyboard.press('KeyE');
+  await page.waitForTimeout(2500);
+  const on = await page.evaluate(() => window.__app.westRoom.tv.on);
+  await page.screenshot({ path: 'screenshots/test-tv-on.png' });
+  check('J1 走到电视跟前按 E，电视亮了', ok && on, { ...p, ok, on });
+  const pt = await page.evaluate(() => {
+    const app = window.__app;
+    const v = app.westRoom.tv.position().clone().project(app.engine.camera);
+    const r = app.engine.renderer.domElement.getBoundingClientRect();
+    return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height };
+  });
+  await page.mouse.click(pt.x, pt.y);
+  await page.waitForTimeout(800);
+  const off = !(await page.evaluate(() => window.__app.westRoom.tv.on));
+  check('J2 点一下电视屏幕，电视关了', off, { off, pt });
+  await ctx.close();
+}
 // F) 手机（iPhone 13 模拟）：用摇杆往前走进东北屋，再到井边点“压水”按钮
 if (run('F')) {
   const { page, ctx } = await open([3.55, 1.5], [3.55, -6], { mobile: true }); // 东北屋门在 x = 3.75，偏开 0.2 m
