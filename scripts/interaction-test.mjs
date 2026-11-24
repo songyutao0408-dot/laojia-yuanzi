@@ -187,10 +187,10 @@ if (run('H')) {
 }
 // I) 西北屋：从外屋往东走，穿过挂门帘的小门洞进里屋（起点偏北 0.25 m，靠进门辅助顺进去），按 E 拉灯，再点按钮关灯
 if (run('I')) {
-  const { page, ctx } = await open([-3.6, -6.45], [-0.5, -6.45]);
-  const p = await holdUntil(page, 'KeyW', (p) => p.x > -1.9);
+  const { page, ctx } = await open([-2.4, -6.45], [1, -6.45]);
+  const p = await holdUntil(page, 'KeyW', (p) => p.x > -1.1);
   const inside = await page.evaluate(() => window.__app.westRoom.inInnerRoom(...(({ x, z }) => [x, z])(window.__app.views.fp.state.pos)));
-  check('I1 穿过门帘走进里屋', p.x > -1.9 && inside, { ...p, inside });
+  check('I1 穿过门帘走进里屋', p.x > -1.1 && inside, { ...p, inside });
   const ok = await waitButton(page, '拉灯');
   await page.keyboard.press('KeyE');
   await page.waitForTimeout(600);
