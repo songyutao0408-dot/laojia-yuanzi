@@ -58,7 +58,7 @@ export function createNorthHouse() {
   // 门、窗、春联
   for (const room of NH.rooms) {
     const d = room.door;
-    group.add(woodDoor({ axis: 'x', at: zs, center: d.x, width: d.width, bottom: NH.floor, height: d.height, thickness: NH.wall, out: +1 }));
+    group.add(woodDoor({ axis: 'x', at: zs, center: d.x, width: d.width, bottom: NH.floor, height: d.height, thickness: NH.wall, out: +1, style: d.style }));
     group.add(couplets({ axis: 'x', at: zs, center: d.x, width: d.width, top: NH.floor + d.height + 0.02, out: +1, wallHalf: NH.wall / 2, texts: COUPLETS[room.id] }));
     for (const w of room.windows) {
       group.add(woodWindow({ axis: 'x', at: zs, center: w.x, width: w.width, bottom: NH.floor + w.sill, height: w.height }));

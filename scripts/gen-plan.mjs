@@ -112,7 +112,7 @@ for (const room of NH.rooms) {
     ...room.windows.map((w) => ({ side: 's', kind: 'window', a: w.x - w.width / 2, b: w.x + w.width / 2 })),
   ];
   // 西北屋隔成外屋/里屋，名字写在外屋中间
-  const lx = room.id === 'west' ? L.WEST_ROOM.origin.x + L.WEST_ROOM.partition.x / 2 : (r.x0 + r.x1) / 2;
+  const lx = room.id === 'west' ? L.WEST_ROOM.origin.x + (0.022 + L.WEST_ROOM.outer.kang.width + L.WEST_ROOM.partition.x - 0.12) / 2 : (r.x0 + r.x1) / 2;
   brickBox(r, NH.wall, ops, room.name, `室内 ${(room.x1 - room.x0 - 1.5 * NH.wall).toFixed(1)}×${(NH.rect.z1 - NH.rect.z0 - 2 * NH.wall).toFixed(1)} m · 高 ${NH.height} m`, lx);
 }
 
@@ -135,7 +135,18 @@ for (const room of NH.rooms) {
   out.push(`<circle cx="${f(X(ix0 + 0.05 + vr))}" cy="${f(Y(oz + W.size.d - 0.05 - vr))}" r="${f(vr * S)}" fill="#3f4a4a" stroke="${C.ink}" stroke-width="0.8"/>`);
   rect({ x0: ix0 + 0.15 + 2 * vr, x1: ix1 - 0.05, z0: oz + W.size.d - 0.05 - W.candles.depth, z1: oz + W.size.d - 0.05 }, `fill="#b89a48" stroke="${C.ink}" stroke-width="0.6"`);
   text((ix0 + 2 * vr + ix1) / 2, oz + W.size.d - 0.55, '做蜡烛的器具', 'class="xs" text-anchor="middle"');
-  text((ox + px) / 2, oz + 0.9, '外屋', 'class="s" text-anchor="middle"');
+  // 外屋陈设
+  const O = W.outer;
+  const tc = 0.022;
+  rect({ x0: ox + tc, x1: ox + tc + O.kang.width, z0: oz + tc, z1: oz + W.size.d - tc }, `fill="#a8784a" stroke="${C.ink}" stroke-width="0.8"`);
+  text(ox + tc + O.kang.width / 2, oz + W.size.d / 2 + 0.6, '木头炕', 'class="s" text-anchor="middle"');
+  rect({ x0: ox + O.tvDesk.x - O.tvDesk.w / 2, x1: ox + O.tvDesk.x + O.tvDesk.w / 2, z0: oz + tc, z1: oz + tc + O.tvDesk.d }, `fill="#d0a060" stroke="${C.ink}" stroke-width="0.6"`);
+  text(ox + O.tvDesk.x, oz + tc + O.tvDesk.d + 0.3, '电视桌', 'class="xs" text-anchor="middle"');
+  out.push(`<circle cx="${f(X(ox + O.table.x))}" cy="${f(Y(oz + O.table.z))}" r="${f(O.table.r * S)}" fill="#5c3a24" stroke="${C.ink}" stroke-width="0.6"/>`);
+  out.push(`<circle cx="${f(X(ox + O.washstand.x))}" cy="${f(Y(oz + O.washstand.z))}" r="${f(0.2 * S)}" fill="#6f9a86" stroke="${C.ink}" stroke-width="0.6"/>`);
+  rect({ x0: px - t2 - tc - O.sewing.depth, x1: px - t2 - tc, z0: oz + O.sewing.z - O.sewing.len / 2, z1: oz + O.sewing.z + O.sewing.len / 2 }, `fill="#aa6030" stroke="${C.ink}" stroke-width="0.6"`);
+  text(px - t2 - 0.9, oz + O.sewing.z + 0.1, '缝纫机', 'class="xs" text-anchor="end"');
+  text((ox + tc + O.kang.width + px - t2) / 2, oz + 3.3, '外屋', 'class="s" text-anchor="middle"');
   text((ix0 + ix1) / 2, oz + 2.35, '里屋', 'class="s" text-anchor="middle"');
 }
 

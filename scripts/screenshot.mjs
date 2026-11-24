@@ -65,6 +65,13 @@ const SHOTS = [
   ['west-curtain-walk', 'view=walk&cam=-3.45,1.2,-6.25,-1,1.2,-6.25'], // 走到门洞前，门帘被撩开
   ['west-inner-night', 'view=orbit&time=night&lamp=on&cam=-1.4,1.95,-7.1,-1.6,1.15,-4.24'],
   ['west-window-night', 'view=orbit&time=night&lamp=on&cam=-0.6,1.5,-0.9,-1.55,1.4,-4'], // 院里看里屋的窗透出灯光
+  // 第 11 轮：外屋（进门看电视桌、炕、圆桌和脸盆架、电视和座钟、缝纫机、屋里看木板门）
+  ['west-outer-from-door', 'view=orbit&cam=-3.75,1.65,-4.55,-3.96,1.2,-8.46'],
+  ['west-outer-kang', 'view=orbit&cam=-3.66,2.25,-6.16,-6.46,1.05,-6.46'],
+  ['west-outer-table', 'view=orbit&cam=-5.36,2.35,-7.86,-4.26,1.15,-4.76'],
+  ['west-outer-tv', 'view=orbit&cam=-3.96,1.55,-7.16,-3.96,1.4,-8.51'],
+  ['west-outer-sewing', 'view=orbit&cam=-4.66,1.95,-6.56,-3.36,1.25,-7.36'],
+  ['west-door-inside', 'view=orbit&cam=-3.96,1.75,-6.76,-3.75,1.45,-4.24'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
   ['orbit-noon', 'view=orbit&time=noon'],
