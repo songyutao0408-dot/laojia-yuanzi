@@ -107,6 +107,7 @@ scripts/
 docs/
   scene-spec.md         场景权威描述
   plan.svg              俯视平面图
+  老家院子-完整prompt.md / .pdf   完工后整理的完整 prompt（从头复刻用；以后场景再改，记得同步更新这两份）
 ```
 
 ## 实现约定

@@ -55,6 +55,7 @@
 
 - 完整描述：[docs/scene-spec.md](docs/scene-spec.md)
 - 俯视平面图：[docs/plan.svg](docs/plan.svg)
+- 从头复刻这个院子的完整 prompt（按最终完工的样子整理）：[Markdown](docs/老家院子-完整prompt.md) · [PDF](docs/老家院子-完整prompt.pdf)
 
 ## 开发
 
