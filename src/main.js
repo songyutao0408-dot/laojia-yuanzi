@@ -14,6 +14,7 @@ import { createWell } from './well/index.js';
 import { createGarden } from './garden/index.js';
 import { createYardItems } from './yard/index.js';
 import { createCharacters } from './characters/index.js';
+import { createBoys } from './characters/boys.js';
 import { createNorthWestInterior } from './interiors/northWest.js';
 import { createNorthEastInterior } from './interiors/northEast.js';
 import { createKitchenInterior } from './interiors/kitchen.js';
@@ -92,6 +93,8 @@ music.tryAutoplay().then((ok) => {
 });
 const pumping = createPumping(scene.getObjectByName('well'));
 const swing = scene.getObjectByName('jujube')?.userData.swing;
+const boys = swing ? createBoys(swing) : null; // 秋千上的两个男孩（坐着的挂在秋千上）
+if (boys) scene.add(boys.group);
 const picking = createPicking();
 const interaction = createInteraction({ engine, views, pumping, picking, ui, swing, characters, westRoom, kitchenRoom });
 const touch = createTouchControls(document.getElementById('touch'), renderer.domElement, views.fp, (x, y) => interaction.tap(x, y));
@@ -99,6 +102,7 @@ engine.onUpdate((dt) => {
   pumping.update(dt);
   swing?.update(dt, engine.elapsed ?? performance.now() / 1000);
   characters.update(dt, performance.now() / 1000);
+  boys?.update(dt, performance.now() / 1000);
   westRoom.update(dt, performance.now() / 1000, views.current === 'walk' ? views.fp.state.pos : null);
   eastRoom.update(dt, performance.now() / 1000);
   kitchenRoom.update(dt, performance.now() / 1000);
@@ -143,4 +147,4 @@ if (params.get('tv') === 'on') westRoom.tv.toggle();
 // ?autoperf=off 关闭按帧率自动降档（自检截图用：无头浏览器帧率极低）
 const perf = params.get('autoperf') === 'off' ? null : createPerfMonitor(engine, { gtao: postfx.gtao, sun: lighting.sun });
 
-window.__app = { westRoom, eastRoom, kitchenRoom, characters, bgm, engine, views, setView, lighting, buildMs, quality, pumping, interaction, perf };
+window.__app = { westRoom, eastRoom, kitchenRoom, characters, boys, swing, bgm, engine, views, setView, lighting, buildMs, quality, pumping, interaction, perf };

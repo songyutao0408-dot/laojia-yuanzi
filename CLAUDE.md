@@ -59,7 +59,7 @@ src/
     wall.js             通用构件：wallWithOpenings（带门窗洞的厚墙，可带过梁/窗台/玻璃）、brickBox（四墙+地坪+平顶+檐口）、baseStain（墙根泛碱泥点）
     steps.js            北屋门前连通两间的石灰台阶（NH.steps.x0..x1）、天地神位小神龛（NH.shrine）
     doorsWindows.js     woodDoor（门框+门槛+向内半开的门扇+倒福；style 'plank' = 西北屋的老式木板门：本色竖木板、横穿带、木门闩）、woodWindow（木框窗棂）、couplets（春联+横批）
-  trees/                泡桐（当地叫梧桐）、石榴、枣树（一种树一个文件）；picking.js 摘果子动画；swing.js 秋千（jujube.js 的 addSwingLimb 加出那根弯出来的枝干，参数在 layout.SWING）
+  trees/                泡桐（当地叫梧桐）、石榴、枣树（一种树一个文件）；picking.js 摘果子动画；swing.js 秋千（jujube.js 的 addSwingLimb 加出那根弯出来的枝干，参数在 layout.SWING；seat 座板上面的挂点、angle、keepAmp 一直荡着）
     treeBuilder.js      递归生长枝干骨架 → 缩放到目标树高/冠幅 → 树皮圆管 + 叶片卡片（InstancedMesh）+ 挂果点 + 碰撞体
     wind.js             叶片风摆（onBeforeCompile 注入顶点位移），main.js 每帧 updateWind(t)
   well/                 压水井：井台、铸铁泵身、出水嘴、压杆、铁桶、葫芦瓢；pumping.js 压水动画（压杆上下、水柱、桶里水位上升、涟漪）
@@ -72,7 +72,10 @@ src/
     postfx.js           EffectComposer：RenderPass → 识别透明叶片的 GTAO（仅高画质）→ OutputPass（ACES + sRGB）
   effects/smoke.js      厨房烟囱炊烟粒子（setAmount 随时间变化）
   yard/                 院子里的零碎物件（一个物件一个文件）：waterVat.js 大水缸、stoneSlabs.js 老青石板
-  characters/           人和动物（父亲和大黄在西边梧桐树下，小女孩在厨房灶前；位置在 layout.CHARACTERS）
+  characters/           人和动物（父亲和大黄在西边梧桐树下，母亲在父亲和压水井中间洗衣服，小女孩在厨房灶前，两个男孩在枣树下荡秋千；位置在 layout.CHARACTERS）
+    person.js           通用的程序化人物（第 17 轮）：按身高出比例（child 头大腿短），衣服 top/bottom（shorts/pants、袖子 short/rolled）、头发 short/bob、手画脸（球面 UV）；pose(P) 每帧摆姿势（胯、上身前倾、两脚踝、两手腕，两段骨骼 IK）；clothTex 小格子/海魂衫条纹/碎花
+    mother.js           母亲（第 17 轮）：齐耳短发，坐小板凳洗衣服：大铝盆、洗衣水、搓衣板、泡着的衣服，两手在搓衣板上搓（按真实时间）
+    boys.js             两个男孩（第 17 轮）：6 岁的挂在 swing.seat 上跟着秋千摆、腿前后甩；8 岁的站在后面，秋千荡回来时手伸到他背上推；swing.keepAmp 让秋千一直小幅度荡着。要等秋千建好，所以在 main.js 里创建
     girl.js             厨房灶前坐在小板凳上烧火的小女孩（第 16 轮）：十岁左右、马尾辫（一串 Limb 段，每帧按重力摆）、齐刘海、碎花裙子（floralTex）；faceTex/hairTex 是球面 UV（正脸 u = 0.25）；右手两段骨骼 IK 握柴、每 5 秒往灶膛里捅一下；位置在 layout.CHARACTERS.girl（和 KITCHEN.stool 一致），碰撞体连板凳一起
     father.js           父亲：参考照片衣着的程序化 3D 人物，**不贴照片**。头：椭球改出宽脸/下巴 + 鼻梁、眉骨、眼窝等起伏；faceAtlas() 用 canvas 画脸（左半边正面投影：黑短发往后梳、浓眉、细长眼、法令纹）和后脑勺（右半边），按三角形分正面/背面给 UV；hairlineY()/backHairlineY() 同时决定画的发际线和头发鼓起的位置。衣着：衬衫、格子毛背心（V 领用 alphaMap 挖）、运动裤、运动鞋；左手插兜，右手两段骨骼 IK 搭在狗头上。之前的照片版本在 git 历史 PR 13 里
     dog.js              大黄：坐姿中华田园犬，尾巴摇、眨眼、呼吸；nuzzle() 往父亲腿上蹭（约 3 s）
@@ -89,7 +92,7 @@ src/
     interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千/摸摸大黄/里屋拉灯/外屋开电视/厨房拉风箱），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
   interiors/            室内细节，见 interiors/README.md；挂在 interior-anchor-* 上，尺寸在 layout.WEST_ROOM 等（室内坐标）
     common.js           室内共用：canvasTex、rng、seamlessBlob、炕席、被面、枕头、一摞被子 quiltStack、木纹 woodTex、挂历做旧 calendarTex、旧大白 plasterTex、水泥墙裙 cementTex、旧砖地 floorTex
-    northWestOuter.js   西北屋外屋陈设（尺寸在 WEST_ROOM.outer）：大木头炕（枕头朝外、靠墙摞被）、电视桌 + 黑白电视（拉杆天线；tv.toggle() 开关：亮线 → 雪花 → 黑白测试图，屏幕前一盏小点光源）+ 座钟（按用户照片：横放木壳、拱顶、镶条立柱，指针走现在的时间）、斑驳圆桌、洗脸盆架 + 洋瓷脸盆（红口沿、囍字，按用户照片）+ 毛巾、脚踏缝纫机
+    northWestOuter.js   西北屋外屋陈设（尺寸在 WEST_ROOM.outer）：大木头炕（枕头朝外、靠墙摞被）+ 白纱蚊帐（第 17 轮，outer.net）、翘头长条几 + 柜桌 + 两把椅子（第 17 轮按用户的图，outer.desk；条几右边暖水壶、茶具）、柜桌上的黑白电视（tv.toggle() 开关：亮线 → 雪花 → 黑白测试图，屏幕前一盏小点光源）+ 座钟（按用户照片：横放木壳、拱顶、镶条立柱，指针走现在的时间）、斑驳圆桌、洗脸盆架 + 洋瓷脸盆（红口沿、囍字，按用户照片）+ 毛巾、脚踏缝纫机
     northEast.js        东北屋（东西 6 m，仓库；尺寸在 layout.EAST_ROOM）：旧大白 + 水泥墙裙、旧砖地；西墙到北墙一溜石灰大缸（玉米/麦子/木盖/麻袋）、南窗下的床、墙角蛛网（透明贴图）、墙上爬的壁虎（贴图片，趴一会儿窜一下）
     kitchen.js          厨房室内（第 14 轮，按用户照片；风箱尺寸在 layout.KITCHEN.bellows，世界坐标）：黄泥内墙 + 灶上方熏黑、泥灰灶台 + 带耳大铁锅、灶膛（炭火、火苗、三根柴、橙色点光源，火力 = 0.35 + 推风箱攒的劲）、旧土黄色木风箱；第 16 轮内墙改成洋灰（墙裙 K.inside.dado 以下深灰 cementTex、以上浅灰 cementUpperTex）+ 掉皮露砖（K.inside.peel）；pump() 拉一下（按真实时间走：前 42% 往外拉火变小，后面往里推火变旺）；kitchenThings()（第 15 轮按照片添的杂物：木架子、洋瓷盆、暖水壶、缸子、小坛子、铝锅、面粉袋、玉米筐、蜂窝煤、大釉缸、筛子笊篱、辣椒串、小凳；位置在 layout.KITCHEN.shelf 等）
     northWest.js        西北屋（东西 9 m）：隔墙分外屋（6 m）/里屋（3 m），门洞白布门帘（顶点动画，人走近被撩开）；墙面旧大白 + 墙根 0.55 m 水泥墙裙（finish() 给每面墙贴两层，外屋也用）、磨旧淡红砖地面；里屋的炕（东西两头顶墙，炕席、炕沿；中间试过竹床、木头床，用户都否了）、被子、拉线开关 + 15 瓦灯泡（lamp.pull() 开关，高画质点光源带阴影）、隔墙上三张挂历（用户给的 1993 年挂历照片，calendars/*.webp，calendarTex() 做旧，夹条 + 挂绳 + 钉子）、西南角水缸（复用 yard/waterVat.js）、两台做蜡烛的器具（按用户照片）+ 煤球炉、熏黑的南墙（窗洞处挖空）和顶棚
@@ -141,6 +144,8 @@ docs/
 七步全部完成。之后追加：背景音乐（src/audio/，用户第一次点击/按键后开始循环，♪按钮开关并记住选择）。最初是代码合成的原创小曲，后按用户要求换成用户提供的 MP3（合成版在 git 历史 PR 9 里）。音乐默认开：加载完先直接试播，被浏览器自动播放策略拦下就显示“进入院子 ♪”遮罩（#enter），点一下开始。注意：无头 Chromium 不拦自动播放，而且 navigator.userActivation 一开始就是 true，测拦截路径要自己在 init script 里按 isTrusted 的输入事件模拟。
 
 之后的迭代（各屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
+
+第 17 轮：加母亲洗衣服（mother.js）、两个男孩荡秋千（boys.js），两人都用新的通用人物 person.js；外屋炕上加蚊帐；电视桌换成翘头长条几 + 柜桌 + 两把椅子。
 
 第 16 轮（二）：厨房按用户和家人回忆改成砖房：外墙旧砖 + 残留泥灰皮（buildings/peel.js、layout.KITCHEN.outside.plaster）、水泥顶板，外面添坛子/大瓦缸/柴火垛/梯子/玉米筐；内墙洋灰 + 墙裙 + 掉皮露砖；灶前加烧火的小女孩（characters/girl.js）。
 
