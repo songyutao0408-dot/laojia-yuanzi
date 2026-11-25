@@ -3,13 +3,14 @@ import { KITCHEN as K } from '../layout.js';
 import { box } from '../core/box.js';
 import { mat } from '../textures/index.js';
 import { wallWithOpenings } from '../buildings/wall.js';
-import { canvasTex, rng, seamlessBlob, woodTex } from './common.js';
+import { canvasTex, rng, seamlessBlob, woodTex, cementTex } from './common.js';
+import { peeledTex } from '../buildings/peel.js';
 import { createWaterVat } from '../yard/waterVat.js';
-import { roundSieve, weaveTex, chiliString } from '../buildings/kitchen.js';
+import { roundSieve, weaveTex, chiliString, cornBasket } from '../buildings/kitchen.js';
 
 /**
  * 厨房室内（第 14 轮，按用户照片；挂在 interior-anchor-kitchen 上，原点 = 室内西北角、地坪面，+x 东、+z 南）：
- * - 内墙是黄泥抹的：土黄色、夹着麦秸、一道道裂纹；灶台上方的西墙、北墙被烟熏出一大片黑
+ * - 内墙（第 16 轮按用户照片）：抹的洋灰，墙根 1 m 一圈深灰墙裙、上面浅灰；掉了几块露出底灰和砖；灶台上方的西墙、北墙被烟熏出一大片黑
  * - 灶台：泥和水泥抹的方墩子，边角磕掉了，顶上嵌一口大铁锅；正面一个烧火的灶膛口（里面烧着几根柴），下面一个掏灰的小口
  * - 风箱：顺着灶台南侧放在地上的木箱子，旧旧的土黄色本色木头，铁皮包角；东头两根拉杆连着一个把手
  * - 第 15 轮照用户照片添的东西：窗下木架子（洋瓷盆、红暖水瓶、搪瓷缸子、盖布的咸菜缸、铝锅、碗），一袋面粉、一筐玉米棒子、
@@ -27,58 +28,57 @@ const H = K.height - 0.15 - K.floor;
 const T = 0.015; // 泥层厚
 
 /* ---------- 贴图 ---------- */
-/** 黄泥墙：土黄、深浅不匀，夹着一截截麦秸，有裂纹，抹子印；1 张 = 1.5 m */
-function mudTex() {
+/** 洋灰墙面（墙裙以上）：浅灰发黄、抹子印、水渍和一道道往下流的脏印子；1 张 = 1.5 m */
+function cementUpperTex() {
   return canvasTex(
     512,
     512,
     (g, w, h) => {
       const r = rng(301);
-      g.fillStyle = '#b88a58';
+      g.fillStyle = '#b3ada2';
       g.fillRect(0, 0, w, h);
-      for (let i = 0; i < 80; i++) {
-        const c = ['150,108,64', '206,164,112', '128,92,58', '190,140,90'][Math.floor(r() * 4)];
+      for (let i = 0; i < 90; i++) {
+        const c = ['150,144,134', '196,190,178', '132,126,116', '172,160,140'][Math.floor(r() * 4)];
         seamlessBlob(g, w, h, r() * w, r() * h, 20 + r() * 90, c, 0.12 + r() * 0.18);
       }
-      // 麦秸
-      for (let i = 0; i < 260; i++) {
-        const x = r() * w;
-        const y = r() * h;
-        const a = r() * Math.PI;
-        const l = 4 + r() * 12;
-        g.strokeStyle = `rgba(${r() > 0.5 ? '226,196,130' : '170,134,80'},${0.5 + r() * 0.4})`;
-        g.lineWidth = 1 + r();
+      // 抹子印
+      for (let i = 0; i < 40; i++) {
+        g.strokeStyle = `rgba(${r() > 0.5 ? '210,204,192' : '120,114,104'},0.1)`;
+        g.lineWidth = 4 + r() * 6;
         g.beginPath();
-        g.moveTo(x, y);
-        g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
+        g.arc(r() * w, r() * h, 60 + r() * 90, r() * 6, r() * 6 + 0.8);
         g.stroke();
       }
-      // 裂纹：弯弯曲曲往外分叉
-      const crack = (x, y, a, len, wd) => {
-        g.strokeStyle = `rgba(60,40,22,${0.55})`;
-        g.lineWidth = wd;
+      // 往下流的脏印子
+      for (let i = 0; i < 40; i++) {
+        const x = r() * w;
+        const y = r() * h;
+        const l = 30 + r() * 120;
+        const gr = g.createLinearGradient(0, y, 0, y + l);
+        gr.addColorStop(0, `rgba(80,72,62,${0.08 + r() * 0.12})`);
+        gr.addColorStop(1, 'rgba(80,72,62,0)');
+        g.fillStyle = gr;
+        g.fillRect(x, y, 2 + r() * 5, l);
+      }
+      // 细裂纹
+      for (let i = 0; i < 8; i++) {
+        let x = r() * w;
+        let y = r() * h;
+        let a = r() * Math.PI * 2;
+        g.strokeStyle = 'rgba(70,64,56,0.45)';
+        g.lineWidth = 1;
         g.beginPath();
         g.moveTo(x, y);
-        for (let k = 0; k < len; k++) {
-          a += (r() - 0.5) * 0.7;
+        for (let k = 0; k < 14; k++) {
+          a += (r() - 0.5) * 0.8;
           x += Math.cos(a) * 6;
           y += Math.sin(a) * 6;
           g.lineTo(x, y);
-          if (r() < 0.08 && wd > 0.8) crack(x, y, a + (r() - 0.5) * 2, len / 2, wd * 0.6);
         }
-        g.stroke();
-      };
-      for (let i = 0; i < 7; i++) crack(40 + r() * (w - 80), 40 + r() * (h - 80), r() * Math.PI * 2, 10 + r() * 20, 1.6);
-      // 抹子印、细颗粒
-      for (let i = 0; i < 30; i++) {
-        g.strokeStyle = `rgba(${r() > 0.5 ? '220,180,130' : '120,86,52'},0.1)`;
-        g.lineWidth = 4 + r() * 6;
-        g.beginPath();
-        g.arc(r() * w, r() * h, 60 + r() * 80, r() * 6, r() * 6 + 0.8);
         g.stroke();
       }
       for (let i = 0; i < 2500; i++) {
-        g.fillStyle = r() > 0.5 ? 'rgba(80,56,32,0.18)' : 'rgba(240,210,160,0.12)';
+        g.fillStyle = r() > 0.5 ? 'rgba(60,56,50,0.18)' : 'rgba(230,226,216,0.14)';
         g.fillRect(r() * w, r() * h, 1, 1);
       }
     },
@@ -191,34 +191,63 @@ export function createKitchenInterior() {
   const group = new THREE.Group();
   group.name = 'interior-kitchen';
   const L = (x, z) => [x - OX, z - OZ]; // 世界 → 室内
-  const mud = new THREE.MeshStandardMaterial({ map: mudTex(), roughness: 1 });
+  const upper = new THREE.MeshStandardMaterial({ map: cementUpperTex(), roughness: 0.95 });
+  const dadoMat = new THREE.MeshStandardMaterial({ map: cementTex(), roughness: 0.9 });
   const off = { solid: false };
 
-  // —— 黄泥内墙 ——
+  // —— 洋灰内墙：墙裙以上浅灰，墙根一圈深灰洋灰墙裙 ——
+  const DADO = K.inside.dado;
   const doorZ = K.door.z - OZ;
   const ops = [
     { center: doorZ, width: K.door.width, bottom: 0, top: K.door.height },
     ...K.windows.map((w) => ({ center: w.z - OZ, width: w.width, bottom: w.sill, top: w.sill + w.height })),
   ];
-  const coat = (o) => group.add(wallWithOpenings({ ...o, thickness: T, y0: 0, y1: H, solid: false }, { wall: mud }));
-  coat({ axis: 'x', from: 0, to: W, at: T / 2 });
-  coat({ axis: 'x', from: 0, to: W, at: D - T / 2 });
-  coat({ axis: 'z', from: T, to: D - T, at: T / 2 });
-  coat({ axis: 'z', from: T, to: D - T, at: W - T / 2, openings: ops });
-  // 门窗洞口里侧也抹泥
+  const TD = T + 0.006; // 墙裙比上面厚一点
+  /** 一面墙：at 为墙面位置，dir 为朝屋里的方向（+1/-1） */
+  const coat = (axis, from, to, at, dir, o = []) => {
+    const opsUp = o.filter((q) => q.top > DADO).map((q) => ({ ...q, bottom: Math.max(q.bottom, DADO) }));
+    const opsDado = o.filter((q) => q.bottom < DADO).map((q) => ({ ...q, top: Math.min(q.top, DADO) }));
+    group.add(wallWithOpenings({ axis, from, to, at: at + (dir * T) / 2, thickness: T, y0: DADO, y1: H, openings: opsUp, solid: false }, { wall: upper }));
+    group.add(wallWithOpenings({ axis, from, to, at: at + (dir * TD) / 2, thickness: TD, y0: 0, y1: DADO, openings: opsDado, solid: false }, { wall: dadoMat }));
+  };
+  coat('x', 0, W, 0, +1); // 北
+  coat('x', 0, W, D, -1); // 南
+  coat('z', TD, D - TD, 0, +1); // 西
+  coat('z', TD, D - TD, W, -1, ops); // 东（门、窗）
+  // 门窗洞口里侧也抹洋灰
   for (const o of ops) {
     const a0 = o.center - o.width / 2;
     const a1 = o.center + o.width / 2;
-    group.add(box(W, W + 0.11, o.bottom, o.top, a0, a0 + T, mud, off));
-    group.add(box(W, W + 0.11, o.bottom, o.top, a1 - T, a1, mud, off));
-    group.add(box(W, W + 0.11, o.top - T, o.top, a0, a1, mud, off));
+    const m = (y0, y1) => (y1 <= DADO ? dadoMat : upper);
+    group.add(box(W, W + 0.11, o.bottom, o.top, a0, a0 + T, m(o.bottom, o.top), off));
+    group.add(box(W, W + 0.11, o.bottom, o.top, a1 - T, a1, m(o.bottom, o.top), off));
+    group.add(box(W, W + 0.11, o.top - T, o.top, a0, a1, upper, off));
+    if (o.bottom > 0) group.add(box(W - 0.02, W + 0.11, o.bottom - 0.02, o.bottom, a0 - 0.02, a1 + 0.02, dadoMat, off)); // 窗台抹洋灰
   }
-  // 烟囱从灶台上去的那一截也抹泥
+  // 烟囱从灶台上去的那一截也抹洋灰
   {
     const c = K.chimney;
     const [cx, cz] = L(c.x, c.z);
     const h = c.size / 2;
-    group.add(box(cx - h - T, cx + h + T, S.height, H, cz - h - T, cz + h + T, mud, off));
+    group.add(box(cx - h - T, cx + h + T, S.height, H, cz - h - T, cz + h + T, upper, off));
+  }
+  // 洋灰掉了的几块，露出底灰和里面的砖（透明贴花，贴在墙面上）
+  for (const [i, pz] of K.inside.peel.entries()) {
+    const w = pz.a1 - pz.a0;
+    const hh = pz.y1 - pz.y0;
+    const m = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, hh),
+      new THREE.MeshStandardMaterial({ map: peeledTex(w, hh, i + 1), transparent: true, roughness: 1, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }),
+    );
+    const yc = (pz.y0 + pz.y1) / 2;
+    const e = (pz.y0 < DADO ? TD : T) + 0.002;
+    if (pz.wall === 'n') m.position.set((pz.a0 + pz.a1) / 2 - OX, yc, e);
+    else if (pz.wall === 's') (m.position.set((pz.a0 + pz.a1) / 2 - OX, yc, D - e), (m.rotation.y = Math.PI));
+    else if (pz.wall === 'w') (m.position.set(e, yc, (pz.a0 + pz.a1) / 2 - OZ), (m.rotation.y = Math.PI / 2));
+    else (m.position.set(W - e, yc, (pz.a0 + pz.a1) / 2 - OZ), (m.rotation.y = -Math.PI / 2));
+    m.receiveShadow = true;
+    m.userData.noAO = true;
+    group.add(m);
   }
 
   // —— 灶台 ——
@@ -291,11 +320,11 @@ export function createKitchenInterior() {
   {
     const west = new THREE.Mesh(new THREE.PlaneGeometry(sz1 - sz0 + 0.8, H - top + 0.2), soot);
     west.rotation.y = Math.PI / 2;
-    west.position.set(T + 0.003, top + (H - top) / 2 - 0.1, (sz0 + sz1) / 2 + 0.2);
+    west.position.set(TD + 0.003, top + (H - top) / 2 - 0.1, (sz0 + sz1) / 2 + 0.2);
     west.userData.noAO = true;
     group.add(west);
     const north = new THREE.Mesh(new THREE.PlaneGeometry(sx1 - sx0 + 0.6, H - top + 0.2), soot);
-    north.position.set((sx0 + sx1) / 2, top + (H - top) / 2 - 0.1, T + 0.003);
+    north.position.set((sx0 + sx1) / 2, top + (H - top) / 2 - 0.1, TD + 0.003);
     north.userData.noAO = true;
     group.add(north);
   }
@@ -536,22 +565,6 @@ function coalTopTex() {
     }
   });
 }
-/** 玉米棒子上的一粒粒玉米 */
-function cobTex() {
-  return canvasTex(64, 64, (g, w, h) => {
-    g.fillStyle = '#a8701a';
-    g.fillRect(0, 0, w, h);
-    for (let y = 0; y < h; y += 6) {
-      for (let x = 0; x < w; x += 7) {
-        g.fillStyle = (x + y) % 3 ? '#e8b440' : '#dca232';
-        g.beginPath();
-        g.ellipse(x + 3.5 + (y % 12 ? 3 : 0), y + 3, 3, 2.6, 0, 0, Math.PI * 2);
-        g.fill();
-      }
-    }
-  });
-}
-
 function kitchenThings(L) {
   const g = new THREE.Group();
   const off = { solid: false };
@@ -659,31 +672,9 @@ function kitchenThings(L) {
   // —— 一筐玉米棒子 ——
   {
     const [x, z] = L(K.cornBasket.x, K.cornBasket.z);
-    const prof = [[0.2, 0], [0.24, 0.02], [0.27, 0.24], [0.28, 0.26]].map(([a, b]) => new THREE.Vector2(a, b));
-    const basket = new THREE.Mesh(new THREE.LatheGeometry(prof, 28), new THREE.MeshStandardMaterial({ map: weaveTex([168, 136, 90], 3), roughness: 1, side: THREE.DoubleSide }));
+    const basket = cornBasket(419);
     basket.position.set(x, 0, z);
-    basket.castShadow = true;
     g.add(basket);
-    const bottom = new THREE.Mesh(new THREE.CircleGeometry(0.2, 20).rotateX(-Math.PI / 2), basket.material);
-    bottom.position.set(x, 0.01, z);
-    g.add(bottom);
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.012, 5, 28).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x9a7a4e, roughness: 1 }));
-    rim.position.set(x, 0.26, z);
-    g.add(rim);
-    const r = rng(419);
-    const n = 22;
-    const cob = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.03, 0.13, 4, 10).rotateZ(Math.PI / 2), new THREE.MeshStandardMaterial({ map: cobTex(), roughness: 0.6 }), n);
-    const m4 = new THREE.Matrix4();
-    const q = new THREE.Quaternion();
-    for (let i = 0; i < n; i++) {
-      const a = r() * Math.PI * 2;
-      const d = r() * 0.17;
-      q.setFromEuler(new THREE.Euler((r() - 0.5) * 0.5, r() * Math.PI, (r() - 0.5) * 0.4));
-      m4.compose(new THREE.Vector3(x + Math.cos(a) * d, 0.2 + Math.floor(i / 8) * 0.05 + r() * 0.03, z + Math.sin(a) * d), q, new THREE.Vector3(1, 1, 1));
-      cob.setMatrixAt(i, m4);
-    }
-    cob.castShadow = true;
-    g.add(cob);
     g.add(box(x - 0.25, x + 0.25, 0, 0.3, z - 0.25, z + 0.25, new THREE.MeshBasicMaterial({ visible: false })));
   }
 
@@ -739,7 +730,7 @@ function kitchenThings(L) {
     g.add(chili);
   }
 
-  // —— 灶前烧火坐的小板凳（矮，不挡人） ——
+  // —— 灶前烧火坐的小板凳（小女孩坐着，碰撞体在 characters/girl.js） ——
   {
     const [x, z] = L(K.stool.x, K.stool.z);
     const st = new THREE.Group();
@@ -754,7 +745,7 @@ function kitchenThings(L) {
       }
     }
     st.position.set(x, 0, z);
-    st.rotation.y = 0.3;
+    st.rotation.y = Math.PI / 2; // 长边横着，小女孩坐在上面面朝灶膛
     g.add(st);
   }
   return g;

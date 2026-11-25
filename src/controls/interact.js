@@ -148,7 +148,8 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     if (nearBellows(p)) acts.push({ label: '拉风箱', run: doBellows });
     if (nearTv(p)) acts.push({ label: westRoom.tv.on ? '关电视' : '开电视', run: doTv });
     if (nearCord(p)) acts.push({ label: westRoom.lamp.on ? '拉灯（关）' : '拉灯', run: doLamp });
-    if (characters) {
+    // 人在厨房里时不出“摸摸大黄”（隔着墙够不着）
+    if (characters && !(kitchenRoom && kitchenRoom.inKitchen(p.x, p.z))) {
       const dp = characters.dogHeadPosition();
       if (Math.hypot(p.x - dp.x, p.z - dp.z) <= 2.0) acts.push({ label: '摸摸大黄', run: doPetDog });
     }
@@ -186,8 +187,8 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
       }
     }
     for (const f of walking() ? fruitsInReach() : fruitsInReach(1e9, 1e9)) cands.push(f);
-    // 大黄的头：走进去时 3 m 内能点，环绕/俯视时随便点
-    if (characters) {
+    // 大黄的头：走进去时 3 m 内能点（人在厨房里不行），环绕/俯视时随便点
+    if (characters && !(walking() && kitchenRoom && kitchenRoom.inKitchen(playerXZ().x, playerXZ().z))) {
       const dp = characters.dogHeadPosition();
       if (!walking() || dp.distanceTo(eye()) <= 3) cands.push({ kind: 'dog', pos: dp });
     }

@@ -51,11 +51,11 @@ const SHOTS = [
   ['backyard', 'view=orbit&cam=-2.7,1.7,3.4,1.2,0.6,7.4'],
   ['swing', 'view=orbit&cam=4.7,1.6,1.0,2.7,1.4,4.2'],
   // 第 9 轮新增：父亲和大黄
-  ['father-dog', 'view=orbit&cam=-2.6,1.35,2.2,-2.7,0.95,-0.3'],
-  ['father-side', 'view=orbit&cam=-0.6,1.4,1.0,-2.7,0.95,-0.3'],
-  ['father-face', 'view=orbit&cam=-2.6,1.45,0.75,-2.62,1.35,-0.3'],
-  ['father-portrait', 'view=orbit&cam=-3.1,1.5,0.3,-2.62,1.56,-0.28'], // 正对着脸的近景
-  ['father-child', 'view=orbit&cam=-3.4,1.2,1.3,-2.65,1.3,-0.3'], // 小孩视线高度看父亲
+  ['father-dog', 'view=orbit&cam=-1.1,1.35,2.2,-1.2,0.95,-0.3'],
+  ['father-side', 'view=orbit&cam=0.9,1.4,1,-1.2,0.95,-0.3'],
+  ['father-face', 'view=orbit&cam=-1.1,1.45,0.75,-1.12,1.35,-0.3'],
+  ['father-portrait', 'view=orbit&cam=-1.6,1.5,0.3,-1.12,1.56,-0.28'], // 正对着脸的近景
+  ['father-child', 'view=orbit&cam=-1.9,1.2,1.3,-1.15,1.3,-0.3'], // 小孩视线高度看父亲
   // 第 10 轮：西北屋室内（外屋看里屋门帘、里屋的炕、蜡烛器具和熏黑的南墙、拉灯）
   ['west-outer-door', 'view=orbit&cam=-3.8,1.65,-4.9,-1.5,1.3,-6.21'],
   ['west-inner-bed', 'view=orbit&cam=1.1,1.95,-4.75,-1.1,1.1,-7.9'],
@@ -91,6 +91,12 @@ const SHOTS = [
   // 第 15 轮：厨房外观正面、窗下架子那一角
   ['kitchen-facade', 'view=orbit&cam=-1.3,1.5,0.4,-4.6,1.2,0.4'],
   ['kitchen-shelf', 'view=orbit&cam=-6.6,1.6,-0.7,-4.95,0.75,1.3'],
+  // 第 16 轮：砖墙外观、洋灰内墙、灶前烧火的小女孩
+  ['kitchen-wide', 'view=orbit&cam=-0.6,2.1,3.2,-4.6,1.1,0.4'],
+  ['kitchen-walls', 'view=orbit&cam=-4.95,1.55,2.55,-6.9,1.3,-1.4'],
+  ['kitchen-girl', 'view=orbit&cam=-5.5,1.0,0.25,-5.6,0.5,-0.95'],
+  ['kitchen-girl-face', 'view=orbit&cam=-5.97,0.8,-0.42,-5.45,0.72,-0.95'],
+  ['kitchen-girl-back', 'view=orbit&cam=-4.85,1.2,-0.8,-5.7,0.55,-0.95'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
   ['orbit-noon', 'view=orbit&time=noon'],

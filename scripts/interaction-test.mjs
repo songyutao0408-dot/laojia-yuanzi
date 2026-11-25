@@ -80,6 +80,9 @@ if (run('B')) {
   const { page, ctx } = await open([-2.9, -0.45], [-8, -0.45]);
   const p = await holdUntil(page, 'KeyW', (p) => p.x < -5.0);
   check('B 从东门走进厨房', p.x < -5.0 && Math.abs(p.feet - 0.05) < 0.03, p);
+  await page.waitForTimeout(600);
+  const bs = await buttons(page);
+  check('B2 进了厨房不再出“摸摸大黄”', !bs.some((t) => t.includes('大黄')), bs);
   await ctx.close();
 }
 // C) 压水井：从井南边 2.2 m 往北走两步，出现“压水”按钮，按 E 压水
@@ -157,7 +160,7 @@ if (run('G')) {
 }
 // H) 大黄：从院子里走到西边梧桐树下，点“摸摸大黄”，大黄往父亲腿上蹭；环绕视角下直接点狗头也行
 if (run('H')) {
-  const { page, ctx } = await open([-3.2, 1.6], [-3.0, -0.3]);
+  const { page, ctx } = await open([-1.7, 1.6], [-1.5, -0.3]);
   await holdUntil(page, 'KeyW', (p) => p.z < 1.0);
   const ok = await waitButton(page, '摸摸大黄');
   if (ok) await page.locator('#hud2 .actions button', { hasText: '摸摸大黄' }).click();
@@ -169,7 +172,7 @@ if (run('H')) {
   const ctx2 = await browser.newContext({ viewport: { width: 640, height: 400 } });
   const p2 = await ctx2.newPage();
   p2.setDefaultTimeout(240000);
-  await p2.goto(`${base}?view=orbit&quality=low&autoperf=off&music=off&cam=-1.6,1.6,1.8,-2.9,0.8,-0.3`, { waitUntil: 'commit', timeout: 120000 });
+  await p2.goto(`${base}?view=orbit&quality=low&autoperf=off&music=off&cam=-0.1,1.6,1.8,-1.4,0.8,-0.3`, { waitUntil: 'commit', timeout: 120000 });
   await p2.waitForFunction(() => window.__sceneReady === true && !!window.__app && document.getElementById('loading')?.classList.contains('done'), null, { timeout: 300000 });
   await p2.waitForTimeout(1500);
   const pt = await p2.evaluate(() => {

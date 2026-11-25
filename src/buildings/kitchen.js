@@ -4,26 +4,30 @@ import { box } from '../core/box.js';
 import { rng } from '../textures/canvas.js';
 import { mat, stainMat } from '../textures/index.js';
 import { canvasTex, seamlessBlob } from '../interiors/common.js';
+import { remnantPlasterTex } from './peel.js';
+import { createWaterVat } from '../yard/waterVat.js';
 import { brickBox, baseStain } from './wall.js';
 import { woodDoor, woodWindow } from './doorsWindows.js';
 
 /**
- * 厨房：西侧北段的低矮平顶房，门窗开在东墙。第 15 轮按用户照片：外墙抹黄泥，到处是裂缝，
- * 几处泥皮掉了露出土坯；屋顶一圈往外挑的泥顶边，檐上压着碎砖；本色旧木门（开着）、田字格木窗蒙塑料布；
- * 墙上挂圆筛子、一串红辣椒，窗下靠一把扫帚，东北角一堆玉米秸。烟囱从西北角伸出屋顶，顶部熏黑；西南墙角堆着柴火。
- * 灶台、风箱、黄泥内墙在 src/interiors/kitchen.js，挂在 interior-anchor-kitchen 上。
+ * 厨房：西侧北段的低矮平顶房，门窗开在东墙。第 16 轮按用户照片：旧砖墙，原先抹的泥灰皮大半掉了，
+ * 只剩一块块（檐下一长条、墙角几块），檐下被雨水和烟熏黑；屋顶一块往外挑的水泥顶板，上面压着几块砖；
+ * 本色旧木门（开着）、田字格木窗蒙塑料布；墙上挂圆筛子、一串红辣椒，窗下靠扫帚、坛子、大瓦缸，
+ * 东南角码着劈柴、靠着木梯子，门北边一筐玉米、一堆玉米秸。烟囱从西北角伸出屋顶，顶部熏黑；屋里西南墙角堆着柴火。
+ * 灶台、风箱、洋灰内墙在 src/interiors/kitchen.js，挂在 interior-anchor-kitchen 上。
  */
 export function createKitchen() {
   const group = new THREE.Group();
   group.name = 'kitchen';
-  const mudWall = new THREE.MeshStandardMaterial({ map: mudOutsideTex(), roughness: 1 });
+  const brick = mat('brickOld');
+  const slab = mat('roof');
   const mats = {
-    wall: mudWall,
+    wall: brick,
     floor: mat('kitchenFloor'),
-    roof: mudWall,
+    roof: slab,
     ceiling: mat('brickOldSoot'),
-    trim: mudWall,
-    coping: mudWall,
+    trim: brick,
+    coping: brick,
   };
   const xe = K.rect.x1 - K.wall / 2; // 东墙中线
   const east = [
@@ -38,33 +42,28 @@ export function createKitchen() {
   const { x0, x1, z0, z1 } = K.rect;
   const off = { solid: false };
 
-  // 屋顶：一圈往外挑的泥顶边，厚薄不匀；檐上压着几块碎砖
+  // 屋顶：一块往外挑的水泥顶板（边上发黑、长了点青苔），上面压着几块砖
   {
-    const r = rng(83);
-    const e = 0.07;
-    const segs = [
-      [x0 - e, x1 + e, z0 - e, z0 + 0.25],
-      [x0 - e, x1 + e, z1 - 0.25, z1 + e],
-      [x0 - e, x0 + 0.25, z0, z1],
-      [x1 - 0.25, x1 + e, z0, z1],
-    ];
-    for (const [a, b2, c2, d] of segs) {
-      const n = 6;
-      const alongX = b2 - a > d - c2;
+    const e = 0.14;
+    group.add(box(x0 - e, x1 + e, K.height - 0.01, K.height + 0.1, z0 - e, z1 + e, slab, off));
+    const moss = new THREE.MeshStandardMaterial({ map: slabEdgeTex(), transparent: true, roughness: 1, depthWrite: false });
+    const mk = (w, rotY, x, z) => {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, 0.11), moss);
+      m.rotation.y = rotY;
+      m.position.set(x, K.height + 0.045, z);
+      m.userData.noAO = true;
+      group.add(m);
+    };
+    mk(x1 - x0 + 2 * e, 0, (x0 + x1) / 2, z1 + e + 0.002);
+    mk(z1 - z0 + 2 * e, Math.PI / 2, x1 + e + 0.002, (z0 + z1) / 2);
+    mk(x1 - x0 + 2 * e, Math.PI, (x0 + x1) / 2, z0 - e - 0.002);
+    for (const [bx, bz, ry, n] of [[x1 - 0.25, -1.2, 0.2, 1], [x1 - 0.2, 1.9, -0.1, 2], [x0 + 0.45, z1 - 0.15, 1.4, 1]]) {
       for (let i = 0; i < n; i++) {
-        const t0 = i / n;
-        const t1 = (i + 1) / n;
-        const y1 = K.height + 0.09 + (r() - 0.5) * 0.04;
-        if (alongX) group.add(box(a + (b2 - a) * t0, a + (b2 - a) * t1, K.height - 0.02, y1, c2, d, mudWall, off));
-        else group.add(box(a, b2, K.height - 0.02, y1, c2 + (d - c2) * t0, c2 + (d - c2) * t1, mudWall, off));
+        const b3 = box(-0.12, 0.12, 0, 0.055, -0.06, 0.06, brick, off);
+        b3.position.set(bx + i * 0.02, K.height + 0.1 + i * 0.055, bz + i * 0.03);
+        b3.rotation.y = ry + i * 0.3;
+        group.add(b3);
       }
-    }
-    const brick = mat('brickOld');
-    for (const [bx, bz, ry] of [[x1 - 0.2, -1.2, 0.2], [x1 - 0.15, 1.9, -0.1], [x0 + 0.4, z1 - 0.12, 1.4]]) {
-      const b3 = box(-0.12, 0.12, 0, 0.055, -0.06, 0.06, brick, off);
-      b3.position.set(bx, K.height + 0.12, bz);
-      b3.rotation.y = ry;
-      group.add(b3);
     }
   }
 
@@ -79,26 +78,29 @@ export function createKitchen() {
     film.position.set(xe + 0.02, K.floor + w.sill + w.height / 2, w.z);
     film.userData.noAO = true;
     group.add(film);
-    // 窗台：抹泥的一道小台
-    group.add(box(x1 - 0.02, x1 + 0.06, K.floor + w.sill - 0.05, K.floor + w.sill, w.z - w.width / 2 - 0.06, w.z + w.width / 2 + 0.06, mudWall, off));
+    // 窗台：一皮砖挑出来
+    group.add(box(x1 - 0.02, x1 + 0.06, K.floor + w.sill - 0.06, K.floor + w.sill, w.z - w.width / 2 - 0.06, w.z + w.width / 2 + 0.06, brick, off));
   }
 
-  // 掉了泥皮、露出土坯的几块
-  const adobe = new THREE.MeshStandardMaterial({ map: adobeTex(), transparent: true, roughness: 1, polygonOffset: true, polygonOffsetFactor: -2 });
-  for (const pt of K.outside.patches) {
-    const w = pt.a1 - pt.a0;
-    const h = pt.y1 - pt.y0;
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), adobe.clone());
-    m.material.map = adobeTex(Math.round(pt.a0 * 100));
-    if (pt.face === 'e') {
-      m.rotation.y = Math.PI / 2;
-      m.position.set(x1 + 0.004, pt.y0 + h / 2, (pt.a0 + pt.a1) / 2);
-    } else {
-      m.position.set((pt.a0 + pt.a1) / 2, pt.y0 + h / 2, z1 + 0.004);
-    }
-    m.receiveShadow = true;
-    m.userData.noAO = true;
-    group.add(m);
+  // 墙上剩下的一块块泥灰皮 + 檐下熏黑：每个立面一整张透明贴花（门窗洞挖空）
+  {
+    const P = K.outside.plaster;
+    const Hh = K.height;
+    const deco = (tex, w, rotY, x, z) => {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, Hh), new THREE.MeshStandardMaterial({ map: tex, transparent: true, roughness: 1, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+      m.rotation.y = rotY;
+      m.position.set(x, Hh / 2, z);
+      m.receiveShadow = true;
+      m.userData.noAO = true;
+      group.add(m);
+    };
+    // 东立面：从外面看左边是南（z1），a = z1 - z
+    const eHoles = east.map((o) => ({ a0: z1 - (o.center + o.width / 2), a1: z1 - (o.center - o.width / 2), y0: o.bottom, y1: o.top }));
+    deco(remnantPlasterTex(z1 - z0, Hh, P.e.map((q) => ({ a0: z1 - q.z1, a1: z1 - q.z0, y0: q.y0, y1: q.y1 })), eHoles, 1), z1 - z0, Math.PI / 2, x1 + 0.004, (z0 + z1) / 2);
+    // 南立面：左边是西，a = x - x0
+    deco(remnantPlasterTex(x1 - x0, Hh, P.s.map((q) => ({ a0: q.x0 - x0, a1: q.x1 - x0, y0: q.y0, y1: q.y1 })), [], 2), x1 - x0, 0, (x0 + x1) / 2, z1 + 0.004);
+    // 北立面：左边是东，a = x1 - x
+    deco(remnantPlasterTex(x1 - x0, Hh, P.n.map((q) => ({ a0: x1 - q.x1, a1: x1 - q.x0, y0: q.y0, y1: q.y1 })), [], 3), x1 - x0, Math.PI, (x0 + x1) / 2, z0 - 0.004);
   }
 
   // 墙根污渍：东立面、南立面
@@ -111,10 +113,10 @@ export function createKitchen() {
 
   group.add(createWoodpile(inner)); // 灶台、风箱、黄泥内墙在 src/interiors/kitchen.js
 
-  // 烟囱：西北角从屋顶伸出去，外面也抹泥，顶上一截熏黑
+  // 烟囱：西北角从屋顶伸出去，旧砖砌的，顶上一截熏黑
   const c = K.chimney;
   const half = c.size / 2;
-  group.add(box(c.x - half, c.x + half, K.floor, c.top - 0.5, c.z - half, c.z + half, mudWall));
+  group.add(box(c.x - half, c.x + half, K.floor, c.top - 0.5, c.z - half, c.z + half, brick));
   group.add(box(c.x - half, c.x + half, c.top - 0.5, c.top, c.z - half, c.z + half, mat('brickOldSoot')));
   group.add(box(c.x - half - 0.04, c.x + half + 0.04, c.top - 0.12, c.top - 0.06, c.z - half - 0.04, c.z + half + 0.04, mat('brickOldSoot'), { solid: false }));
 
@@ -170,106 +172,66 @@ function createWoodpile(inner) {
 }
 
 /* ---------- 外观用的贴图和小物件 ---------- */
-/** 外墙抹的黄泥：土黄偏灰，一块块抹出来的接缝，弯弯曲曲的大裂缝，夹着麦秸；1 张 = 2 m */
-function mudOutsideTex() {
-  return canvasTex(
-    512,
-    512,
-    (g, w, h) => {
-      const r = rng(331);
-      g.fillStyle = '#a48a6a';
-      g.fillRect(0, 0, w, h);
-      for (let i = 0; i < 90; i++) {
-        const c = ['136,114,88', '184,160,128', '120,100,78', '196,176,146'][Math.floor(r() * 4)];
-        seamlessBlob(g, w, h, r() * w, r() * h, 20 + r() * 80, c, 0.12 + r() * 0.2);
-      }
-      for (let i = 0; i < 300; i++) {
-        const x = r() * w;
-        const y = r() * h;
-        const a = r() * Math.PI;
-        const l = 4 + r() * 10;
-        g.strokeStyle = `rgba(${r() > 0.5 ? '214,192,140' : '150,124,84'},0.55)`;
-        g.lineWidth = 1;
-        g.beginPath();
-        g.moveTo(x, y);
-        g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
-        g.stroke();
-      }
-      // 大裂缝：发暗、边上一道亮边（泥皮翘起来）
-      const crack = (x, y, a, len, wd) => {
-        let px = x;
-        let py = y;
-        const pts = [[px, py]];
-        for (let k = 0; k < len; k++) {
-          a += (r() - 0.5) * 0.8;
-          px += Math.cos(a) * 7;
-          py += Math.sin(a) * 7;
-          pts.push([px, py]);
-          if (r() < 0.07 && wd > 1) crack(px, py, a + (r() - 0.5) * 2.2, len / 2, wd * 0.6);
-        }
-        g.lineCap = 'round';
-        g.strokeStyle = 'rgba(230,214,186,0.5)';
-        g.lineWidth = wd + 1.5;
-        g.beginPath();
-        pts.forEach(([qx, qy], i) => (i ? g.lineTo(qx + 1, qy + 1) : g.moveTo(qx + 1, qy + 1)));
-        g.stroke();
-        g.strokeStyle = 'rgba(46,32,20,0.8)';
-        g.lineWidth = wd;
-        g.beginPath();
-        pts.forEach(([qx, qy], i) => (i ? g.lineTo(qx, qy) : g.moveTo(qx, qy)));
-        g.stroke();
-      };
-      for (let i = 0; i < 9; i++) crack(30 + r() * (w - 60), 30 + r() * (h - 60), r() * Math.PI * 2, 12 + r() * 22, 2.2);
-      for (let i = 0; i < 3000; i++) {
-        g.fillStyle = r() > 0.5 ? 'rgba(70,54,36,0.2)' : 'rgba(236,220,190,0.15)';
-        g.fillRect(r() * w, r() * h, 1, 1);
-      }
-    },
-    { repeat: [1 / 2, 1 / 2] },
-  );
+/** 水泥顶板的边：发灰发黑、雨水冲出来的道道、一点青苔；透明边（贴在板边外侧） */
+function slabEdgeTex() {
+  return canvasTex(256, 16, (g, w, h) => {
+    const r = rng(331);
+    for (let i = 0; i < 70; i++) {
+      g.fillStyle = r() > 0.6 ? `rgba(70,78,52,${0.2 + r() * 0.25})` : `rgba(38,34,30,${0.15 + r() * 0.25})`;
+      g.fillRect(r() * w, r() * h * 0.5, 2 + r() * 14, 2 + r() * h);
+    }
+    const gr = g.createLinearGradient(0, 0, 0, h);
+    gr.addColorStop(0, 'rgba(40,36,30,0)');
+    gr.addColorStop(1, 'rgba(40,36,30,0.45)');
+    g.fillStyle = gr;
+    g.fillRect(0, 0, w, h);
+  }, { repeat: [3, 1] });
 }
 
-/** 泥皮掉了露出来的土坯：浅灰黄的大土坯块、泥缝，四周一圈不规则的泥皮断口（透明边） */
-function adobeTex(seed = 1) {
-  return canvasTex(256, 256, (g, w, h) => {
-    const r = rng(337 + seed);
-    // 不规则的轮廓
-    g.save();
-    g.beginPath();
-    const n = 28;
-    for (let i = 0; i <= n; i++) {
-      const a = (i / n) * Math.PI * 2;
-      const rx = w * (0.42 + r() * 0.08);
-      const ry = h * (0.42 + r() * 0.08);
-      const x = w / 2 + Math.cos(a) * rx;
-      const y = h / 2 + Math.sin(a) * ry;
-      i ? g.lineTo(x, y) : g.moveTo(x, y);
-    }
-    g.closePath();
-    g.clip();
-    g.fillStyle = '#8a745a'; // 泥缝
+/** 玉米棒子上的一粒粒玉米 */
+function cobTex() {
+  return canvasTex(64, 64, (g, w, h) => {
+    g.fillStyle = '#a8701a';
     g.fillRect(0, 0, w, h);
-    const bw = 76;
-    const bh = 34;
-    for (let row = 0; row * bh < h; row++) {
-      for (let col = -1; col * bw < w; col++) {
-        const x = col * bw + (row % 2 ? bw / 2 : 0);
-        const k = 0.88 + r() * 0.2;
-        g.fillStyle = `rgb(${178 * k},${158 * k},${126 * k})`;
-        g.fillRect(x + 3, row * bh + 3, bw - 6, bh - 6);
-        for (let i = 0; i < 6; i++) {
-          g.fillStyle = 'rgba(120,98,70,0.35)';
-          g.fillRect(x + 3 + r() * (bw - 10), row * bh + 3 + r() * (bh - 10), 3 + r() * 6, 2 + r() * 3);
-        }
+    for (let y = 0; y < h; y += 6) {
+      for (let x = 0; x < w; x += 7) {
+        g.fillStyle = (x + y) % 3 ? '#e8b440' : '#dca232';
+        g.beginPath();
+        g.ellipse(x + 3.5 + (y % 12 ? 3 : 0), y + 3, 3, 2.6, 0, 0, Math.PI * 2);
+        g.fill();
       }
     }
-    g.restore();
-    // 断口一圈发暗（显得泥皮有厚度）
-    g.strokeStyle = 'rgba(60,44,28,0.6)';
-    g.lineWidth = 5;
-    g.globalCompositeOperation = 'source-atop';
-    g.strokeRect(-2, -2, w + 4, h + 4);
   });
+}
+
+/** 一筐玉米棒子：柳条筐（原点在筐底中心），不带碰撞体 */
+export function cornBasket(seed = 419) {
+  const g = new THREE.Group();
+  const prof = [[0.2, 0], [0.24, 0.02], [0.27, 0.24], [0.28, 0.26]].map(([a, b]) => new THREE.Vector2(a, b));
+  const basket = new THREE.Mesh(new THREE.LatheGeometry(prof, 28), new THREE.MeshStandardMaterial({ map: weaveTex([168, 136, 90], 3), roughness: 1, side: THREE.DoubleSide }));
+  basket.castShadow = true;
+  g.add(basket);
+  const bottom = new THREE.Mesh(new THREE.CircleGeometry(0.2, 20).rotateX(-Math.PI / 2), basket.material);
+  bottom.position.y = 0.01;
+  g.add(bottom);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.012, 5, 28).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x9a7a4e, roughness: 1 }));
+  rim.position.y = 0.26;
+  g.add(rim);
+  const r = rng(seed);
+  const n = 22;
+  const cob = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.03, 0.13, 4, 10).rotateZ(Math.PI / 2), new THREE.MeshStandardMaterial({ map: cobTex(), roughness: 0.6 }), n);
+  const m4 = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  for (let i = 0; i < n; i++) {
+    const a = r() * Math.PI * 2;
+    const d = r() * 0.17;
+    q.setFromEuler(new THREE.Euler((r() - 0.5) * 0.5, r() * Math.PI, (r() - 0.5) * 0.4));
+    m4.compose(new THREE.Vector3(Math.cos(a) * d, 0.2 + Math.floor(i / 8) * 0.05 + r() * 0.03, Math.sin(a) * d), q, new THREE.Vector3(1, 1, 1));
+    cob.setMatrixAt(i, m4);
+  }
+  cob.castShadow = true;
+  g.add(cob);
+  return g;
 }
 
 /** 窗上蒙的塑料布：发黄、半透明、起皱 */
@@ -383,6 +345,72 @@ function outsideThings() {
     broom.position.set(xw + 0.25, 0, O.broom.z);
     broom.rotation.z = 0.22;
     g.add(broom);
+  }
+  const hide = new THREE.MeshBasicMaterial({ visible: false });
+  // 窗下一个小黑釉坛子、一口盖着布的大瓦缸
+  {
+    const jar = createWaterVat({ height: 0.42, rimRadius: 0.1, bellyRadius: 0.17, baseRadius: 0.12, x: xw + 0.24, z: O.jar.z }, { leanLid: false });
+    jar.children.slice(2).forEach((c) => (c.visible = false));
+    g.add(jar);
+    const crock = createWaterVat({ height: 0.78, rimRadius: 0.22, bellyRadius: 0.3, baseRadius: 0.2, x: xw + 0.36, z: O.crock.z }, { leanLid: false });
+    crock.children.slice(2).forEach((c) => (c.visible = false));
+    const cloth = new THREE.Mesh(new THREE.SphereGeometry(0.29, 20, 6, 0, Math.PI * 2, 0, 1.15), new THREE.MeshStandardMaterial({ color: 0xc9bc9c, roughness: 1, side: THREE.DoubleSide }));
+    cloth.scale.set(1, 0.3, 1);
+    cloth.position.y = 0.74;
+    crock.add(cloth);
+    g.add(crock);
+    g.add(box(xw, xw + 0.66, 0, 0.75, O.crock.z - 0.3, O.crock.z + 0.3, hide));
+  }
+  // 东南角码起来的劈柴（截面朝外），斜靠一架木梯子
+  {
+    const W2 = O.woodpile;
+    const r = rng(379);
+    const wood = mat('rawWood');
+    const endMat = new THREE.MeshStandardMaterial({ color: 0xb08a5c, roughness: 1 });
+    const geo = new THREE.CylinderGeometry(1, 1, 1, 8).rotateZ(Math.PI / 2);
+    const rows = 7;
+    const cols = 5;
+    const n = rows * cols;
+    const logs = new THREE.InstancedMesh(geo, [wood, endMat, endMat], n);
+    const m4 = new THREE.Matrix4();
+    const q = new THREE.Quaternion();
+    let i = 0;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const rad = 0.04 + r() * 0.02;
+        const zc = W2.z0 + 0.05 + (col + (row % 2) * 0.5) * ((W2.z1 - W2.z0 - 0.1) / cols);
+        q.setFromEuler(new THREE.Euler((r() - 0.5) * 0.1, (r() - 0.5) * 0.15, 0));
+        m4.compose(new THREE.Vector3(xw + W2.depth / 2 + (r() - 0.5) * 0.05, 0.05 + row * 0.1, Math.min(zc, W2.z1 - 0.05)), q, new THREE.Vector3(W2.depth / 2 + r() * 0.05, rad, rad));
+        logs.setMatrixAt(i++, m4);
+      }
+    }
+    logs.castShadow = logs.receiveShadow = true;
+    g.add(logs);
+    // 梯子：两根立杆 + 几根横撑，靠在柴火垛和墙上
+    const ladder = new THREE.Group();
+    const pole = new THREE.MeshStandardMaterial({ color: 0x7a6248, roughness: 1 });
+    for (const s of [-1, 1]) {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.026, 1.9, 6), pole);
+      p.position.set(0, 0.95, s * 0.19);
+      p.castShadow = true;
+      ladder.add(p);
+    }
+    for (let k = 0; k < 6; k++) {
+      const rung = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.4, 5).rotateX(Math.PI / 2), pole);
+      rung.position.y = 0.25 + k * 0.28;
+      ladder.add(rung);
+    }
+    ladder.position.set(xw + W2.depth + 0.45, 0, (W2.z0 + W2.z1) / 2 + 0.05);
+    ladder.rotation.z = 0.24;
+    g.add(ladder);
+    g.add(box(xw, xw + W2.depth + 0.05, 0, W2.height, W2.z0, W2.z1, hide));
+  }
+  // 门北边一筐玉米棒子
+  {
+    const basket = cornBasket(431);
+    basket.position.set(O.cornBasket.x, 0, O.cornBasket.z);
+    g.add(basket);
+    g.add(box(O.cornBasket.x - 0.25, O.cornBasket.x + 0.25, 0, 0.3, O.cornBasket.z - 0.25, O.cornBasket.z + 0.25, hide));
   }
   // 东北角一堆玉米秸：横七竖八躺着，带干叶子
   {
