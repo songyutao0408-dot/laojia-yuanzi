@@ -4,7 +4,8 @@ import { fillMulti, textureSet, makeFbm, hash, mixRGB, clamp01 } from './canvas.
  * 清水红砖墙（不抹灰）：240×115×53 标准砖、10 mm 灰白砖缝、顺砖错缝。
  * 一张贴图 = 1 m × 1 m（4 块砖 × 16 皮）。砖色深浅不一，偶有过火的深色砖、缺角、麻点。
  */
-export function redBrick({ tint = null } = {}) {
+/** old = true：更旧更破（厨房用）——颜色更淡、缺角更多更大、砖缝风化凹进去、有的砖面起皮、一道道雨水印 */
+export function redBrick({ tint = null, old = false } = {}) {
   const W = 512;
   const cellW = 128; // 0.25 m
   const cellH = 32; // 0.0625 m
@@ -12,6 +13,7 @@ export function redBrick({ tint = null } = {}) {
   const grain = makeFbm(11, 16, 4);
   const mottle = makeFbm(12, 8, 3);
   const dirt = makeFbm(13, 2, 4);
+  const streak = makeFbm(14, 6, 3);
   const PAL = [
     // 风吹日晒几十年、褪成很淡的旧红色
     [200, 160, 146], [190, 148, 134], [208, 170, 156], [184, 142, 130], [214, 180, 166], [196, 154, 140], [180, 140, 128],
@@ -26,7 +28,7 @@ export function redBrick({ tint = null } = {}) {
     const id = row * 7 + col;
     const r0 = hash(id, 1);
     // 缺角：每块砖随机一个角被啃掉一点
-    const chip = hash(id, 2) < 0.25 ? 3 + hash(id, 3) * 5 : 0;
+    const chip = hash(id, 2) < (old ? 0.6 : 0.25) ? 3 + hash(id, 3) * (old ? 12 : 5) : 0;
     const corner = Math.floor(hash(id, 4) * 4);
     const cx = corner % 2 ? cellW - lx : lx - joint;
     const cy = corner > 1 ? cellH - ly : ly - joint;
@@ -34,10 +36,11 @@ export function redBrick({ tint = null } = {}) {
     const mortar = lx < joint || ly < joint || chipped;
     const g = grain(u, v);
     if (mortar) {
-      const m = 0.78 + g * 0.1 + dirt(u, v) * 0.08;
-      return { c: [m * 228, m * 222, m * 210], h: 0.15 + g * 0.15, r: 0.97 };
+      const m = (old ? 0.66 : 0.78) + g * 0.1 + dirt(u, v) * 0.08;
+      return { c: old ? [m * 214, m * 204, m * 188] : [m * 228, m * 222, m * 210], h: old ? 0.02 + g * 0.08 : 0.15 + g * 0.15, r: 0.97 };
     }
     let base = PAL[Math.floor(r0 * PAL.length)];
+    if (old) base = mixRGB(base, [226, 206, 190], 0.38);
     if (hash(id, 5) < 0.035) base = [160, 124, 114]; // 过火深色砖
     if (hash(id, 6) < 0.06) base = [214, 178, 156]; // 欠火浅色砖
     const mt = mottle(u * 1.7 + r0, v * 1.7);
@@ -52,8 +55,19 @@ export function redBrick({ tint = null } = {}) {
     // 墙面整体的灰尘、风化发白
     const dd = dirt(u, v);
     c = mixRGB(c, [206, 188, 168], clamp01((dd - 0.4) * 1.1));
+    let spall = 0;
+    if (old) {
+      // 砖面起皮：一块块剥落，颜色发白发粉、表面更低更糙
+      if (hash(id, 7) < 0.22) {
+        spall = clamp01((mottle(u * 3.1 + r0, v * 3.1) - 0.45) * 4);
+        c = mixRGB(c, [228, 198, 180], spall * 0.7);
+      }
+      // 一道道往下流的雨水印
+      const st = streak(u * 6, v * 0.35);
+      c = mixRGB(c, [150, 138, 128], clamp01((st - 0.58) * 2.5) * 0.45);
+    }
     if (tint) c = [c[0] * tint[0], c[1] * tint[1], c[2] * tint[2]];
-    return { c, h: 0.55 + bevel * 0.3 + g * 0.15 - pit * 0.3, r: 0.78 + g * 0.15 };
+    return { c, h: 0.55 + bevel * 0.3 + g * 0.15 - pit * 0.3 - spall * 0.25, r: 0.78 + g * 0.15 };
   });
   return textureSet({ ...set, normalStrength: 3 }, 1);
 }

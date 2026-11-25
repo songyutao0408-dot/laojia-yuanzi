@@ -226,6 +226,43 @@ if (run('J')) {
   check('J2 点一下电视屏幕，电视关了', off, { off, pt });
   await ctx.close();
 }
+// K) 厨房：从东门进厨房往西走到灶台跟前，连按几下 E 拉风箱，火旺起来；再点风箱把手也能拉
+if (run('K')) {
+  const { page, ctx } = await open([-3.4, -0.4], [-8, -0.2]);
+  const p = await holdUntil(page, 'KeyW', (p) => p.x < -5.2);
+  const ok = await waitButton(page, '拉风箱');
+  const f0 = await page.evaluate(() => window.__app.kitchenRoom.fire);
+  for (let i = 0; i < 3; i++) {
+    await page.keyboard.press('KeyE');
+    await page.waitForTimeout(1300);
+  }
+  const f1 = await page.evaluate(() => window.__app.kitchenRoom.fire);
+  await page.screenshot({ path: 'screenshots/test-bellows.png' });
+  check('K1 走到风箱跟前按 E 拉风箱，火变旺', ok && f1 > f0 + 0.3, { ...p, ok, f0: +f0.toFixed(2), f1: +f1.toFixed(2) });
+  // 等上一下拉完；把手在脚边，像真人一样按住鼠标往上拖、低头看，直到把手进到画面里再点
+  await page.waitForFunction(() => !window.__app.kitchenRoom.busy, null, { timeout: 60000 });
+  const handleOnScreen = () => page.evaluate(() => {
+    const app = window.__app;
+    const v = app.kitchenRoom.handlePosition().clone().project(app.engine.camera);
+    const r = app.engine.renderer.domElement.getBoundingClientRect();
+    return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height, z: v.z };
+  });
+  let pt = await handleOnScreen();
+  for (let i = 0; i < 10 && (pt.y > 360 || pt.y < 40 || pt.x < 40 || pt.x > 600); i++) {
+    await page.mouse.move(320, 200);
+    await page.mouse.down();
+    // 往下拖 = 低头，往右拖 = 往右转
+    await page.mouse.move(320 + (pt.x > 600 ? 80 : pt.x < 40 ? -80 : 0), pt.y > 360 ? 290 : pt.y < 40 ? 110 : 200, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(600);
+    pt = await handleOnScreen();
+  }
+  await page.mouse.click(pt.x, pt.y);
+  await page.waitForTimeout(300);
+  const busy = await page.evaluate(() => window.__app.kitchenRoom.busy);
+  check('K2 直接点风箱把手也能拉', busy, { busy, pt });
+  await ctx.close();
+}
 // F) 手机（iPhone 13 模拟）：用摇杆往前走进东北屋，再到井边点“压水”按钮
 if (run('F')) {
   const { page, ctx } = await open([3.55, 1.5], [3.55, -6], { mobile: true }); // 东北屋门在 x = 3.75，偏开 0.2 m
