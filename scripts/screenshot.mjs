@@ -91,6 +91,12 @@ const SHOTS = [
   // 第 15 轮：厨房外观正面、窗下架子那一角
   ['kitchen-facade', 'view=orbit&cam=-1.3,1.5,0.4,-4.6,1.2,0.4'],
   ['kitchen-shelf', 'view=orbit&cam=-6.6,1.6,-0.7,-4.95,0.75,1.3'],
+  // 第 16 轮：砖墙外观、洋灰内墙、灶前烧火的小女孩
+  ['kitchen-wide', 'view=orbit&cam=-0.6,2.1,3.2,-4.6,1.1,0.4'],
+  ['kitchen-walls', 'view=orbit&cam=-4.95,1.55,2.55,-6.9,1.3,-1.4'],
+  ['kitchen-girl', 'view=orbit&cam=-5.5,1.0,0.25,-5.6,0.5,-0.95'],
+  ['kitchen-girl-face', 'view=orbit&cam=-5.97,0.8,-0.42,-5.45,0.72,-0.95'],
+  ['kitchen-girl-back', 'view=orbit&cam=-4.85,1.2,-0.8,-5.7,0.55,-0.95'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
   ['orbit-noon', 'view=orbit&time=noon'],
