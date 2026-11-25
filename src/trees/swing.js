@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 /**
  * 秋千：两根麻绳绑在枣树弯出来的那根枝干上，下面一块旧木板。
- * 平时随风轻轻晃；push() 推一把，荡起来再慢慢停下。
+ * 平时随风轻轻晃；push() 推一把，荡起来再慢慢停下。keepAmp > 0 时一直荡着（有人在后面推）。
  * a、b 为两个绑绳点（树的局部坐标），seatY 为座板高度。
  */
 export function createSwing(a, b, seatY) {
@@ -37,12 +37,24 @@ export function createSwing(a, b, seatY) {
   seat.position.y = -len;
   seat.castShadow = seat.receiveShadow = true;
   pivot.add(seat);
+  // 座板上面（坐人的地方），跟着秋千一起摆
+  const seatTop = new THREE.Object3D();
+  seatTop.position.y = -len + 0.0175;
+  pivot.add(seatTop);
 
   let amp = 0;
   let phase = 0;
   const period = 2 * Math.PI * Math.sqrt(len / 9.8);
   return {
     object: pivot,
+    seat: seatTop,
+    ropeHalf: half,
+    length: len,
+    /** 有人在后面一下一下轻轻推着（第 17 轮两个男孩）：秋千至少荡这么大（弧度） */
+    keepAmp: 0,
+    get angle() {
+      return pivot.rotation.x;
+    },
     get position() {
       return pivot.getWorldPosition(new THREE.Vector3());
     },
@@ -52,6 +64,7 @@ export function createSwing(a, b, seatY) {
     update(dt, t) {
       phase += (dt / period) * Math.PI * 2;
       amp *= Math.exp(-dt * 0.12); // 慢慢停下
+      if (amp < this.keepAmp) amp += (this.keepAmp - amp) * Math.min(1, dt * 0.8);
       const idle = Math.sin(t * 0.9) * 0.025; // 风吹得轻轻晃
       pivot.rotation.x = amp * Math.sin(phase) + idle;
     },

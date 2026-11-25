@@ -97,6 +97,14 @@ const SHOTS = [
   ['kitchen-girl', 'view=orbit&cam=-5.5,1.0,0.25,-5.6,0.5,-0.95'],
   ['kitchen-girl-face', 'view=orbit&cam=-5.97,0.8,-0.42,-5.45,0.72,-0.95'],
   ['kitchen-girl-back', 'view=orbit&cam=-4.85,1.2,-0.8,-5.7,0.55,-0.95'],
+  // 第 17 轮：母亲洗衣服、两个男孩荡秋千、外屋的条几柜桌和蚊帐
+  ['mother', 'view=orbit&cam=0.75,1.35,1.75,0.3,0.45,-0.15'],
+  ['mother-side', 'view=orbit&cam=1.7,1.05,0.05,0.35,0.45,-0.1'],
+  ['family', 'view=orbit&cam=1.2,2.2,4.6,-0.8,0.7,-0.6'],
+  ['swing-boys', 'view=orbit&cam=1.6,1.45,5.4,2.9,0.85,3.7'],
+  ['swing-boys-side', 'view=orbit&cam=0.9,1.3,2.3,3.0,0.85,3.6'],
+  ['outer-desk', 'view=orbit&cam=-3.9,1.55,-5.9,-3.96,0.95,-8.6'],
+  ['outer-net', 'view=orbit&cam=-4.4,1.75,-5.0,-6.5,1.15,-7.0'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
   ['orbit-noon', 'view=orbit&time=noon'],

@@ -140,8 +140,17 @@ for (const room of NH.rooms) {
   const tc = 0.022;
   rect({ x0: ox + tc, x1: ox + tc + O.kang.width, z0: oz + tc, z1: oz + W.size.d - tc }, `fill="#a8784a" stroke="${C.ink}" stroke-width="0.8"`);
   text(ox + tc + O.kang.width / 2, oz + W.size.d / 2 + 0.6, '木头炕', 'class="s" text-anchor="middle"');
-  rect({ x0: ox + O.tvDesk.x - O.tvDesk.w / 2, x1: ox + O.tvDesk.x + O.tvDesk.w / 2, z0: oz + tc, z1: oz + tc + O.tvDesk.d }, `fill="#d0a060" stroke="${C.ink}" stroke-width="0.6"`);
-  text(ox + O.tvDesk.x, oz + tc + O.tvDesk.d + 0.3, '电视桌', 'class="xs" text-anchor="middle"');
+  {
+    const D = O.desk;
+    rect({ x0: ox + D.x - D.altar.w / 2, x1: ox + D.x + D.altar.w / 2, z0: oz + tc, z1: oz + tc + D.altar.d }, `fill="#8a5a3a" stroke="${C.ink}" stroke-width="0.6"`);
+    rect({ x0: ox + D.x - D.cabinet.w / 2, x1: ox + D.x + D.cabinet.w / 2, z0: oz + tc + D.cabinet.z0, z1: oz + tc + D.cabinet.z0 + D.cabinet.d }, `fill="#a06a44" stroke="${C.ink}" stroke-width="0.6"`);
+    for (const s of [-1, 1]) {
+      const cx = ox + D.x + s * D.chairs.dx;
+      const cz = oz + tc + D.cabinet.z0 + D.cabinet.d / 2;
+      rect({ x0: cx - D.chairs.w / 2, x1: cx + D.chairs.w / 2, z0: cz - D.chairs.d / 2, z1: cz + D.chairs.d / 2 }, `fill="#b07a50" stroke="${C.ink}" stroke-width="0.4"`);
+    }
+    text(ox + D.x, oz + tc + D.cabinet.z0 + D.cabinet.d + 0.3, '条几·柜桌', 'class="xs" text-anchor="middle"');
+  }
   out.push(`<circle cx="${f(X(ox + O.table.x))}" cy="${f(Y(oz + O.table.z))}" r="${f(O.table.r * S)}" fill="#5c3a24" stroke="${C.ink}" stroke-width="0.6"/>`);
   out.push(`<circle cx="${f(X(ox + O.washstand.x))}" cy="${f(Y(oz + O.washstand.z))}" r="${f(0.2 * S)}" fill="#6f9a86" stroke="${C.ink}" stroke-width="0.6"/>`);
   rect({ x0: px - t2 - tc - O.sewing.depth, x1: px - t2 - tc, z0: oz + O.sewing.z - O.sewing.len / 2, z1: oz + O.sewing.z + O.sewing.len / 2 }, `fill="#aa6030" stroke="${C.ink}" stroke-width="0.6"`);

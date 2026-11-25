@@ -7,7 +7,9 @@ import { canvasTex, rng, reedMat, pillowTex, quiltStack, woodTex, seamlessBlob }
 /**
  * 西北屋外屋的陈设（第 11 轮，按用户描述和照片）。坐标同 northWest.js：室内原点在西北角、地坪面，+x 东、+z 南。
  * - 西边一铺大木头炕，南北通长；炕沿朝外这一面摆着一排枕头，靠西墙摞着棉被
- * - 进门正对着、靠北墙一张老式电视桌，上面一台黑白电视（拉杆天线；tv.toggle() 开关：亮线 → 雪花 → 黑白测试图），电视左边一座老座钟（按用户照片：横放木壳、拱顶、两边镶条立柱，指针走的是现在的时间）
+ * - 进门正对着、靠北墙（第 17 轮按用户的图）：一张翘头长条几，前面一张两开门的柜桌，两边各一把木椅子；柜桌上一台黑白电视（tv.toggle() 开关：亮线 → 雪花 → 黑白测试图），
+ *   条几左边一座老座钟（按用户照片：横放木壳、拱顶、两边镶条立柱，指针走的是现在的时间），右边两个暖水壶、一盘茶具、一个茶叶筒
+ * - 炕上挂一顶白纱蚊帐（第 17 轮）：四根竹竿撑着，朝外那面中间撩开、两边挂在钩子上
  * - 靠南墙一张折叠圆桌：深色桌面、斑驳，铁管腿生了锈
  * - 进门右手边（隔墙这边）一个洗脸盆架，上面一只搪瓷洋盆，架子上搭着毛巾
  * - 隔墙边、里屋门洞往北一点一台脚踏缝纫机
@@ -18,11 +20,70 @@ const O = R.outer;
 
 /* ---------- 贴图 ---------- */
 /** 黑白电视的正面：灰色金属框、圆角的灰绿屏幕、右边一条控制面板（红指示灯、四个小按钮、两个大旋钮、喇叭格栅） */
+/** 暖水壶的铁壳：一种底色，上面印着花，上下两道细环 */
+function flaskTex(col, seed) {
+  return canvasTex(128, 128, (g, w, h) => {
+    const r = rng(613 + seed);
+    g.fillStyle = `rgb(${col.join(',')})`;
+    g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 6; i++) {
+      const x = r() * w;
+      const y = 30 + r() * 60;
+      for (let k = 0; k < 5; k++) {
+        const a = (k / 5) * Math.PI * 2;
+        g.fillStyle = 'rgba(250,240,220,0.85)';
+        g.beginPath();
+        g.ellipse(x + Math.cos(a) * 5, y + Math.sin(a) * 5, 4, 2.6, a, 0, Math.PI * 2);
+        g.fill();
+      }
+      g.fillStyle = '#e8c040';
+      g.beginPath();
+      g.arc(x, y, 2.2, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.fillStyle = 'rgba(240,230,200,0.7)';
+    g.fillRect(0, 10, w, 3);
+    g.fillRect(0, h - 14, w, 3);
+    for (let i = 0; i < 200; i++) {
+      g.fillStyle = 'rgba(0,0,0,0.12)';
+      g.fillRect(r() * w, r() * h, 1 + r() * 2, 1);
+    }
+  });
+}
+
+/** 蚊帐纱：很细的网眼 + 几道竖着的褶子（半透明白） */
+function netTex() {
+  return canvasTex(256, 256, (g, w, h) => {
+    const r = rng(617);
+    g.fillStyle = 'rgba(250,248,240,0.55)';
+    g.fillRect(0, 0, w, h);
+    for (let x = 0; x < w; x += 3) {
+      g.fillStyle = 'rgba(255,255,255,0.35)';
+      g.fillRect(x, 0, 1, h);
+    }
+    for (let y = 0; y < h; y += 3) {
+      g.fillStyle = 'rgba(255,255,255,0.3)';
+      g.fillRect(0, y, w, 1);
+    }
+    // 褶子：一道道竖着的亮暗
+    for (let i = 0; i < 10; i++) {
+      const x = r() * w;
+      const gw = 8 + r() * 22;
+      const gr = g.createLinearGradient(x - gw, 0, x + gw, 0);
+      gr.addColorStop(0, 'rgba(255,255,255,0)');
+      gr.addColorStop(0.5, r() > 0.5 ? 'rgba(255,255,255,0.4)' : 'rgba(170,166,156,0.3)');
+      gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = gr;
+      g.fillRect(x - gw, 0, gw * 2, h);
+    }
+  }, { repeat: [1, 1] });
+}
+
 function tvFaceTex() {
   return canvasTex(512, 400, (g, w, h) => {
     const lin = g.createLinearGradient(0, 0, 0, h);
-    lin.addColorStop(0, '#8a8c8e');
-    lin.addColorStop(1, '#5e6062');
+    lin.addColorStop(0, '#a08e76');
+    lin.addColorStop(1, '#6e5e4c');
     g.fillStyle = lin;
     g.fillRect(0, 0, w, h);
     // 屏幕外圈的黑框
@@ -50,7 +111,7 @@ function tvFaceTex() {
     g.fillRect(150, 90, 18, 40);
     g.fillRect(172, 90, 18, 40);
     // 右边控制面板
-    g.fillStyle = '#6c6e70';
+    g.fillStyle = '#857460';
     g.fillRect(392, 22, 100, 356);
     g.fillStyle = '#c03028';
     g.fillRect(402, 34, 22, 12); // 指示灯
@@ -546,47 +607,246 @@ export function createOuterRoom({ tc }) {
     st.group.rotation.y = Math.PI / 2; // 长边顺着西墙
     st.group.position.set(x0 + 0.33, K.height, 1.6);
     group.add(st.group);
+
+    // 蚊帐：四根竹竿撑一个架子，白纱从顶上垂到炕面；朝外（东）那面中间撩开，两边各挽成一束挂在钩子上
+    {
+      const N = O.net;
+      const nx0 = x0 + 0.03;
+      const nx1 = x1 - 0.05;
+      const nz0 = z0 + 0.03;
+      const nz1 = z1 - 0.03;
+      const yb = K.height;
+      const yt = N.top;
+      const bamboo = new THREE.MeshStandardMaterial({ color: 0xc8b078, roughness: 0.6 });
+      for (const px of [nx0, nx1]) {
+        for (const pz of [nz0, nz1]) {
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.014, yt - yb + 0.06, 8), bamboo);
+          pole.position.set(px, (yb + yt) / 2 + 0.03, pz);
+          group.add(pole);
+        }
+      }
+      for (const [a, b] of [[[nx0, nz0], [nx1, nz0]], [[nx0, nz1], [nx1, nz1]], [[nx0, nz0], [nx0, nz1]], [[nx1, nz0], [nx1, nz1]]]) {
+        tube(group, V3(a[0], yt, a[1]), V3(b[0], yt, b[1]), 0.01, bamboo, 6);
+      }
+      const tex = netTex();
+      const netMat = (rx, ry) => {
+        const t = tex.clone();
+        t.repeat.set(rx, ry);
+        return new THREE.MeshStandardMaterial({ map: t, color: 0xf6f3ea, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false, roughness: 0.9 });
+      };
+      const H2 = yt - yb;
+      const panel = (w, rotY, x, z) => {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(w, H2), netMat(w / 1.2, 1));
+        m.rotation.y = rotY;
+        m.position.set(x, yb + H2 / 2, z);
+        m.userData.noAO = true;
+        group.add(m);
+      };
+      // 顶、靠墙的三面
+      const top = new THREE.Mesh(new THREE.PlaneGeometry(nx1 - nx0, nz1 - nz0), netMat(1, 3));
+      top.rotation.x = Math.PI / 2;
+      top.position.set((nx0 + nx1) / 2, yt, (nz0 + nz1) / 2);
+      top.userData.noAO = true;
+      group.add(top);
+      panel(nz1 - nz0, Math.PI / 2, nx0, (nz0 + nz1) / 2);
+      panel(nx1 - nx0, 0, (nx0 + nx1) / 2, nz0);
+      panel(nx1 - nx0, 0, (nx0 + nx1) / 2, nz1);
+      // 朝外那面：两头垂着，中间撩开
+      const [o0, o1] = N.open;
+      panel(o0 - nz0, Math.PI / 2, nx1, (nz0 + o0) / 2);
+      panel(nz1 - o1, Math.PI / 2, nx1, (o1 + nz1) / 2);
+      // 撩开的两片各挽成一束（上宽、在钩子处收紧、下面散开一点）
+      const prof = [[0.09, 0], [0.06, 0.25], [0.025, 0.62], [0.05, 0.85], [0.1, H2]].map(([a, b]) => new THREE.Vector2(a, b));
+      for (const zz of [o0, o1]) {
+        const bunch = new THREE.Mesh(new THREE.LatheGeometry(prof, 16), netMat(1, 1));
+        bunch.material.opacity = 0.8;
+        bunch.scale.set(0.45, 1, 1);
+        bunch.position.set(nx1, yb, zz);
+        bunch.userData.noAO = true;
+        group.add(bunch);
+        // 挂帐子的铜钩
+        const hook = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.004, 6, 12, Math.PI * 1.3), new THREE.MeshStandardMaterial({ color: 0xc8a050, roughness: 0.3, metalness: 0.9 }));
+        hook.position.set(nx1 + 0.01, yb + 0.62, zz);
+        hook.rotation.y = Math.PI / 2;
+        group.add(hook);
+      }
+      // 顶上四边一道白布滚边
+      const hemM = new THREE.MeshStandardMaterial({ color: 0xf4f1e6, roughness: 1 });
+      group.add(box(nx0, nx1, yt - 0.06, yt, nz0 - 0.004, nz0 + 0.004, hemM, off));
+      group.add(box(nx0, nx1, yt - 0.06, yt, nz1 - 0.004, nz1 + 0.004, hemM, off));
+      group.add(box(nx1 - 0.004, nx1 + 0.004, yt - 0.06, yt, nz0, nz1, hemM, off));
+    }
   }
 
-  // —— 进门正对着、靠北墙的电视桌 ——
+  // —— 进门正对着、靠北墙：翘头长条几 + 前面的柜桌 + 两把椅子（第 17 轮按用户的图） ——
   const clockParts = {};
   const tvParts = {};
   {
-    const D = O.tvDesk;
-    const x0 = D.x - D.w / 2;
-    const x1 = D.x + D.w / 2;
-    const z0 = tc;
-    const z1 = tc + D.d;
-    const wood = new THREE.MeshStandardMaterial({ map: woodTex([190, 140, 76], { seed: 9 }), roughness: 0.45 });
-    const woodD = new THREE.MeshStandardMaterial({ map: woodTex([150, 104, 54], { seed: 10 }), roughness: 0.5 });
-    group.add(box(x0 + 0.02, x1 - 0.02, 0, 0.07, z0 + 0.02, z1 - 0.04, woodD, off)); // 底座
-    group.add(box(x0 + 0.01, x1 - 0.01, 0.07, D.h - 0.03, z0, z1 - 0.02, wood)); // 柜体（挡人）
-    group.add(box(x0 - 0.015, x1 + 0.015, D.h - 0.03, D.h, z0, z1 + 0.01, wood, off)); // 台面
-    const cw = 0.5; // 两边柜门宽
-    const sy = D.h * 0.52; // 中间敞口格的隔板高
-    const fz = z1 - 0.02; // 正面
-    const knob = new THREE.MeshStandardMaterial({ color: 0xb8a070, roughness: 0.35, metalness: 0.8 });
-    for (const [a0, a1, kx] of [[x0 + 0.02, x0 + cw, x0 + cw - 0.05], [x1 - cw, x1 - 0.02, x1 - cw + 0.05]]) {
-      group.add(box(a0, a1, 0.1, D.h - 0.06, fz, fz + 0.015, wood, off)); // 柜门
-      group.add(box(a0 + 0.05, a1 - 0.05, 0.16, D.h - 0.12, fz + 0.015, fz + 0.022, woodD, off)); // 芯板
-      const k = new THREE.Mesh(new THREE.SphereGeometry(0.012, 10, 8), knob);
-      k.position.set(kx, D.h * 0.55, fz + 0.03);
-      group.add(k);
+    const D = O.desk;
+    const A = D.altar;
+    const C = D.cabinet;
+    const darkWood = new THREE.MeshStandardMaterial({ map: woodTex([92, 50, 30], { seed: 21 }), roughness: 0.42 });
+    const darkWood2 = new THREE.MeshStandardMaterial({ map: woodTex([78, 42, 26], { seed: 22 }), roughness: 0.5 });
+    const chairWood = new THREE.MeshStandardMaterial({ map: woodTex([104, 46, 30], { seed: 23 }), roughness: 0.4 });
+    const brass = new THREE.MeshStandardMaterial({ color: 0xa88a5a, roughness: 0.35, metalness: 0.8 });
+
+    // 条几：一块长面板，两头往上翘、卷出去；四条方腿，前面一道牙板，两头腿间有雕花的牙子和横枨
+    {
+      const z0 = tc;
+      const z1 = tc + A.d;
+      const x0 = D.x - A.w / 2;
+      const x1 = D.x + A.w / 2;
+      const T = 0.045;
+      group.add(box(x0, x1, A.h - T, A.h, z0, z1, darkWood, off));
+      for (const s2 of [-1, 1]) {
+        const xe = s2 < 0 ? x0 : x1;
+        // 翘头：面板两头往上卷
+        const curl = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, A.d - 0.02, 14, 1, false, 0, Math.PI * 1.3).rotateX(Math.PI / 2), darkWood);
+        curl.position.set(xe - s2 * 0.02, A.h + 0.01, (z0 + z1) / 2);
+        curl.rotation.z = s2 < 0 ? 0.6 : Math.PI - 1.9;
+        curl.castShadow = true;
+        group.add(curl);
+        group.add(box(Math.min(xe, xe - s2 * 0.1), Math.max(xe, xe - s2 * 0.1), A.h, A.h + 0.02, z0 + 0.01, z1 - 0.01, darkWood, off));
+        // 腿（离两头 0.12 m）
+        const lx = xe - s2 * 0.15;
+        for (const lz of [z0 + 0.03, z1 - 0.03]) group.add(box(lx - 0.025, lx + 0.025, 0, A.h - T, lz - 0.025, lz + 0.025, darkWood));
+        // 腿间横枨、侧面的牙子
+        group.add(box(lx - 0.015, lx + 0.015, 0.1, 0.14, z0 + 0.03, z1 - 0.03, darkWood2, off));
+        group.add(box(lx - 0.012, lx + 0.012, A.h - 0.2, A.h - T, z0 + 0.03, z1 - 0.03, darkWood2, off));
+        // 前面腿外侧的云纹牙子（一块挤出的弯板）
+        const sh = new THREE.Shape();
+        sh.moveTo(0, 0);
+        sh.lineTo(0.12, 0);
+        sh.quadraticCurveTo(0.1, -0.03, 0.06, -0.035);
+        sh.quadraticCurveTo(0.03, -0.04, 0.02, -0.09);
+        sh.quadraticCurveTo(0.01, -0.12, 0, -0.13);
+        sh.closePath();
+        const bracket = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.015, bevelEnabled: false }), darkWood2);
+        bracket.position.set(lx + s2 * 0.025, A.h - T, z1 - 0.02);
+        bracket.scale.x = s2;
+        group.add(bracket);
+        const bracketIn = bracket.clone();
+        bracketIn.position.x = lx - s2 * 0.025;
+        bracketIn.scale.x = -s2;
+        group.add(bracketIn);
+      }
+      // 前面的牙板（面板底下一长条）
+      group.add(box(x0 + 0.15, x1 - 0.15, A.h - 0.12, A.h - T, z1 - 0.025, z1 - 0.01, darkWood2, off));
+      group.add(box(x0 + 0.15, x1 - 0.15, A.h - 0.12, A.h - T, z0 + 0.01, z0 + 0.025, darkWood2, off));
     }
-    // 中间：上面一格敞口、下面一个抽屉
-    const m0 = x0 + cw;
-    const m1 = x1 - cw;
-    group.add(box(m0 + 0.01, m1 - 0.01, sy + 0.02, D.h - 0.06, fz - 0.3, fz - 0.29, new THREE.MeshStandardMaterial({ color: 0x2e2418, roughness: 0.9 }), off)); // 敞口格的里面（暗）
-    group.add(box(m0, m1, sy - 0.01, sy + 0.02, fz - 0.3, fz + 0.005, wood, off)); // 隔板
-    group.add(box(m0 + 0.01, m1 - 0.01, 0.1, sy - 0.02, fz, fz + 0.015, wood, off)); // 抽屉脸
-    group.add(box(D.x - 0.06, D.x + 0.06, (0.1 + sy) / 2 - 0.012, (0.1 + sy) / 2 + 0.012, fz + 0.015, fz + 0.03, knob, off)); // 抽屉拉手
-    // 敞口格里一摞旧报纸
-    group.add(box(m0 + 0.06, m1 - 0.08, sy + 0.02, sy + 0.08, fz - 0.27, fz - 0.06, new THREE.MeshStandardMaterial({ color: 0xcfc6a8, roughness: 1 }), off));
+
+    // 柜桌：前面两扇对开的柜门（芯板），中间两根铜拉手，底下一圈带弯脚的牙板；挡人
+    const cz0 = tc + C.z0;
+    const cz1 = cz0 + C.d;
+    {
+      const x0 = D.x - C.w / 2;
+      const x1 = D.x + C.w / 2;
+      group.add(box(x0 + 0.02, x1 - 0.02, 0.06, C.h - 0.04, cz0, cz1 - 0.02, darkWood2)); // 柜体
+      group.add(box(x0 - 0.015, x1 + 0.015, C.h - 0.04, C.h, cz0 - 0.01, cz1 + 0.015, darkWood, off)); // 台面（边上一圈线脚）
+      group.add(box(x0 - 0.005, x1 + 0.005, C.h - 0.05, C.h - 0.04, cz0, cz1 + 0.008, darkWood2, off));
+      // 四条腿 + 底下的牙板（中间挖出弧）
+      for (const lx of [x0 + 0.01, x1 - 0.01]) group.add(box(lx - 0.025, lx + 0.025, 0, C.h - 0.04, cz1 - 0.05, cz1, darkWood, off));
+      const apron = new THREE.Shape();
+      const aw = C.w - 0.1;
+      apron.moveTo(-aw / 2, 0.1);
+      apron.lineTo(aw / 2, 0.1);
+      apron.lineTo(aw / 2, 0.0);
+      apron.quadraticCurveTo(aw / 2 - 0.04, 0.0, aw / 2 - 0.07, 0.045);
+      apron.lineTo(-aw / 2 + 0.07, 0.045);
+      apron.quadraticCurveTo(-aw / 2 + 0.04, 0.0, -aw / 2, 0.0);
+      apron.closePath();
+      const ap = new THREE.Mesh(new THREE.ExtrudeGeometry(apron, { depth: 0.02, bevelEnabled: false }), darkWood);
+      ap.position.set(D.x, 0, cz1 - 0.02);
+      ap.castShadow = true;
+      group.add(ap);
+      // 两扇柜门 + 芯板 + 拉手
+      const fz = cz1 - 0.02;
+      for (const s2 of [-1, 1]) {
+        const a0 = s2 < 0 ? x0 + 0.04 : D.x + 0.004;
+        const a1 = s2 < 0 ? D.x - 0.004 : x1 - 0.04;
+        group.add(box(a0, a1, 0.12, C.h - 0.08, fz, fz + 0.018, darkWood, off));
+        group.add(box(a0 + 0.045, a1 - 0.045, 0.17, C.h - 0.13, fz + 0.018, fz + 0.026, darkWood2, off));
+        const pull = new THREE.Mesh(new THREE.CapsuleGeometry(0.006, 0.07, 3, 8), brass);
+        pull.position.set(D.x + s2 * 0.035, C.h * 0.5, fz + 0.034);
+        group.add(pull);
+      }
+    }
+
+    // 两把木椅子：柜桌两边，椅背靠着条几，面朝南
+    {
+      const H = D.chairs;
+      for (const s2 of [-1, 1]) {
+        const ch = new THREE.Group();
+        ch.position.set(D.x + s2 * H.dx, 0, (cz0 + cz1) / 2 + 0.02);
+        const w2 = H.w / 2;
+        const d2 = H.d / 2;
+        ch.add(box(-w2, w2, H.seat - 0.03, H.seat, -d2, d2, chairWood, off)); // 座面
+        ch.add(box(-w2 + 0.01, w2 - 0.01, H.seat - 0.07, H.seat - 0.03, d2 - 0.03, d2 - 0.01, chairWood, off)); // 前面的牙条
+        for (const [lx, lz, top] of [[-w2 + 0.025, d2 - 0.025, H.seat - 0.03], [w2 - 0.025, d2 - 0.025, H.seat - 0.03], [-w2 + 0.025, -d2 + 0.025, H.back], [w2 - 0.025, -d2 + 0.025, H.back]]) {
+          ch.add(box(lx - 0.02, lx + 0.02, 0, top, lz - 0.02, lz + 0.02, chairWood, off));
+        }
+        // 横枨
+        ch.add(box(-w2 + 0.02, w2 - 0.02, 0.14, 0.17, d2 - 0.035, d2 - 0.015, chairWood, off));
+        ch.add(box(-w2 + 0.02, w2 - 0.02, 0.1, 0.13, -d2 + 0.015, -d2 + 0.035, chairWood, off));
+        for (const sx of [-1, 1]) ch.add(box(sx * (w2 - 0.035), sx * (w2 - 0.015), 0.2, 0.23, -d2 + 0.02, d2 - 0.02, chairWood, off));
+        // 椅背：上面一道搭脑、下面一道横档，中间四根竖棂
+        ch.add(box(-w2, w2, H.back - 0.06, H.back, -d2 + 0.005, -d2 + 0.045, chairWood, off));
+        ch.add(box(-w2 + 0.02, w2 - 0.02, H.seat + 0.12, H.seat + 0.15, -d2 + 0.01, -d2 + 0.04, chairWood, off));
+        for (let k = 0; k < 4; k++) {
+          const sx = -0.105 + k * 0.07;
+          ch.add(box(sx - 0.011, sx + 0.011, H.seat + 0.15, H.back - 0.06, -d2 + 0.015, -d2 + 0.035, chairWood, off));
+        }
+        ch.traverse((o) => o.isMesh && (o.castShadow = o.receiveShadow = true));
+        group.add(ch);
+        group.add(blocker(D.x + s2 * H.dx - w2, D.x + s2 * H.dx + w2, 0, H.back, ch.position.z - d2, ch.position.z + d2));
+      }
+    }
+
+    // 条几右边的杂物：两个暖水壶、一个茶盘（几个茶杯、一把茶壶）、一个铁茶叶筒
+    {
+      const y = A.h;
+      const zc = tc + A.d / 2;
+      for (const [x, col, seed] of [[D.x + 0.5, [196, 40, 40], 1], [D.x + 0.64, [60, 120, 96], 2]]) {
+        const th = new THREE.Group();
+        const bodyT = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.3, 20), new THREE.MeshStandardMaterial({ map: flaskTex(col, seed), roughness: 0.4, metalness: 0.3 }));
+        bodyT.position.y = 0.17;
+        const shoulder = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.055, 0.05, 20), new THREE.MeshStandardMaterial({ color: 0xc8c8c4, roughness: 0.25, metalness: 0.85 }));
+        shoulder.position.y = 0.345;
+        const cork = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.02, 0.035, 12), new THREE.MeshStandardMaterial({ color: 0xc8a070, roughness: 1 }));
+        cork.position.y = 0.385;
+        const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.058, 0.02, 20), shoulder.material);
+        foot.position.y = 0.01;
+        th.add(bodyT, shoulder, cork, foot);
+        th.traverse((o) => o.isMesh && (o.castShadow = true));
+        th.position.set(x, y, zc - 0.04);
+        group.add(th);
+      }
+      // 茶盘 + 茶壶 + 四个茶杯
+      const tray = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.012, 0.22), new THREE.MeshStandardMaterial({ color: 0x8a2a22, roughness: 0.35 }));
+      tray.position.set(D.x + 0.33, y + 0.006, zc + 0.04);
+      group.add(tray);
+      const porcelain = new THREE.MeshStandardMaterial({ color: 0xf2efe6, roughness: 0.25 });
+      const pot = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 12), porcelain);
+      pot.scale.y = 0.8;
+      pot.position.set(D.x + 0.28, y + 0.056, zc + 0.03);
+      const spout = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.01, 0.06, 8), porcelain);
+      spout.position.set(D.x + 0.34, y + 0.07, zc + 0.03);
+      spout.rotation.z = -0.9;
+      group.add(pot, spout);
+      for (const [dx, dz] of [[0.38, -0.03], [0.42, 0.04], [0.36, 0.1], [0.27, 0.11]]) {
+        const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.019, 0.045, 14, 1, true), new THREE.MeshStandardMaterial({ color: 0xf4f1ea, roughness: 0.25, side: THREE.DoubleSide }));
+        cup.position.set(D.x + dx, y + 0.035, zc + dz);
+        group.add(cup);
+      }
+      const can = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.14, 16), new THREE.MeshStandardMaterial({ color: 0x2f5a3a, roughness: 0.4, metalness: 0.5 }));
+      can.position.set(D.x + 0.72, y + 0.07, zc + 0.1);
+      group.add(can);
+    }
 
     // 黑白电视（14 寸左右）：灰色金属壳，后面一个大屁股，顶上拉杆天线
     const tv = new THREE.Group();
-    tv.position.set(D.x + 0.22, D.h, (z0 + z1) / 2 + 0.02);
-    const shell = new THREE.MeshStandardMaterial({ color: 0x6e7072, roughness: 0.45, metalness: 0.4 });
+    tv.position.set(D.x + 0.12, C.h, (cz0 + cz1) / 2 - 0.02);
+    const shell = new THREE.MeshStandardMaterial({ color: 0x8a7a66, roughness: 0.45, metalness: 0.25 });
     const front = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.1), [shell, shell, shell, shell, new THREE.MeshStandardMaterial({ map: tvFaceTex(), roughness: 0.35, metalness: 0.2 }), shell]);
     front.position.set(0, 0.21, 0.1);
     const back = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.32, 0.24), new THREE.MeshStandardMaterial({ color: 0x3a3a3c, roughness: 0.7 }));
@@ -619,19 +879,12 @@ export function createOuterRoom({ tc }) {
     glass.userData.noAO = true;
     tv.add(glass);
     tvParts.glass = glass;
-    // 拉杆天线：一个小底座，两根拉杆叉开
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 0.02, 12), iron);
-    base.position.set(0.12, 0.35, -0.04);
-    tv.add(base);
-    const chrome = new THREE.MeshStandardMaterial({ color: 0xd0d0d0, roughness: 0.2, metalness: 0.9 });
-    tube(tv, V3(0.12, 0.36, -0.04), V3(-0.12, 0.72, -0.08), 0.003, chrome, 5);
-    tube(tv, V3(0.12, 0.36, -0.04), V3(0.32, 0.7, -0.1), 0.003, chrome, 5);
     group.add(tv);
 
     // 电视左边一座老座钟（按用户照片）：横放的木壳，中间一块拱顶，两边两根立柱镶着浅色人字纹木条，
     // 正中一个大圆钟面、镀铬的圈、凸玻璃；钟面中间一圈露出木头，两个上弦孔
     const clock = new THREE.Group();
-    clock.position.set(D.x - 0.42, D.h, (z0 + z1) / 2 - 0.01);
+    clock.position.set(D.x - 0.45, A.h, tc + A.d / 2);
     const cwood = new THREE.MeshStandardMaterial({ map: woodTex([196, 108, 50], { seed: 13 }), roughness: 0.32 });
     const CD = 0.13; // 进深
     // 中间拱顶的壳：沿 z 挤出
