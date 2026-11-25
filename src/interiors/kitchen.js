@@ -3,13 +3,17 @@ import { KITCHEN as K } from '../layout.js';
 import { box } from '../core/box.js';
 import { mat } from '../textures/index.js';
 import { wallWithOpenings } from '../buildings/wall.js';
-import { canvasTex, rng, seamlessBlob } from './common.js';
+import { canvasTex, rng, seamlessBlob, woodTex } from './common.js';
+import { createWaterVat } from '../yard/waterVat.js';
+import { roundSieve, weaveTex, chiliString } from '../buildings/kitchen.js';
 
 /**
  * 厨房室内（第 14 轮，按用户照片；挂在 interior-anchor-kitchen 上，原点 = 室内西北角、地坪面，+x 东、+z 南）：
  * - 内墙是黄泥抹的：土黄色、夹着麦秸、一道道裂纹；灶台上方的西墙、北墙被烟熏出一大片黑
  * - 灶台：泥和水泥抹的方墩子，边角磕掉了，顶上嵌一口大铁锅；正面一个烧火的灶膛口（里面烧着几根柴），下面一个掏灰的小口
- * - 风箱：顺着灶台南侧放在地上的木箱子，刷过的红漆掉得斑斑驳驳，铁皮包角；东头两根拉杆连着一个把手
+ * - 风箱：顺着灶台南侧放在地上的木箱子，旧旧的土黄色本色木头，铁皮包角；东头两根拉杆连着一个把手
+ * - 第 15 轮照用户照片添的东西：窗下木架子（洋瓷盆、红暖水瓶、搪瓷缸子、盖布的咸菜缸、铝锅、碗），一袋面粉、一筐玉米棒子、
+ *   一摞蜂窝煤、墙上挂的筛子、漏勺、一串红辣椒，灶前一个小板凳
  *   互动：拉一下风箱——往外拉，火小一点；往里推，进风，灶膛里的火呼地旺起来，屋里的火光跟着一明一暗
  * 布局里的坐标是世界坐标（layout.KITCHEN），这里换算成室内坐标。
  */
@@ -341,8 +345,9 @@ export function createKitchenInterior() {
   const bz0 = sz1 + 0.02;
   const bz1 = bz0 + B.width;
   const bm = (bz0 + bz1) / 2;
-  const red = mat('wood'); // 红漆掉得斑斑驳驳的旧木头
-  const raw = mat('oldWood');
+  // 风箱木头：没刷漆的旧木板，土黄色，用得发暗发亮（第 15 轮用户：改成旧旧的土黄色）
+  const red = new THREE.MeshStandardMaterial({ map: woodTex([170, 132, 80], { seed: 41, planks: 0.12 }), roughness: 0.75 });
+  const raw = new THREE.MeshStandardMaterial({ map: woodTex([150, 116, 72], { seed: 43 }), roughness: 0.8 });
   const iron = new THREE.MeshStandardMaterial({ color: 0x5a3a2a, roughness: 0.7, metalness: 0.5 });
   group.add(box(bx0, bx1, 0.03, B.height, bz0, bz1, red)); // 箱体（挡人）
   group.add(box(bx0 - 0.01, bx1 + 0.01, 0, 0.03, bz0 - 0.01, bz1 + 0.01, raw, off)); // 底下垫的木条
@@ -376,6 +381,9 @@ export function createKitchenInterior() {
   grip.castShadow = true;
   handle.add(grip);
   group.add(handle);
+
+  // —— 照用户照片添的东西 ——
+  group.add(kitchenThings(L));
 
   /* ---------- 风箱、火的动画 ---------- */
   let out = B.stroke * 0.3; // 把手现在拉出来多少
@@ -444,4 +452,310 @@ export function createKitchenInterior() {
       fireLight.intensity = (0.6 + lv * 2.6) * (0.9 + Math.random() * 0.2);
     },
   };
+}
+
+/* ---------- 照用户照片添的东西 ---------- */
+/** 洋瓷：白搪瓷上一簇簇红花绿叶 */
+function enamelTex(seed) {
+  return canvasTex(256, 128, (g, w, h) => {
+    const r = rng(401 + seed);
+    g.fillStyle = '#f4f1ea';
+    g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 6; i++) {
+      const x = ((i + 0.5) / 6) * w;
+      const y = h * (0.45 + (r() - 0.5) * 0.2);
+      g.fillStyle = '#3f8a4a';
+      for (const s of [-1, 1]) {
+        g.beginPath();
+        g.ellipse(x + s * 12, y + 6, 9, 3.5, s * 0.5, 0, Math.PI * 2);
+        g.fill();
+      }
+      for (let k = 0; k < 3; k++) {
+        g.fillStyle = ['#d02a34', '#e8505a', '#c01a28'][k];
+        g.beginPath();
+        g.arc(x + (k - 1) * 8, y - (k % 2) * 4, 6 - k, 0, Math.PI * 2);
+        g.fill();
+      }
+    }
+  });
+}
+/** 暖水瓶外壳：红漆铁皮，压着一圈花纹 */
+function thermosTex() {
+  return canvasTex(128, 128, (g, w, h) => {
+    g.fillStyle = '#b8282a';
+    g.fillRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(255,220,180,0.5)';
+    g.lineWidth = 2;
+    for (let y = 20; y < h; y += 34) {
+      g.beginPath();
+      for (let x = 0; x <= w; x += 8) g.lineTo(x, y + Math.sin(x * 0.2) * 5);
+      g.stroke();
+    }
+    g.fillStyle = 'rgba(255,240,200,0.6)';
+    for (let i = 0; i < 6; i++) {
+      g.beginPath();
+      g.arc(10 + i * 22, 70, 5, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.fillStyle = 'rgba(0,0,0,0.12)';
+    g.fillRect(0, 0, w, h);
+  });
+}
+/** 面粉袋：白色编织袋，印着红字 */
+function sackTex() {
+  // 圆柱展开一圈：字印两遍（正反两面），哪个角度看都能看到
+  return canvasTex(256, 192, (g, w, h) => {
+    const r = rng(409);
+    g.fillStyle = '#d6cebd';
+    g.fillRect(0, 0, w, h);
+    for (let y = 0; y < h; y += 3) {
+      g.fillStyle = `rgba(150,140,120,${0.1 + r() * 0.08})`;
+      g.fillRect(0, y, w, 1);
+    }
+    g.fillStyle = '#b8282e';
+    g.textAlign = 'center';
+    for (const cx of [w / 4, (3 * w) / 4]) {
+      g.font = 'bold 34px "KaiTi", serif';
+      g.fillText('面粉', cx, 88);
+      g.font = 'bold 18px serif';
+      g.fillText('25公斤', cx, 118);
+    }
+    for (let i = 0; i < 30; i++) seamlessBlob(g, w, h, r() * w, r() * h, 10 + r() * 24, '170,160,135', 0.25);
+  });
+}
+/** 蜂窝煤：黑灰色，上面一圈圈小眼 */
+function coalTopTex() {
+  return canvasTex(64, 64, (g, w, h) => {
+    g.fillStyle = '#2c2a28';
+    g.fillRect(0, 0, w, h);
+    g.fillStyle = '#0c0b0a';
+    for (const [x, y] of [[32, 32], [32, 14], [32, 50], [16, 23], [48, 23], [16, 41], [48, 41], [22, 8], [42, 8], [22, 56], [42, 56], [8, 32], [56, 32]]) {
+      g.beginPath();
+      g.arc(x, y, 3.5, 0, Math.PI * 2);
+      g.fill();
+    }
+  });
+}
+/** 玉米棒子上的一粒粒玉米 */
+function cobTex() {
+  return canvasTex(64, 64, (g, w, h) => {
+    g.fillStyle = '#a8701a';
+    g.fillRect(0, 0, w, h);
+    for (let y = 0; y < h; y += 6) {
+      for (let x = 0; x < w; x += 7) {
+        g.fillStyle = (x + y) % 3 ? '#e8b440' : '#dca232';
+        g.beginPath();
+        g.ellipse(x + 3.5 + (y % 12 ? 3 : 0), y + 3, 3, 2.6, 0, 0, Math.PI * 2);
+        g.fill();
+      }
+    }
+  });
+}
+
+function kitchenThings(L) {
+  const g = new THREE.Group();
+  const off = { solid: false };
+  const enamelRim = new THREE.MeshStandardMaterial({ color: 0x23406e, roughness: 0.3 });
+  const wood = new THREE.MeshStandardMaterial({ map: woodTex([138, 108, 72], { seed: 47 }), roughness: 0.85 });
+  const alu = new THREE.MeshStandardMaterial({ color: 0xb4b6b4, roughness: 0.35, metalness: 0.8 });
+  const enamelBowl = (r0, r1, h, seed) => {
+    const prof = [[r0 * 0.6, 0], [r0, 0.005], [r1 * 0.97, h * 0.92], [r1, h]].map(([x, y]) => new THREE.Vector2(x, y));
+    const m = new THREE.Mesh(new THREE.LatheGeometry(prof, 32), new THREE.MeshStandardMaterial({ map: enamelTex(seed), roughness: 0.25, side: THREE.DoubleSide }));
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(r1, 0.004, 4, 32).rotateX(Math.PI / 2), enamelRim);
+    rim.position.y = h;
+    const bot = new THREE.Mesh(new THREE.CircleGeometry(r0 * 0.6, 24).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xf4f1ea, roughness: 0.25 }));
+    bot.position.y = 0.002;
+    const b = new THREE.Group();
+    b.add(m, rim, bot);
+    m.castShadow = true;
+    return b;
+  };
+
+  // —— 窗下的木架子（两层） ——
+  {
+    const S = K.shelf;
+    const [x1, z0] = L(S.x1, S.z0);
+    const [, z1] = L(S.x1, S.z1);
+    const x0 = x1 - S.depth;
+    const H = S.height;
+    for (const x of [x0, x1 - 0.04]) for (const z of [z0, z1 - 0.04]) g.add(box(x, x + 0.04, 0, H, z, z + 0.04, wood, off));
+    g.add(box(x0 - 0.01, x1, H - 0.03, H, z0 - 0.02, z1 + 0.02, wood, off));
+    g.add(box(x0, x1, 0.36, 0.385, z0, z1, wood, off));
+    g.add(box(x0, x1, 0, H, z0, z1, new THREE.MeshBasicMaterial({ visible: false }))); // 挡人
+    const xc = (x0 + x1) / 2;
+    // 上层：洋瓷盆、红暖水瓶、搪瓷缸子、一口盖着布的小坛子
+    const basin = enamelBowl(0.1, 0.17, 0.08, 1);
+    basin.position.set(xc, H, z0 + 0.2);
+    g.add(basin);
+    const th = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.058, 0.3, 20), new THREE.MeshStandardMaterial({ map: thermosTex(), roughness: 0.45, metalness: 0.3 }));
+    body.position.y = 0.15;
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.05, 16), alu);
+    neck.position.y = 0.325;
+    const cork = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.026, 0.03, 12), new THREE.MeshStandardMaterial({ color: 0xc8a070, roughness: 0.9 }));
+    cork.position.y = 0.365;
+    const handle = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.006, 4, 12, Math.PI), alu);
+    handle.rotation.z = -Math.PI / 2;
+    handle.position.set(0.06, 0.2, 0);
+    for (const m of [body, neck]) m.castShadow = true;
+    th.add(body, neck, cork, handle);
+    th.position.set(xc, H, z0 + 0.46);
+    g.add(th);
+    const mug = new THREE.Group();
+    const mugBody = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.085, 20, 1, true), new THREE.MeshStandardMaterial({ map: enamelTex(3), roughness: 0.25, side: THREE.DoubleSide }));
+    mugBody.position.y = 0.0425;
+    const mugRim = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.003, 4, 20).rotateX(Math.PI / 2), enamelRim);
+    mugRim.position.y = 0.085;
+    const mugHandle = new THREE.Mesh(new THREE.TorusGeometry(0.025, 0.005, 4, 10, Math.PI), new THREE.MeshStandardMaterial({ color: 0xf4f1ea }));
+    mugHandle.rotation.z = -Math.PI / 2;
+    mugHandle.position.set(0.045, 0.045, 0);
+    mug.add(mugBody, mugRim, mugHandle);
+    mug.position.set(xc - 0.05, H, z0 + 0.62);
+    mug.rotation.y = 0.8;
+    g.add(mug);
+    // 小咸菜坛子：酱釉，口上蒙块布、拿绳扎着
+    const jar = createWaterVat({ height: 0.3, rimRadius: 0.08, bellyRadius: 0.13, baseRadius: 0.09 }, { leanLid: false });
+    jar.children.slice(2).forEach((c) => (c.visible = false)); // 不要木盖
+    const cloth = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 6, 0, Math.PI * 2, 0, 1.2), new THREE.MeshStandardMaterial({ color: 0xd8ccb0, roughness: 1, side: THREE.DoubleSide }));
+    cloth.scale.set(1, 0.35, 1);
+    cloth.position.y = 0.28;
+    const tie = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.004, 4, 20).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x8a6a4a }));
+    tie.position.y = 0.285;
+    jar.add(cloth, tie);
+    jar.position.set(xc, H, z1 - 0.15);
+    g.add(jar);
+    // 下层：铝锅、一个碗
+    const pot = new THREE.Group();
+    const pb = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.125, 0.15, 24), alu);
+    pb.position.y = 0.075;
+    const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.135, 0.135, 0.012, 24), alu);
+    lid.position.y = 0.156;
+    const kn = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.02, 10), new THREE.MeshStandardMaterial({ color: 0x1a1a1a }));
+    kn.position.y = 0.172;
+    pb.castShadow = true;
+    pot.add(pb, lid, kn);
+    pot.position.set(xc, 0.385, z0 + 0.25);
+    g.add(pot);
+    const bowl = enamelBowl(0.05, 0.08, 0.05, 5);
+    bowl.position.set(xc, 0.385, z0 + 0.62);
+    g.add(bowl);
+  }
+
+  // —— 一袋面粉 ——
+  {
+    const [x, z] = L(K.flourSack.x, K.flourSack.z);
+    const sack = new THREE.Mesh(new THREE.CapsuleGeometry(0.17, 0.32, 6, 14), new THREE.MeshStandardMaterial({ map: sackTex(), roughness: 1 }));
+    sack.scale.set(1.15, 1, 0.75);
+    sack.position.set(x, 0.33, z);
+    sack.rotation.set(0.05, -1.2, 0.04);
+    sack.castShadow = sack.receiveShadow = true;
+    g.add(sack);
+    const knot = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.1, 8), sack.material);
+    knot.position.set(x, 0.66, z);
+    g.add(knot);
+    g.add(box(x - 0.2, x + 0.2, 0, 0.6, z - 0.14, z + 0.14, new THREE.MeshBasicMaterial({ visible: false })));
+  }
+
+  // —— 一筐玉米棒子 ——
+  {
+    const [x, z] = L(K.cornBasket.x, K.cornBasket.z);
+    const prof = [[0.2, 0], [0.24, 0.02], [0.27, 0.24], [0.28, 0.26]].map(([a, b]) => new THREE.Vector2(a, b));
+    const basket = new THREE.Mesh(new THREE.LatheGeometry(prof, 28), new THREE.MeshStandardMaterial({ map: weaveTex([168, 136, 90], 3), roughness: 1, side: THREE.DoubleSide }));
+    basket.position.set(x, 0, z);
+    basket.castShadow = true;
+    g.add(basket);
+    const bottom = new THREE.Mesh(new THREE.CircleGeometry(0.2, 20).rotateX(-Math.PI / 2), basket.material);
+    bottom.position.set(x, 0.01, z);
+    g.add(bottom);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.012, 5, 28).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x9a7a4e, roughness: 1 }));
+    rim.position.set(x, 0.26, z);
+    g.add(rim);
+    const r = rng(419);
+    const n = 22;
+    const cob = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.03, 0.13, 4, 10).rotateZ(Math.PI / 2), new THREE.MeshStandardMaterial({ map: cobTex(), roughness: 0.6 }), n);
+    const m4 = new THREE.Matrix4();
+    const q = new THREE.Quaternion();
+    for (let i = 0; i < n; i++) {
+      const a = r() * Math.PI * 2;
+      const d = r() * 0.17;
+      q.setFromEuler(new THREE.Euler((r() - 0.5) * 0.5, r() * Math.PI, (r() - 0.5) * 0.4));
+      m4.compose(new THREE.Vector3(x + Math.cos(a) * d, 0.2 + Math.floor(i / 8) * 0.05 + r() * 0.03, z + Math.sin(a) * d), q, new THREE.Vector3(1, 1, 1));
+      cob.setMatrixAt(i, m4);
+    }
+    cob.castShadow = true;
+    g.add(cob);
+    g.add(box(x - 0.25, x + 0.25, 0, 0.3, z - 0.25, z + 0.25, new THREE.MeshBasicMaterial({ visible: false })));
+  }
+
+  // —— 一摞蜂窝煤 ——
+  {
+    const [x, z] = L(K.coal.x, K.coal.z);
+    const coalMats = [new THREE.MeshStandardMaterial({ color: 0x2c2a28, roughness: 1 }), new THREE.MeshStandardMaterial({ map: coalTopTex(), roughness: 1 }), new THREE.MeshStandardMaterial({ color: 0x2c2a28, roughness: 1 })];
+    const geo = new THREE.CylinderGeometry(0.063, 0.063, 0.078, 16);
+    const r = rng(421);
+    const spots = [[0, 0, 5], [0.135, 0, 4], [0.07, 0.12, 3]];
+    for (const [dx, dz, n] of spots) {
+      for (let i = 0; i < n; i++) {
+        const c = new THREE.Mesh(geo, coalMats);
+        c.position.set(x + dx + (r() - 0.5) * 0.01, 0.039 + i * 0.079, z + dz + (r() - 0.5) * 0.01);
+        c.rotation.y = r() * 3;
+        c.castShadow = c.receiveShadow = true;
+        g.add(c);
+      }
+    }
+    g.add(box(x - 0.07, x + 0.21, 0, 0.4, z - 0.07, z + 0.19, new THREE.MeshBasicMaterial({ visible: false })));
+  }
+
+  // —— 东北角一口盖着布的咸菜缸 ——
+  {
+    const [x, z] = L(K.crock.x, K.crock.z);
+    const crock = createWaterVat({ height: 0.62, rimRadius: 0.2, bellyRadius: 0.26, baseRadius: 0.18, x, z }, { leanLid: false });
+    crock.children.slice(2).forEach((c) => (c.visible = false));
+    const cloth = new THREE.Mesh(new THREE.SphereGeometry(0.27, 20, 6, 0, Math.PI * 2, 0, 1.1), new THREE.MeshStandardMaterial({ color: 0xcfc2a4, roughness: 1, side: THREE.DoubleSide }));
+    cloth.scale.set(1, 0.3, 1);
+    cloth.position.y = 0.58;
+    const tie = new THREE.Mesh(new THREE.TorusGeometry(0.205, 0.006, 4, 24).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x7a5a3a }));
+    tie.position.y = 0.6;
+    crock.add(cloth, tie);
+    g.add(crock);
+  }
+
+  // —— 墙上挂的：北墙一个圆筛子、一把漏勺；窗边一串红辣椒 ——
+  {
+    const [sx] = L(K.coal.x + 0.45, 0);
+    const sieve = roundSieve(0.24);
+    sieve.position.set(sx, 1.45, 0.04);
+    g.add(sieve);
+    const ladle = new THREE.Group();
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.006, 20).rotateX(Math.PI / 2), alu);
+    const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.3, 6), alu);
+    stick.position.y = 0.21;
+    ladle.add(disc, stick);
+    ladle.position.set(sx - 0.38, 1.25, 0.03);
+    g.add(ladle);
+    const [, cz] = L(0, K.windows[0].z - K.windows[0].width / 2 - 0.15);
+    const chili = chiliString(0.45);
+    chili.position.set(L(K.rect.x1 - K.wall, 0)[0] - 0.05, 1.7, cz);
+    g.add(chili);
+  }
+
+  // —— 灶前烧火坐的小板凳（矮，不挡人） ——
+  {
+    const [x, z] = L(K.stool.x, K.stool.z);
+    const st = new THREE.Group();
+    st.add(box(-0.16, 0.16, 0.2, 0.23, -0.09, 0.09, wood, off));
+    for (const sx of [-1, 1]) {
+      for (const sz of [-1, 1]) {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.016, 0.2, 6), wood);
+        leg.position.set(sx * 0.12, 0.1, sz * 0.06);
+        leg.rotation.set(sz * 0.12, 0, -sx * 0.12);
+        leg.castShadow = true;
+        st.add(leg);
+      }
+    }
+    st.position.set(x, 0, z);
+    st.rotation.y = 0.3;
+    g.add(st);
+  }
+  return g;
 }

@@ -89,7 +89,7 @@ src/
     common.js           室内共用：canvasTex、rng、seamlessBlob、炕席、被面、枕头、一摞被子 quiltStack、木纹 woodTex、挂历做旧 calendarTex、旧大白 plasterTex、水泥墙裙 cementTex、旧砖地 floorTex
     northWestOuter.js   西北屋外屋陈设（尺寸在 WEST_ROOM.outer）：大木头炕（枕头朝外、靠墙摞被）、电视桌 + 黑白电视（拉杆天线；tv.toggle() 开关：亮线 → 雪花 → 黑白测试图，屏幕前一盏小点光源）+ 座钟（按用户照片：横放木壳、拱顶、镶条立柱，指针走现在的时间）、斑驳圆桌、洗脸盆架 + 洋瓷脸盆（红口沿、囍字，按用户照片）+ 毛巾、脚踏缝纫机
     northEast.js        东北屋（东西 6 m，仓库；尺寸在 layout.EAST_ROOM）：旧大白 + 水泥墙裙、旧砖地；西墙到北墙一溜石灰大缸（玉米/麦子/木盖/麻袋）、南窗下的床、墙角蛛网（透明贴图）、墙上爬的壁虎（贴图片，趴一会儿窜一下）
-    kitchen.js          厨房室内（第 14 轮，按用户照片；风箱尺寸在 layout.KITCHEN.bellows，世界坐标）：黄泥内墙 + 灶上方熏黑、泥灰灶台 + 带耳大铁锅、灶膛（炭火、火苗、三根柴、橙色点光源，火力 = 0.35 + 推风箱攒的劲）、红漆斑驳木风箱；pump() 拉一下（按真实时间走：前 42% 往外拉火变小，后面往里推火变旺）
+    kitchen.js          厨房室内（第 14 轮，按用户照片；风箱尺寸在 layout.KITCHEN.bellows，世界坐标）：黄泥内墙 + 灶上方熏黑、泥灰灶台 + 带耳大铁锅、灶膛（炭火、火苗、三根柴、橙色点光源，火力 = 0.35 + 推风箱攒的劲）、旧土黄色木风箱；pump() 拉一下（按真实时间走：前 42% 往外拉火变小，后面往里推火变旺）；kitchenThings()（第 15 轮按照片添的杂物：木架子、洋瓷盆、暖水壶、缸子、小坛子、铝锅、面粉袋、玉米筐、蜂窝煤、大釉缸、筛子笊篱、辣椒串、小凳；位置在 layout.KITCHEN.shelf 等）
     northWest.js        西北屋（东西 9 m）：隔墙分外屋（6 m）/里屋（3 m），门洞白布门帘（顶点动画，人走近被撩开）；墙面旧大白 + 墙根 0.55 m 水泥墙裙（finish() 给每面墙贴两层，外屋也用）、磨旧淡红砖地面；里屋的炕（东西两头顶墙，炕席、炕沿；中间试过竹床、木头床，用户都否了）、被子、拉线开关 + 15 瓦灯泡（lamp.pull() 开关，高画质点光源带阴影）、隔墙上三张挂历（用户给的 1993 年挂历照片，calendars/*.webp，calendarTex() 做旧，夹条 + 挂绳 + 钉子）、西南角水缸（复用 yard/waterVat.js）、两台做蜡烛的器具（按用户照片）+ 煤球炉、熏黑的南墙（窗洞处挖空）和顶棚
   ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针；musicButton.js 音乐开关（指北针左边，偏好存在 localStorage 'laojia-bgm-v2'）
 scripts/
@@ -138,6 +138,8 @@ docs/
 七步全部完成。之后追加：背景音乐（src/audio/，用户第一次点击/按键后开始循环，♪按钮开关并记住选择）。最初是代码合成的原创小曲，后按用户要求换成用户提供的 MP3（合成版在 git 历史 PR 9 里）。音乐默认开：加载完先直接试播，被浏览器自动播放策略拦下就显示“进入院子 ♪”遮罩（#enter），点一下开始。注意：无头 Chromium 不拦自动播放，而且 navigator.userActivation 一开始就是 true，测拦截路径要自己在 init script 里按 isTrusted 的输入事件模拟。
 
 之后的迭代（各屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
+
+第 15 轮：厨房再按用户的外观/屋里照片改：buildings/kitchen.js 外墙改成开裂黄泥墙（mudOutsideTex，掉皮处露旧砖/土坯，位置在 layout.KITCHEN.outside.patches）、去掉女儿墙改泥屋檐、木板门 + 糊塑料布的 plain 木窗、墙上圆筛子/辣椒串/扫帚/玉米秸；屋里布局不动，风箱改土黄色，加 kitchenThings 杂物。
 
 第 14 轮：厨房按用户照片重做：外墙旧砖（brickOld）、黄泥内墙、灶台 + 灶膛火、风箱（可拉）。
 
