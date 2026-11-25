@@ -268,8 +268,9 @@ export const SWING = { dir: [-0.8, -0.6], branchFrom: 1.75, branchLength: 2.2, h
  * 大黄（中华田园犬）：坐在父亲右手边、面朝东（朝着他的腿）；x/z 为狗的身体位置，rot 为朝向（度，0 = 朝南，90 = 朝东），scale 为体型。
  */
 export const CHARACTERS = {
-  father: { x: -2.55, z: -0.3, rot: -18, height: 1.72 },
-  dog: { x: -3.05, z: -0.25, rot: 100, scale: 1.1 },
+  // 第 16 轮：整体往东挪 1.5 m（原 x -2.55 / -3.05），离厨房门远一点，不挡进厨房的路
+  father: { x: -1.05, z: -0.3, rot: -18, height: 1.72 },
+  dog: { x: -1.55, z: -0.25, rot: 100, scale: 1.1 },
 };
 
 /** 默认视角 */

@@ -139,6 +139,8 @@ docs/
 
 之后的迭代（各屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
 
+第 16 轮：父亲和大黄一起往东挪 1.5 m（layout.CHARACTERS），不挡厨房门口；人在厨房里不出“摸摸大黄”（interact.js 判断 kitchenRoom.inKitchen）。
+
 第 15 轮：厨房再按用户的外观/屋里照片改：buildings/kitchen.js 外墙改成开裂黄泥墙（mudOutsideTex，掉皮处露旧砖/土坯，位置在 layout.KITCHEN.outside.patches）、去掉女儿墙改泥屋檐、木板门 + 糊塑料布的 plain 木窗、墙上圆筛子/辣椒串/扫帚/玉米秸；屋里布局不动，风箱改土黄色，加 kitchenThings 杂物。
 
 第 14 轮：厨房按用户照片重做：外墙旧砖（brickOld）、黄泥内墙、灶台 + 灶膛火、风箱（可拉）。
