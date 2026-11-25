@@ -16,6 +16,7 @@ import { createYardItems } from './yard/index.js';
 import { createCharacters } from './characters/index.js';
 import { createNorthWestInterior } from './interiors/northWest.js';
 import { createNorthEastInterior } from './interiors/northEast.js';
+import { createKitchenInterior } from './interiors/kitchen.js';
 import { createSmoke } from './effects/smoke.js';
 import { createViewModes } from './controls/viewModes.js';
 import { createTimeSlider } from './ui/timeSlider.js';
@@ -51,6 +52,8 @@ const westRoom = createNorthWestInterior();
 scene.getObjectByName('interior-anchor-west').add(westRoom.group);
 const eastRoom = createNorthEastInterior();
 scene.getObjectByName('interior-anchor-east').add(eastRoom.group);
+const kitchenRoom = createKitchenInterior();
+scene.getObjectByName('interior-anchor-kitchen').add(kitchenRoom.group);
 scene.add(createTrees());
 scene.add(createWell());
 scene.add(createGarden());
@@ -90,7 +93,7 @@ music.tryAutoplay().then((ok) => {
 const pumping = createPumping(scene.getObjectByName('well'));
 const swing = scene.getObjectByName('jujube')?.userData.swing;
 const picking = createPicking();
-const interaction = createInteraction({ engine, views, pumping, picking, ui, swing, characters, westRoom });
+const interaction = createInteraction({ engine, views, pumping, picking, ui, swing, characters, westRoom, kitchenRoom });
 const touch = createTouchControls(document.getElementById('touch'), renderer.domElement, views.fp, (x, y) => interaction.tap(x, y));
 engine.onUpdate((dt) => {
   pumping.update(dt);
@@ -98,6 +101,7 @@ engine.onUpdate((dt) => {
   characters.update(dt, performance.now() / 1000);
   westRoom.update(dt, performance.now() / 1000, views.current === 'walk' ? views.fp.state.pos : null);
   eastRoom.update(dt, performance.now() / 1000);
+  kitchenRoom.update(dt, performance.now() / 1000);
   picking.update(dt);
   interaction.update(dt);
   compass.update(camera);
@@ -139,4 +143,4 @@ if (params.get('tv') === 'on') westRoom.tv.toggle();
 // ?autoperf=off 关闭按帧率自动降档（自检截图用：无头浏览器帧率极低）
 const perf = params.get('autoperf') === 'off' ? null : createPerfMonitor(engine, { gtao: postfx.gtao, sun: lighting.sun });
 
-window.__app = { westRoom, eastRoom, characters, bgm, engine, views, setView, lighting, buildMs, quality, pumping, interaction, perf };
+window.__app = { westRoom, eastRoom, kitchenRoom, characters, bgm, engine, views, setView, lighting, buildMs, quality, pumping, interaction, perf };

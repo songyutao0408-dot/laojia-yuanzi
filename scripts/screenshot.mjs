@@ -83,6 +83,14 @@ const SHOTS = [
   ['east-bed', 'view=orbit&cam=2.8,1.8,-6.8,5.8,0.6,-4.6'],
   ['east-gecko', 'view=orbit&cam=5.0,2.0,-6.6,5.9,2.9,-8.76'],
   ['east-night', 'view=orbit&time=night&cam=4.1,1.75,-4.7,1.9,0.7,-8.2'],
+  // 第 14 轮：厨房（灶台和风箱、黄泥墙、夜里的灶火、外面的旧砖）
+  ['kitchen-stove', 'view=orbit&cam=-5.1,1.35,0.3,-6.4,0.5,-0.8'],
+  ['kitchen-fire', 'view=orbit&cam=-5.25,0.75,-0.55,-6.2,0.35,-0.9'],
+  ['kitchen-night', 'view=orbit&time=night&cam=-5.1,1.35,0.3,-6.4,0.5,-0.8'],
+  ['kitchen-outside', 'view=orbit&cam=-2.8,1.5,1.8,-4.5,1.2,0.3'],
+  // 第 15 轮：厨房外观正面、窗下架子那一角
+  ['kitchen-facade', 'view=orbit&cam=-1.3,1.5,0.4,-4.6,1.2,0.4'],
+  ['kitchen-shelf', 'view=orbit&cam=-6.6,1.6,-0.7,-4.95,0.75,1.3'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
   ['orbit-noon', 'view=orbit&time=noon'],

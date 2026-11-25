@@ -9,13 +9,14 @@ import { WELL, TREES } from '../layout.js';
  * - 环绕/俯视模式下点果子、压水井也有效（不限距离）
  * - 西北屋里屋：站在里屋里、离灯绳 2.6 m 内出“拉灯”按钮；也可以直接点灯绳
  * - 西北屋外屋：走到电视跟前（2 m 内）出“开电视”按钮；也可以直接点电视屏幕
+ * - 厨房：走到风箱跟前（1.8 m 内）出“拉风箱”按钮（点一下拉一下；连着点就一直拉）；也可以直接点风箱把手
  */
 const WELL_NEAR = 2.0;
 const POME_REACH = 2.6;
 const JUJUBE_REACH = 3.0;
 const CLICK_RADIUS = 90;
 
-export function createInteraction({ engine, views, pumping, picking, ui, swing, characters, westRoom }) {
+export function createInteraction({ engine, views, pumping, picking, ui, swing, characters, westRoom, kitchenRoom }) {
   const { scene, camera, renderer } = engine;
   const well = scene.getObjectByName('well');
   const pump = well.getObjectByName('pump');
@@ -102,6 +103,19 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     const c = westRoom.lamp.cordPosition();
     return Math.hypot(p.x - c.x, p.z - c.z) <= 2.6; // 里屋小，进了门洞基本就够得着
   };
+  let bellowsToast = 0;
+  function doBellows() {
+    kitchenRoom.pump();
+    if (performance.now() - bellowsToast > 4000) {
+      bellowsToast = performance.now();
+      ui.toast('呼嗒——呼嗒——，往里一推，灶膛里的火呼地旺起来');
+    }
+  }
+  const nearBellows = (p) => {
+    if (!kitchenRoom || !kitchenRoom.inKitchen(p.x, p.z)) return false;
+    const c = kitchenRoom.handlePosition();
+    return Math.hypot(p.x - c.x, p.z - c.z) <= 1.8;
+  };
   function doTv() {
     const on = westRoom.tv.toggle();
     ui.toast(on ? '啪一声，电视亮了，先是一阵雪花，沙沙的' : '电视关了，屏幕中间剩一个小亮点，慢慢没了');
@@ -131,6 +145,7 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     const p = playerXZ();
     if (!walking()) return acts;
     if (p.distanceTo(wellPos) <= WELL_NEAR) acts.push({ label: '压水', run: doPump });
+    if (nearBellows(p)) acts.push({ label: '拉风箱', run: doBellows });
     if (nearTv(p)) acts.push({ label: westRoom.tv.on ? '关电视' : '开电视', run: doTv });
     if (nearCord(p)) acts.push({ label: westRoom.lamp.on ? '拉灯（关）' : '拉灯', run: doLamp });
     if (characters) {
@@ -178,6 +193,11 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     }
     // 里屋的灯绳：走进去时人在里屋里才能点，环绕/俯视时随便点
     if (westRoom && (!walking() || westRoom.inInnerRoom(playerXZ().x, playerXZ().z))) cands.push({ kind: 'lamp', pos: westRoom.lamp.cordPosition() });
+    // 厨房的风箱把手：走进去时人在厨房里、3 m 内能点，环绕/俯视时随便点
+    if (kitchenRoom) {
+      const hp = kitchenRoom.handlePosition(new THREE.Vector3());
+      if (!walking() || (kitchenRoom.inKitchen(playerXZ().x, playerXZ().z) && Math.hypot(playerXZ().x - hp.x, playerXZ().z - hp.z) <= 3)) cands.push({ kind: 'bellows', pos: hp });
+    }
     // 外屋的电视：走进去时人在外屋、3 m 内能点，环绕/俯视时随便点
     if (westRoom) {
       const tp = westRoom.tv.position(new THREE.Vector3());
@@ -208,6 +228,7 @@ export function createInteraction({ engine, views, pumping, picking, ui, swing, 
     else if (best.kind === 'dog') doPetDog();
     else if (best.kind === 'lamp') doLamp();
     else if (best.kind === 'tv') doTv();
+    else if (best.kind === 'bellows') doBellows();
     else doPick(best);
     return true;
   }

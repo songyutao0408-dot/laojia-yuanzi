@@ -3,7 +3,7 @@ import { box } from '../core/box.js';
 import { mat, coupletMat, fuMat } from '../textures/index.js';
 
 /**
- * 八九十年代农村木门窗。所有函数用“沿墙坐标系”描述，再按墙的朝向放进世界：
+ * 八九十年代农村木门窗（woodWindow 的 style：'panel' 默认红漆带上亮子 / 'plain' 本色旧木田字格）。所有函数用“沿墙坐标系”描述，再按墙的朝向放进世界：
  *   along = 沿墙方向坐标，at = 墙中线坐标，axis = 'x'（东西向墙）| 'z'（南北向墙）
  *   out = 室外方向（+1 / -1，沿墙法线轴）
  */
@@ -164,9 +164,9 @@ export function woodDoor({ axis, at, center, width, bottom, height, thickness, o
 /**
  * 木框玻璃窗：外框 + 中梃 + 上亮子横档 + 窗扇小格（玻璃本身由墙体洞口生成）。
  */
-export function woodWindow({ axis, at, center, width, bottom, height, cols = 2, rows = 3 }) {
+export function woodWindow({ axis, at, center, width, bottom, height, cols = 2, rows = 3, style = 'panel' }) {
   const g = new THREE.Group();
-  const wood = mat('wood');
+  const wood = style === 'plain' ? mat('oldWood') : mat('wood');
   const f = 0.06;
   const d = 0.08;
   const a0 = center - width / 2;
@@ -178,6 +178,12 @@ export function woodWindow({ axis, at, center, width, bottom, height, cols = 2, 
   B(a1 - f, a1, y0, y1);
   B(a0, a1, y0, y0 + f);
   B(a0, a1, y1 - f, y1);
+  if (style === 'plain') {
+    // 本色旧木框，田字格（厨房，按用户照片）
+    B((a0 + a1) / 2 - 0.02, (a0 + a1) / 2 + 0.02, y0 + f, y1 - f, 0.05);
+    B(a0 + f, a1 - f, (y0 + y1) / 2 - 0.02, (y0 + y1) / 2 + 0.02, 0.05);
+    return g;
+  }
   const transom = y1 - f - (height - 2 * f) * 0.28;
   B(a0 + f, a1 - f, transom - 0.025, transom + 0.025); // 上亮子横档
   // 下部窗扇：中梃 + 小格窗棂

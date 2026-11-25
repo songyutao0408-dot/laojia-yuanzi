@@ -10,6 +10,9 @@ import { coupletTexture, fuTexture, grassCard, wallBaseStain, wetPatch } from '.
  */
 const DEFS = {
   brick: () => ({ ...redBrick(), roughness: 1 }),
+  // 厨房的砖：更淡、更破（缺角多、砖缝风化、起皮、雨水印）
+  brickOld: () => ({ ...redBrick({ old: true }), roughness: 1 }),
+  brickOldSoot: () => ({ ...shared('brickOld'), color: 0x3b3430, roughness: 1 }),
   // 烟熏黑的砖（烟囱顶、灶口）：同一套砖贴图，乘深色
   brickSoot: () => ({ ...shared('brick'), color: 0x3b3430, roughness: 1 }),
   paving: () => ({ ...brickPaving({ worn: 0.6 }), roughness: 1 }),
