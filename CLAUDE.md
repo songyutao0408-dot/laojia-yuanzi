@@ -71,7 +71,7 @@ src/
     nightLights.js      夜间：屋里吊灯泡（点光源）、窗后暖光面、门窗向外的聚光
     postfx.js           EffectComposer：RenderPass → 识别透明叶片的 GTAO（仅高画质）→ OutputPass（ACES + sRGB）
   effects/smoke.js      厨房烟囱炊烟粒子（setAmount 随时间变化）
-  yard/                 院子里的零碎物件（一个物件一个文件，位置在 layout.YARD_ITEMS）：waterVat.js 大水缸、stoneSlabs.js 老青石板、narcissus.js 东梧桐下的一盆水仙、tricycle.js 时风三马车（车厢两边白字“时”“风”；第 18 轮挪到当院、车头朝东）、bicycle.js 二八自行车（第 17 轮）
+  yard/                 院子里的零碎物件（一个物件一个文件，位置在 layout.YARD_ITEMS）：waterVat.js 大水缸、stoneSlabs.js 老青石板、impatiens.js 东北屋门口台阶东边的一丛指甲桃（凤仙花，第 19 轮替换了原来东梧桐下的水仙）、tricycle.js 时风三马车（车厢两边白字“时”“风”；第 18 轮挪到当院、车头朝东）、bicycle.js 二八自行车（第 17 轮）
   characters/           人和动物（父亲和大黄在西边梧桐树下，母亲在父亲和压水井中间洗衣服，小女孩在厨房灶前，两个男孩在枣树下荡秋千；位置在 layout.CHARACTERS；猪、鸡在 layout.PIGPEN / CHICKENS）
     person.js           通用的程序化人物（第 17 轮）：按身高出比例（child 头大腿短），衣服 top/bottom（shorts/pants、袖子 short/rolled）、头发 short/bob、手画脸（球面 UV）；pose(P) 每帧摆姿势（胯、上身前倾、两脚踝、两手腕，两段骨骼 IK）；clothTex 小格子/海魂衫条纹/碎花
     pigs.js             猪圈里的两头黑猪（第 18 轮）：eat 在石槽跟前拱食、lie 在棚子底下趴着喘气扇耳朵
@@ -148,6 +148,8 @@ docs/
 七步全部完成。之后追加：背景音乐（src/audio/，用户第一次点击/按键后开始循环，♪按钮开关并记住选择）。最初是代码合成的原创小曲，后按用户要求换成用户提供的 MP3（合成版在 git 历史 PR 9 里）。音乐默认开：加载完先直接试播，被浏览器自动播放策略拦下就显示“进入院子 ♪”遮罩（#enter），点一下开始。注意：无头 Chromium 不拦自动播放，而且 navigator.userActivation 一开始就是 true，测拦截路径要自己在 init script 里按 isTrusted 的输入事件模拟。
 
 之后的迭代（各屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
+
+第 19 轮：东梧桐下的水仙换成指甲桃（凤仙花，yard/impatiens.js），种在东北屋门口台阶东边、窗户底下往西一点；同步改 docs/老家院子-完整prompt.md / .pdf。
 
 第 18 轮：三马车挪到当院（车头朝东）；菜地南头让出来做猪圈（buildings/pigpen.js）+ 两头黑猪（characters/pigs.js）；东墙头五彩大公鸡 + 十只小鸡（characters/chickens.js）。
 
