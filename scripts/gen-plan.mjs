@@ -229,11 +229,23 @@ text(ch.x + 0.4, ch.z - 0.35, '烟囱', 'class="s"');
   out.push(`<circle cx="${f(X(n.x))}" cy="${f(Y(n.z))}" r="${0.16 * S}" fill="#f4f2e8" stroke="#2a4a8a" stroke-width="1.2"/>`);
   text(n.x + 0.25, n.z + 0.1, '水仙', 'class="s"');
   const t = Y2.tricycle;
-  out.push(`<rect x="${f(X(t.x) - 0.66 * S)}" y="${f(Y(t.z) - 1.75 * S)}" width="${f(1.32 * S)}" height="${f(3.45 * S)}" rx="3" fill="#2c5cb0" fill-opacity="0.85" stroke="${C.ink}" stroke-width="0.8"/>`);
+  // 车身约 3.5 m × 1.32 m；rot 把车头（局部 +z）转到哪：90 = 朝东
+  out.push(`<rect x="${f(X(t.x) - 0.66 * S)}" y="${f(Y(t.z) - 1.75 * S)}" width="${f(1.32 * S)}" height="${f(3.5 * S)}" rx="3" fill="#2c5cb0" fill-opacity="0.85" stroke="${C.ink}" stroke-width="0.8" transform="rotate(${-t.rot + 180} ${f(X(t.x))} ${f(Y(t.z))})"/>`);
   text(t.x, t.z + 0.1, '三马车', 'class="s" text-anchor="middle" fill="#fff"');
   const b = Y2.bicycle;
   line(b.x - 0.6, b.z, b.x + 0.6, b.z, `stroke="#1a1a1a" stroke-width="3"`);
   text(b.x, b.z + 0.35, '自行车', 'class="s" text-anchor="middle"');
+}
+// 第 18 轮：猪圈、鸡
+{
+  const P = L.PIGPEN;
+  rect(P.rect, `fill="#5a4a38" fill-opacity="0.5" stroke="${C.ink}" stroke-width="1.5"`);
+  for (const p of P.pigs) out.push(`<ellipse cx="${f(X(p.x))}" cy="${f(Y(p.z))}" rx="${0.5 * S}" ry="${0.24 * S}" fill="#1e1c1c" transform="rotate(${-(p.rot - 90)} ${f(X(p.x))} ${f(Y(p.z))})"/>`);
+  text((P.rect.x0 + P.rect.x1) / 2, P.rect.z0 + 0.35, '猪圈', 'class="s" text-anchor="middle" fill="#fff"');
+  const R2 = L.CHICKENS.rooster;
+  out.push(`<circle cx="${f(X(R2.x))}" cy="${f(Y(R2.z))}" r="${0.14 * S}" fill="#c8201c" stroke="${C.ink}" stroke-width="0.8"/>`);
+  text(R2.x - 0.25, R2.z + 0.1, '公鸡', 'class="s" text-anchor="end"');
+  for (const c of L.CHICKENS.chicks) out.push(`<circle cx="${f(X(c.x))}" cy="${f(Y(c.z))}" r="${0.06 * S}" fill="#f2d04a" stroke="${C.ink}" stroke-width="0.4"/>`);
 }
 // 秋千（挂在枣树弯出来的枝干上）
 {

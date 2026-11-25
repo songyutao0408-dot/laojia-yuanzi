@@ -109,9 +109,15 @@ const SHOTS = [
   ['narcissus', 'view=orbit&cam=4.0,1.0,0.35,4.33,0.45,-0.72'],
   ['inner-cabinets', 'view=orbit&cam=-0.95,1.5,-6.2,1.25,1.0,-6.2'],
   ['east-labels', 'view=orbit&cam=4.4,1.7,-5.0,2.1,0.75,-7.5'],
-  ['tricycle', 'view=orbit&cam=1.4,2.0,4.3,4.4,0.8,6.7'],
-  ['tricycle-front', 'view=orbit&cam=3.0,1.6,3.6,4.4,0.9,6.0'],
+  ['tricycle', 'view=orbit&cam=-0.4,1.9,6.2,-0.8,0.8,2.9'],
+  ['tricycle-front', 'view=orbit&cam=2.3,1.5,1.7,-0.5,0.8,2.9'],
   ['bicycle', 'view=orbit&cam=-5.4,1.3,5.0,-5.85,0.6,3.3'],
+  // 第 18 轮：猪圈、黑猪、墙头公鸡、小鸡、当院俯看
+  ['pigpen', 'view=orbit&cam=4.4,2.2,2.6,6.2,0.35,4.6'],
+  ['pigs', 'view=orbit&cam=5.25,1.45,4.1,6.1,0.35,4.9'],
+  ['rooster', 'view=orbit&cam=6.3,2.55,1.95,7.3,2.45,1.2'],
+  ['chicks', 'view=orbit&cam=1.75,0.75,2.15,0.9,0.05,1.0'],
+  ['yard-wide', 'view=orbit&cam=2.5,8.5,11.5,1.0,0.0,2.0'],
   // 时间
   ['orbit-dawn', 'view=orbit&time=dawn'],
   ['orbit-noon', 'view=orbit&time=noon'],

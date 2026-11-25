@@ -54,7 +54,7 @@ src/
     prewarm.js          加载时逐张预生成所有贴图（每张让出一帧，驱动进度条）
     materials.js        mat(key) 材质库（首次使用时生成并缓存）；stainMat/wetMat/grassMat/coupletMat/fuMat 贴花材质
   ground/               黄土地面（院内没有砖路）、院外地面、井边湿地；horizon.js 院外远处的树林剪影（被雾吞没）
-  buildings/            北屋、厨房、土墙、大门、影背墙、茅厕（一个建筑一个文件）
+  buildings/            北屋、厨房、土墙、大门、影背墙、茅厕、猪圈（一个建筑一个文件；pigpen.js 第 18 轮，尺寸在 layout.PIGPEN）
     peel.js             墙皮剥落贴图（第 16 轮厨房）：blobPath 参差不齐的边、remnantPlasterTex 外墙砖上残留的泥灰皮 + 檐下熏黑（整面透明贴花）、peeledTex 内墙洋灰掉皮露砖
     wall.js             通用构件：wallWithOpenings（带门窗洞的厚墙，可带过梁/窗台/玻璃）、brickBox（四墙+地坪+平顶+檐口）、baseStain（墙根泛碱泥点）
     steps.js            北屋门前连通两间的石灰台阶（NH.steps.x0..x1）、天地神位小神龛（NH.shrine）
@@ -71,9 +71,11 @@ src/
     nightLights.js      夜间：屋里吊灯泡（点光源）、窗后暖光面、门窗向外的聚光
     postfx.js           EffectComposer：RenderPass → 识别透明叶片的 GTAO（仅高画质）→ OutputPass（ACES + sRGB）
   effects/smoke.js      厨房烟囱炊烟粒子（setAmount 随时间变化）
-  yard/                 院子里的零碎物件（一个物件一个文件，位置在 layout.YARD_ITEMS）：waterVat.js 大水缸、stoneSlabs.js 老青石板、narcissus.js 东梧桐下的一盆水仙、tricycle.js 时风三马车（车厢两边白字“时”“风”）、bicycle.js 二八自行车（第 17 轮）
-  characters/           人和动物（父亲和大黄在西边梧桐树下，母亲在父亲和压水井中间洗衣服，小女孩在厨房灶前，两个男孩在枣树下荡秋千；位置在 layout.CHARACTERS）
+  yard/                 院子里的零碎物件（一个物件一个文件，位置在 layout.YARD_ITEMS）：waterVat.js 大水缸、stoneSlabs.js 老青石板、narcissus.js 东梧桐下的一盆水仙、tricycle.js 时风三马车（车厢两边白字“时”“风”；第 18 轮挪到当院、车头朝东）、bicycle.js 二八自行车（第 17 轮）
+  characters/           人和动物（父亲和大黄在西边梧桐树下，母亲在父亲和压水井中间洗衣服，小女孩在厨房灶前，两个男孩在枣树下荡秋千；位置在 layout.CHARACTERS；猪、鸡在 layout.PIGPEN / CHICKENS）
     person.js           通用的程序化人物（第 17 轮）：按身高出比例（child 头大腿短），衣服 top/bottom（shorts/pants、袖子 short/rolled）、头发 short/bob、手画脸（球面 UV）；pose(P) 每帧摆姿势（胯、上身前倾、两脚踝、两手腕，两段骨骼 IK）；clothTex 小格子/海魂衫条纹/碎花
+    pigs.js             猪圈里的两头黑猪（第 18 轮）：eat 在石槽跟前拱食、lie 在棚子底下趴着喘气扇耳朵
+    chickens.js         东墙头上的五彩大公鸡（隔 14 秒打一次鸣）+ 十只小鸡（在 home 点附近溜达、停下啄食，位置按真实时间算出来，不累加）；位置在 layout.CHICKENS（第 18 轮）
     mother.js           母亲（第 17 轮）：齐耳短发，坐小板凳洗衣服：大铝盆、洗衣水、搓衣板、泡着的衣服，两手在搓衣板上搓（按真实时间）
     boys.js             两个男孩（第 17 轮）：6 岁的挂在 swing.seat 上跟着秋千摆、腿前后甩；8 岁的站在后面，秋千荡回来时手伸到他背上推；swing.keepAmp 让秋千一直小幅度荡着。要等秋千建好，所以在 main.js 里创建
     girl.js             厨房灶前坐在小板凳上烧火的小女孩（第 16 轮）：十岁左右、马尾辫（一串 Limb 段，每帧按重力摆）、齐刘海、碎花裙子（floralTex）；faceTex/hairTex 是球面 UV（正脸 u = 0.25）；右手两段骨骼 IK 握柴、每 5 秒往灶膛里捅一下；位置在 layout.CHARACTERS.girl（和 KITCHEN.stool 一致），碰撞体连板凳一起
@@ -145,6 +147,8 @@ docs/
 七步全部完成。之后追加：背景音乐（src/audio/，用户第一次点击/按键后开始循环，♪按钮开关并记住选择）。最初是代码合成的原创小曲，后按用户要求换成用户提供的 MP3（合成版在 git 历史 PR 9 里）。音乐默认开：加载完先直接试播，被浏览器自动播放策略拦下就显示“进入院子 ♪”遮罩（#enter），点一下开始。注意：无头 Chromium 不拦自动播放，而且 navigator.userActivation 一开始就是 true，测拦截路径要自己在 init script 里按 isTrusted 的输入事件模拟。
 
 之后的迭代（各屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
+
+第 18 轮：三马车挪到当院（车头朝东）；菜地南头让出来做猪圈（buildings/pigpen.js）+ 两头黑猪（characters/pigs.js）；东墙头五彩大公鸡 + 十只小鸡（characters/chickens.js）。
 
 第 17 轮（二）：东梧桐下一盆水仙、里屋东墙衣柜 + 碗柜、东北屋粮缸贴红纸、时风三马车、二八自行车（yard/，位置在 layout.YARD_ITEMS）；走进去以后滚轮 / 双指捏合拉宽视野看全景。
 
