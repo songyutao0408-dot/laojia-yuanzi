@@ -31,7 +31,14 @@ export function createTouchControls(root, canvas, fp, onTap) {
     e.preventDefault();
   }, { passive: false });
 
+  // 两根手指在画面上捏合 / 张开：拉远看全景 / 拉近（第 17 轮）
+  const pinchDist = () => {
+    const [a, b] = [...looks.values()];
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  };
   window.addEventListener('touchmove', (e) => {
+    const pinching = looks.size >= 2;
+    const d0 = pinching ? pinchDist() : 0;
     for (const t of e.changedTouches) {
       if (t.identifier === stickId && center) {
         let dx = t.clientX - center.x;
@@ -51,9 +58,10 @@ export function createTouchControls(root, canvas, fp, onTap) {
         l.moved += Math.abs(dx) + Math.abs(dy);
         l.x = t.clientX;
         l.y = t.clientY;
-        fp.look(dx, dy, 0.006);
+        if (!pinching) fp.look(dx, dy, 0.006);
       }
     }
+    if (pinching) fp.zoom(-(pinchDist() - d0) * 0.12);
   }, { passive: true });
 
   const end = (e) => {

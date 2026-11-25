@@ -3,6 +3,8 @@ import { createDog } from './dog.js';
 import { createFather } from './father.js';
 import { createGirl } from './girl.js';
 import { createMother } from './mother.js';
+import { createPigs } from './pigs.js';
+import { createChickens } from './chickens.js';
 
 /**
  * 院子里的人和动物（西边梧桐树下）：
@@ -11,6 +13,8 @@ import { createMother } from './mother.js';
  *   mother.js  母亲：坐在小板凳上洗衣服（大铝盆、搓衣板），在父亲和压水井中间（第 17 轮）
  *   boys.js    枣树下荡秋千的两个男孩（第 17 轮；要等秋千建好，在 main.js 里单独创建）
  *   person.js  通用的程序化人物（母亲、男孩用）：按身高出比例，pose() 摆姿势
+ *   pigs.js     猪圈里的两头黑猪（第 18 轮）：一头在石槽跟前拱食，一头在棚子底下趴着
+ *   chickens.js 东墙头上的五彩大公鸡（隔一阵打鸣）+ 院子里溜达啄食的十只小鸡（第 18 轮）
  *   dog.js     大黄（中华田园犬），坐着、摇尾巴，被摸时往父亲腿上蹭
  *   rig.js     肢体、两段骨骼 IK、椭球等小工具
  */
@@ -21,7 +25,9 @@ export function createCharacters() {
   const father = createFather();
   const girl = createGirl();
   const mother = createMother();
-  group.add(dog.object, father.object, girl.object, mother.object);
+  const pigs = createPigs();
+  const chickens = createChickens();
+  group.add(dog.object, father.object, girl.object, mother.object, pigs.group, chickens.group);
   const target = new THREE.Vector3();
   return {
     group,
@@ -29,6 +35,8 @@ export function createCharacters() {
     father,
     girl,
     mother,
+    pigs,
+    chickens,
     /** 大黄头的世界坐标（交互用） */
     dogHeadPosition: () => dog.head.getWorldPosition(new THREE.Vector3()),
     update(dt, t) {
@@ -37,6 +45,8 @@ export function createCharacters() {
       father.update(dt, t, target, dog.nuzzling);
       girl.update(dt, t);
       mother.update(dt, t);
+      pigs.update(dt, t);
+      chickens.update(dt, t);
     },
   };
 }
