@@ -71,7 +71,7 @@ src/
     nightLights.js      夜间：屋里吊灯泡（点光源）、窗后暖光面、门窗向外的聚光
     postfx.js           EffectComposer：RenderPass → 识别透明叶片的 GTAO（仅高画质）→ OutputPass（ACES + sRGB）
   effects/smoke.js      厨房烟囱炊烟粒子（setAmount 随时间变化）
-  yard/                 院子里的零碎物件（一个物件一个文件）：waterVat.js 大水缸、stoneSlabs.js 老青石板
+  yard/                 院子里的零碎物件（一个物件一个文件，位置在 layout.YARD_ITEMS）：waterVat.js 大水缸、stoneSlabs.js 老青石板、narcissus.js 东梧桐下的一盆水仙、tricycle.js 时风三马车（车厢两边白字“时”“风”）、bicycle.js 二八自行车（第 17 轮）
   characters/           人和动物（父亲和大黄在西边梧桐树下，母亲在父亲和压水井中间洗衣服，小女孩在厨房灶前，两个男孩在枣树下荡秋千；位置在 layout.CHARACTERS）
     person.js           通用的程序化人物（第 17 轮）：按身高出比例（child 头大腿短），衣服 top/bottom（shorts/pants、袖子 short/rolled）、头发 short/bob、手画脸（球面 UV）；pose(P) 每帧摆姿势（胯、上身前倾、两脚踝、两手腕，两段骨骼 IK）；clothTex 小格子/海魂衫条纹/碎花
     mother.js           母亲（第 17 轮）：齐耳短发，坐小板凳洗衣服：大铝盆、洗衣水、搓衣板、泡着的衣服，两手在搓衣板上搓（按真实时间）
@@ -86,21 +86,22 @@ src/
                         单文件版里 MP3 以 data: 内联；只通过 SRC.url 引用一次，否则压缩器会把 3.4 MB 的字符串复制多份
   controls/             浏览与交互
     viewModes.js        三种模式切换：top 俯视（平移缩放）、orbit 环绕、walk 走进去
-    firstPerson.js      第一人称：WASD/方向键、Shift 跑、按住鼠标拖动转头（不锁定鼠标）、上台阶、进门辅助（朝门走时自动往门洞中线靠）、视线起伏
+    firstPerson.js      第一人称：WASD/方向键、Shift 跑、按住鼠标拖动转头（不锁定鼠标）、上台阶、进门辅助（朝门走时自动往门洞中线靠）、视线起伏；视野 68°，滚轮 / 双指捏合（touch.js）在 35°~105° 之间拉宽看全景（第 17 轮），离开走进去时恢复 50°
     colliders.js        从 userData.solid 的 Mesh 生成可旋转矩形碰撞体 + 高度过滤；groundHeight(x,z) 台阶/室内地坪
     touch.js            手机：左下虚拟摇杆、滑动转头、轻点交互
     interact.js         走近时出现大按钮（压水/摘石榴/打枣/荡秋千/摸摸大黄/里屋拉灯/外屋开电视/厨房拉风箱），按 E 执行第一个；直接点画面会选点击处 90 像素内够得着的目标；“兜里”计数
   interiors/            室内细节，见 interiors/README.md；挂在 interior-anchor-* 上，尺寸在 layout.WEST_ROOM 等（室内坐标）
     common.js           室内共用：canvasTex、rng、seamlessBlob、炕席、被面、枕头、一摞被子 quiltStack、木纹 woodTex、挂历做旧 calendarTex、旧大白 plasterTex、水泥墙裙 cementTex、旧砖地 floorTex
     northWestOuter.js   西北屋外屋陈设（尺寸在 WEST_ROOM.outer）：大木头炕（枕头朝外、靠墙摞被）+ 白纱蚊帐（第 17 轮，outer.net）、翘头长条几 + 柜桌 + 两把椅子（第 17 轮按用户的图，outer.desk；条几右边暖水壶、茶具）、柜桌上的黑白电视（tv.toggle() 开关：亮线 → 雪花 → 黑白测试图，屏幕前一盏小点光源）+ 座钟（按用户照片：横放木壳、拱顶、镶条立柱，指针走现在的时间）、斑驳圆桌、洗脸盆架 + 洋瓷脸盆（红口沿、囍字，按用户照片）+ 毛巾、脚踏缝纫机
-    northEast.js        东北屋（东西 6 m，仓库；尺寸在 layout.EAST_ROOM）：旧大白 + 水泥墙裙、旧砖地；西墙到北墙一溜石灰大缸（玉米/麦子/木盖/麻袋）、南窗下的床、墙角蛛网（透明贴图）、墙上爬的壁虎（贴图片，趴一会儿窜一下）
+    northEast.js        东北屋（东西 6 m，仓库；尺寸在 layout.EAST_ROOM）：旧大白 + 水泥墙裙、旧砖地；西墙到北墙一溜石灰大缸（玉米/麦子/绿豆/芝麻/油菜籽/棉花/木盖/麻袋，每口朝屋里贴一条红纸写装的什么 labelTex，第 17 轮）、南窗下的床、墙角蛛网（透明贴图）、墙上爬的壁虎（贴图片，趴一会儿窜一下）
     kitchen.js          厨房室内（第 14 轮，按用户照片；风箱尺寸在 layout.KITCHEN.bellows，世界坐标）：黄泥内墙 + 灶上方熏黑、泥灰灶台 + 带耳大铁锅、灶膛（炭火、火苗、三根柴、橙色点光源，火力 = 0.35 + 推风箱攒的劲）、旧土黄色木风箱；第 16 轮内墙改成洋灰（墙裙 K.inside.dado 以下深灰 cementTex、以上浅灰 cementUpperTex）+ 掉皮露砖（K.inside.peel）；pump() 拉一下（按真实时间走：前 42% 往外拉火变小，后面往里推火变旺）；kitchenThings()（第 15 轮按照片添的杂物：木架子、洋瓷盆、暖水壶、缸子、小坛子、铝锅、面粉袋、玉米筐、蜂窝煤、大釉缸、筛子笊篱、辣椒串、小凳；位置在 layout.KITCHEN.shelf 等）
+    innerCabinets.js    西北屋里屋东墙（正对门洞）的豆绿漆大衣柜（梅花喜鹊）+ 碗柜（推拉玻璃、碗盘茶杯、圆闹钟），第 17 轮按用户的图；尺寸在 WEST_ROOM.cabinets
     northWest.js        西北屋（东西 9 m）：隔墙分外屋（6 m）/里屋（3 m），门洞白布门帘（顶点动画，人走近被撩开）；墙面旧大白 + 墙根 0.55 m 水泥墙裙（finish() 给每面墙贴两层，外屋也用）、磨旧淡红砖地面；里屋的炕（东西两头顶墙，炕席、炕沿；中间试过竹床、木头床，用户都否了）、被子、拉线开关 + 15 瓦灯泡（lamp.pull() 开关，高画质点光源带阴影）、隔墙上三张挂历（用户给的 1993 年挂历照片，calendars/*.webp，calendarTex() 做旧，夹条 + 挂绳 + 钉子）、西南角水缸（复用 yard/waterVat.js）、两台做蜡烛的器具（按用户照片）+ 煤球炉、熏黑的南墙（窗洞处挖空）和顶棚
   ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针；musicButton.js 音乐开关（指北针左边，偏好存在 localStorage 'laojia-bgm-v2'）
 scripts/
   gen-plan.mjs          由 layout.js 生成 docs/plan.svg
   screenshot.mjs        自检截图
-  interaction-test.mjs  交互自检（npm run test:interact，ONLY=A..K 可只跑部分）：只用真实按键/点击/触摸，从附近自己走过去：斜着进西北屋、进厨房、井边按 E、点按钮摘石榴、点画面摘石榴、打枣、手机摇杆进东北屋、手机点压水、摸大黄（H）、穿过门帘进里屋拉灯（I）、外屋走到电视跟前开电视/点屏幕关（J）、厨房按 E 拉风箱火变旺/低头点把手（K）
+  interaction-test.mjs  交互自检（npm run test:interact，ONLY=A..L 可只跑部分）：只用真实按键/点击/触摸，从附近自己走过去：斜着进西北屋、进厨房、井边按 E、点按钮摘石榴、点画面摘石榴、打枣、手机摇杆进东北屋、手机点压水、摸大黄（H）、穿过门帘进里屋拉灯（I）、外屋走到电视跟前开电视/点屏幕关（J）、厨房按 E 拉风箱火变旺/低头点把手（K）、外屋里滚轮拉宽视野再拉回、切回环绕恢复（L）
 docs/
   scene-spec.md         场景权威描述
   plan.svg              俯视平面图
@@ -145,7 +146,9 @@ docs/
 
 之后的迭代（各屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
 
-第 17 轮：加母亲洗衣服（mother.js）、两个男孩荡秋千（boys.js），两人都用新的通用人物 person.js；外屋炕上加蚊帐；电视桌换成翘头长条几 + 柜桌 + 两把椅子。
+第 17 轮（二）：东梧桐下一盆水仙、里屋东墙衣柜 + 碗柜、东北屋粮缸贴红纸、时风三马车、二八自行车（yard/，位置在 layout.YARD_ITEMS）；走进去以后滚轮 / 双指捏合拉宽视野看全景。
+
+第 17 轮（一）：加母亲洗衣服（mother.js）、两个男孩荡秋千（boys.js），两人都用新的通用人物 person.js；外屋炕上加蚊帐；电视桌换成翘头长条几 + 柜桌 + 两把椅子。
 
 第 16 轮（二）：厨房按用户和家人回忆改成砖房：外墙旧砖 + 残留泥灰皮（buildings/peel.js、layout.KITCHEN.outside.plaster）、水泥顶板，外面添坛子/大瓦缸/柴火垛/梯子/玉米筐；内墙洋灰 + 墙裙 + 掉皮露砖；灶前加烧火的小女孩（characters/girl.js）。
 

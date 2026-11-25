@@ -88,6 +88,8 @@ export const WEST_ROOM = {
   ],
   vat: { height: 0.7, rimRadius: 0.27, bellyRadius: 0.33, baseRadius: 0.21 }, // 里屋西南角的水缸
   candles: { depth: 0.32, length: 0.8 }, // 水缸往东一排做蜡烛的器具（两台）
+  // 第 17 轮按用户的图：里屋正对门洞（东墙）一个豆绿漆的大衣柜 + 一个碗柜（比图上窄一点，塞进炕和煤球炉之间）；z0 为北头，w 为南北宽
+  cabinets: { wardrobe: { z0: 1.93, w: 0.86, d: 0.56, h: 1.86 }, sideboard: { z0: 2.83, w: 1.1, d: 0.46, h: 0.96 } },
   // —— 外屋（第 11 轮，用户描述）：x 0 .. partition.x - 0.12 ——
   outer: {
     kang: { width: 1.62, height: 0.6 }, // 西边一铺大木头炕，南北通长（顶住南北墙），从西墙往东 1.62 m（第 11 轮用户：比 1.8 m 再窄一点）
@@ -116,18 +118,20 @@ export const EAST_ROOM = {
   origin: { x: NORTH_HOUSE.rooms[1].x0 + NORTH_HOUSE.wall / 2, z: NORTH_HOUSE.rect.z0 + NORTH_HOUSE.wall },
   size: { w: NORTH_HOUSE.rect.x1 - NORTH_HOUSE.wall - (NORTH_HOUSE.rooms[1].x0 + NORTH_HOUSE.wall / 2), d: 4.52, h: NORTH_HOUSE.height - 0.15 - NORTH_HOUSE.floor },
   vat: { r: 0.43, h: 0.95 }, // 石灰大缸：口沿外半径、高
-  // 大缸：西墙一溜（从南往北）、西北角一口、北墙一溜（从西往东）；fill：corn 玉米 / wheat 麦子 / lid 盖着木盖 / sack 上面压着麻袋
+  // 大缸：西墙一溜（从南往北）、西北角一口、北墙一溜（从西往东）
+  // fill：缸里看得见的东西（corn 玉米 / wheat 麦子 / mungbean 绿豆 / sesame 芝麻 / rapeseed 油菜籽 / cotton 棉花 / lid 盖着木盖 / sack 上面压着麻袋）
+  // label：第 17 轮用户要求，每口缸朝屋里贴一张红纸，写装的是什么（Claude 分配）
   vats: [
-    { x: 0.47, z: 4.05, fill: 'wheat' },
-    { x: 0.47, z: 3.13, fill: 'lid' },
-    { x: 0.47, z: 2.21, fill: 'corn' },
-    { x: 0.47, z: 1.29, fill: 'wheat' },
-    { x: 0.47, z: 0.47, fill: 'corn' },
-    { x: 1.39, z: 0.47, fill: 'lid' },
-    { x: 2.31, z: 0.47, fill: 'wheat' },
-    { x: 3.23, z: 0.47, fill: 'sack' },
-    { x: 4.15, z: 0.47, fill: 'corn' },
-    { x: 5.07, z: 0.47, fill: 'lid' },
+    { x: 0.47, z: 4.05, fill: 'wheat', label: '小麦' },
+    { x: 0.47, z: 3.13, fill: 'lid', label: '花生' },
+    { x: 0.47, z: 2.21, fill: 'corn', label: '玉米' },
+    { x: 0.47, z: 1.29, fill: 'mungbean', label: '绿豆' },
+    { x: 0.47, z: 0.47, fill: 'cotton', label: '棉花' },
+    { x: 1.39, z: 0.47, fill: 'lid', label: '黄豆' },
+    { x: 2.31, z: 0.47, fill: 'sesame', label: '芝麻' },
+    { x: 3.23, z: 0.47, fill: 'sack', label: '谷子' },
+    { x: 4.15, z: 0.47, fill: 'rapeseed', label: '油菜籽' },
+    { x: 5.07, z: 0.47, fill: 'lid', label: '高粱' },
   ],
   bed: { x0: 3.15, length: 2.0, width: 1.5, height: 0.5 }, // 南窗底下的床：x0 为床头（西头），长 2 m 东西向、宽 1.5 m，靠南墙
   // 墙上的壁虎：wall 哪面墙（n/e/s），u 沿墙的起始位置（从西或从北量），v 离地高
@@ -293,6 +297,16 @@ export const BACK_YARD = {
     { x: 3.45, z: 7.55, rot: 78, y: 0 },
   ],
   slabSize: { l: 1.8, w: 0.6, t: 0.12 },
+};
+
+/** 第 17 轮：院子里添的几样东西（用户要求） */
+export const YARD_ITEMS = {
+  // 东边梧桐树底下一盆水仙：放在一个小木凳上，树干南边一点
+  narcissus: { x: 4.32, z: -0.72, stool: 0.3 },
+  // 时风三马车：车头朝北，车尾靠近南墙（在青石板东边、茅厕西边）；x/z 为车身中心
+  tricycle: { x: 4.42, z: 6.75, rot: 180 }, // rot：车头（局部 +z）转到朝北
+  // 二八自行车：支着车梯子停在厨房南墙根，车头朝东
+  bicycle: { x: -5.85, z: 3.34, rot: 90 },
 };
 
 /** 枣树弯出来的那根枝干上绑的秋千：枝干从主干约 1.75 m 处朝 dir 方向伸出；秋千挂在离主干 hang 米处 */

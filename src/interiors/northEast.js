@@ -81,6 +81,62 @@ function wheatTex() {
   });
 }
 
+/** 一般的豆子、籽：底色 + 一粒粒椭圆（rx × ry 像素），colors 里随机挑 */
+function seedTex(bg, colors, rx, ry, n, seed) {
+  return canvasTex(256, 256, (g, w, h) => {
+    const r = rng(seed);
+    g.fillStyle = bg;
+    g.fillRect(0, 0, w, h);
+    for (let i = 0; i < n; i++) {
+      const c = colors[Math.floor(r() * colors.length)];
+      const k = 0.85 + r() * 0.25;
+      g.fillStyle = `rgb(${c[0] * k},${c[1] * k},${c[2] * k})`;
+      g.beginPath();
+      g.ellipse(r() * w, r() * h, rx, ry, r() * Math.PI, 0, Math.PI * 2);
+      g.fill();
+      if (rx > 2) {
+        g.fillStyle = 'rgba(255,255,240,0.35)';
+        g.fillRect(r() * w, r() * h, 1, 1);
+      }
+    }
+  });
+}
+
+/** 棉花：一团团白，带点灰影和几片干壳 */
+function cottonTex() {
+  return canvasTex(256, 256, (g, w, h) => {
+    const r = rng(241);
+    g.fillStyle = '#d8d4cc';
+    g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 160; i++) seamlessBlob(g, w, h, r() * w, r() * h, 8 + r() * 22, r() > 0.25 ? '250,248,244' : '170,164,154', 0.6);
+    for (let i = 0; i < 25; i++) {
+      g.fillStyle = 'rgba(110,80,50,0.6)';
+      g.fillRect(r() * w, r() * h, 2 + r() * 3, 1 + r() * 2);
+    }
+  });
+}
+
+/** 缸上贴的红纸：竖着一条，毛笔字（一个字一行），褪色、边上卷起发白 */
+function labelTex(text, seed) {
+  return canvasTex(96, 240, (g, w, h) => {
+    const r = rng(seed);
+    g.fillStyle = '#b8282a';
+    g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 14; i++) seamlessBlob(g, w, h, r() * w, r() * h, 10 + r() * 30, r() > 0.5 ? '214,96,86' : '140,20,24', 0.25);
+    g.fillStyle = 'rgba(20,12,10,0.92)';
+    const n = [...text].length;
+    const fs = Math.min(64, (h - 30) / n);
+    g.font = `bold ${fs}px "KaiTi","STKaiti","SimSun",serif`;
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    [...text].forEach((ch, i) => g.fillText(ch, w / 2, 15 + fs * (i + 0.5) + (h - 30 - fs * n) / 2));
+    // 边上褪成粉白
+    g.strokeStyle = 'rgba(240,200,190,0.5)';
+    g.lineWidth = 4;
+    g.strokeRect(1, 1, w - 2, h - 2);
+  });
+}
+
 /** 麻袋：粗麻布经纬纹 */
 function sackTex() {
   return canvasTex(128, 128, (g, w, h) => {
@@ -238,18 +294,19 @@ function limeVat(mats, fill, seed) {
   g.add(m);
   // 缸里的东西
   const level = h * (0.84 + (seed % 3) * 0.03); // 粮食装到离口沿十来厘米
-  if (fill === 'corn' || fill === 'wheat') {
+  if (['corn', 'wheat', 'mungbean', 'sesame', 'rapeseed', 'cotton'].includes(fill)) {
     // 一个扁扁的球冠：边缘正好贴着缸的内壁，中间鼓起一个小堆
     const inner = r * 0.86;
     const th = 0.6;
     const rs = inner / Math.sin(th);
-    const heap = new THREE.Mesh(new THREE.SphereGeometry(rs, 32, 8, 0, Math.PI * 2, 0, th), fill === 'corn' ? mats.corn : mats.wheat);
-    heap.scale.set(1, 0.4, 1);
-    heap.position.y = level - rs * Math.cos(th) * 0.4;
+    const sy = fill === 'cotton' ? 0.75 : 0.4; // 棉花蓬松，鼓出缸口
+    const heap = new THREE.Mesh(new THREE.SphereGeometry(rs, 32, 8, 0, Math.PI * 2, 0, th), mats[fill]);
+    heap.scale.set(1, sy, 1);
+    heap.position.y = level - rs * Math.cos(th) * sy;
     heap.receiveShadow = true;
     g.add(heap);
     // 插着一只舀粮食的瓢
-    if (seed % 2) {
+    if (seed % 2 && fill !== 'cotton') {
       const scoop = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), mats.gourd);
       scoop.material.side = THREE.DoubleSide;
       scoop.position.set(0.1, level + 0.07, 0.08);
@@ -370,6 +427,10 @@ export function createNorthEastInterior() {
   const mats = {
     corn: new THREE.MeshStandardMaterial({ map: cornTex(), roughness: 0.6 }),
     wheat: new THREE.MeshStandardMaterial({ map: wheatTex(), roughness: 0.9 }),
+    mungbean: new THREE.MeshStandardMaterial({ map: seedTex('#3e5a26', [[96, 140, 60], [80, 120, 50], [110, 150, 70]], 3.4, 2.6, 2600, 251), roughness: 0.5 }),
+    sesame: new THREE.MeshStandardMaterial({ map: seedTex('#b8a07a', [[236, 222, 190], [220, 204, 168], [250, 240, 214]], 1.6, 2.4, 6000, 257), roughness: 0.8 }),
+    rapeseed: new THREE.MeshStandardMaterial({ map: seedTex('#2a1a14', [[86, 44, 30], [60, 32, 24], [110, 60, 40]], 1.8, 1.8, 5000, 263), roughness: 0.55 }),
+    cotton: new THREE.MeshStandardMaterial({ map: cottonTex(), roughness: 1 }),
     lid: new THREE.MeshStandardMaterial({ map: woodTex([130, 98, 64], { seed: 31, planks: 0.12 }), roughness: 0.85 }),
     sack: new THREE.MeshStandardMaterial({ map: sackTex(), roughness: 1 }),
     gourd: new THREE.MeshStandardMaterial({ color: 0xc8a466, roughness: 0.6 }),
@@ -378,6 +439,18 @@ export function createNorthEastInterior() {
     const vat = limeVat(mats, v.fill, i + 3);
     vat.position.set(v.x, 0, v.z);
     group.add(vat);
+    // 朝屋里贴一张红纸（第 17 轮）：一块贴着缸肚子的弧面
+    if (v.label) {
+      const rr = R.vat.r * 1.003 + 0.002;
+      const lw = 0.15;
+      const lh = Math.min(0.36, 0.1 * [...v.label].length + 0.06);
+      const face = Math.atan2(R.size.w / 2 - v.x, R.size.d / 2 - v.z); // 朝屋子中间
+      const geo = new THREE.CylinderGeometry(rr, rr, lh, 8, 1, true, face - lw / rr / 2, lw / rr);
+      const lab = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: labelTex(v.label, 271 + i), roughness: 0.9, polygonOffset: true, polygonOffsetFactor: -2 }));
+      lab.position.y = R.vat.h * 0.66;
+      lab.userData.noAO = true;
+      vat.add(lab);
+    }
   });
   // 缸边地上撒的几粒玉米、麦子
   {

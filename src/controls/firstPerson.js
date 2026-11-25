@@ -41,6 +41,9 @@ function doorAssist(p, dirX, dirZ, dt) {
   }
 }
 
+// 视野（第 17 轮，用户要求“进了屋子也能看全景”）：走进去默认 68°，滚轮 / 双指捏合在 35° ~ 105° 之间拉近拉远
+const FOV = { walk: 68, min: 35, max: 105, other: 50 };
+
 export function createFirstPerson(camera, dom, getColliders) {
   const state = {
     enabled: false,
@@ -51,6 +54,7 @@ export function createFirstPerson(camera, dom, getColliders) {
     keys: new Set(),
     move: new THREE.Vector2(), // 摇杆输入：x 右、y 前
     locked: false,
+    fov: FOV.walk,
   };
 
   function reset() {
@@ -59,6 +63,7 @@ export function createFirstPerson(camera, dom, getColliders) {
     state.feet = groundHeight(s.x, s.z);
     state.yaw = Math.atan2(-s.look[0], -s.look[1]);
     state.pitch = 0.03;
+    state.fov = FOV.walk;
     apply();
   }
 
@@ -66,7 +71,24 @@ export function createFirstPerson(camera, dom, getColliders) {
     camera.up.set(0, 1, 0);
     camera.position.set(state.pos.x, state.feet + VIEWS.eyeHeight, state.pos.z);
     camera.rotation.set(state.pitch, state.yaw, 0, 'YXZ');
+    if (camera.fov !== state.fov) {
+      camera.fov = state.fov;
+      camera.updateProjectionMatrix();
+    }
   }
+  /** 拉远（d > 0，视野变宽）/ 拉近（d < 0） */
+  function zoom(d) {
+    state.fov = Math.max(FOV.min, Math.min(FOV.max, state.fov + d));
+  }
+  dom.addEventListener(
+    'wheel',
+    (e) => {
+      if (!state.enabled) return;
+      e.preventDefault();
+      zoom(e.deltaY * 0.04);
+    },
+    { passive: false },
+  );
 
   // —— 键盘 ——
   const onKey = (e, down) => {
@@ -83,6 +105,7 @@ export function createFirstPerson(camera, dom, getColliders) {
 
   // —— 鼠标转头 ——
   const look = (dx, dy, k = 0.0025) => {
+    k *= state.fov / FOV.walk; // 视野越宽，转得越快一点
     state.yaw -= dx * k;
     state.pitch = Math.max(-1.3, Math.min(1.3, state.pitch - dy * k));
   };
@@ -157,12 +180,17 @@ export function createFirstPerson(camera, dom, getColliders) {
     reset,
     update,
     look,
+    zoom,
     setMove: (x, y) => state.move.set(x, y),
     enable(on) {
       state.enabled = on;
       state.keys.clear();
       state.move.set(0, 0);
       if (!on && document.pointerLockElement === dom) document.exitPointerLock();
+      if (!on && camera.fov !== FOV.other) {
+        camera.fov = FOV.other;
+        camera.updateProjectionMatrix();
+      }
     },
     get position() {
       return state.pos;

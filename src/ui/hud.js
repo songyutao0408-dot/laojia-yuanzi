@@ -14,8 +14,8 @@ export function createHUD(root, { touch }) {
   let toastTimer = 0;
   let helpTimer = 0;
   const help = touch
-    ? '左下角摇杆走动 · 屏幕上滑动转头 · 走到压水井、石榴树、枣树旁边，点下面出现的按钮'
-    : 'W A S D 走动（Shift 跑）· 按住鼠标拖动转头 · 走到压水井、果树旁边按 E 或点下面出现的按钮';
+    ? '左下角摇杆走动 · 屏幕上滑动转头 · 两指捏合拉远看全景 · 走到压水井、石榴树、枣树旁边，点下面出现的按钮'
+    : 'W A S D 走动（Shift 跑）· 按住鼠标拖动转头 · 滚轮拉远看全景 · 走到压水井、果树旁边按 E 或点下面出现的按钮';
   return {
     touch,
     toast(msg) {

@@ -266,6 +266,31 @@ if (run('K')) {
   check('K2 直接点风箱把手也能拉', busy, { busy, pt });
   await ctx.close();
 }
+// L) 走进去以后看全景：在外屋里往后滚滚轮，视野拉宽；再往前滚拉回来；切回环绕视角恢复原来的视野
+if (run('L')) {
+  const { page, ctx } = await open([-3.85, -5.0], [-3.85, -9]);
+  await holdUntil(page, 'KeyW', (p) => p.z < -5.6);
+  const fov0 = await page.evaluate(() => window.__app.engine.camera.fov);
+  await page.mouse.move(320, 200);
+  for (let i = 0; i < 8; i++) {
+    await page.mouse.wheel(0, 120);
+    await page.waitForTimeout(150);
+  }
+  await page.waitForTimeout(800);
+  const fov1 = await page.evaluate(() => window.__app.engine.camera.fov);
+  await page.screenshot({ path: 'screenshots/test-walk-wide.png' });
+  for (let i = 0; i < 4; i++) {
+    await page.mouse.wheel(0, -120);
+    await page.waitForTimeout(150);
+  }
+  await page.waitForTimeout(800);
+  const fov2 = await page.evaluate(() => window.__app.engine.camera.fov);
+  await page.locator('button[data-view="orbit"]').click();
+  await page.waitForTimeout(800);
+  const fov3 = await page.evaluate(() => window.__app.engine.camera.fov);
+  check('L 走进去后滚轮拉远看全景、再拉近，切回环绕恢复', fov1 > 95 && fov2 < fov1 - 10 && fov3 === 50, { fov0, fov1, fov2, fov3 });
+  await ctx.close();
+}
 // F) 手机（iPhone 13 模拟）：用摇杆往前走进东北屋，再到井边点“压水”按钮
 if (run('F')) {
   const { page, ctx } = await open([3.55, 1.5], [3.55, -6], { mobile: true }); // 东北屋门在 x = 3.75，偏开 0.2 m

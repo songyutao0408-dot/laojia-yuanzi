@@ -222,6 +222,19 @@ text(ch.x + 0.4, ch.z - 0.35, '烟囱', 'class="s"');
   }
   text(B.slabs[0].x, B.slabs[0].z - 0.45, '青石板', 'class="s" text-anchor="middle"');
 }
+// 第 17 轮：水仙、三马车、二八自行车
+{
+  const Y2 = L.YARD_ITEMS;
+  const n = Y2.narcissus;
+  out.push(`<circle cx="${f(X(n.x))}" cy="${f(Y(n.z))}" r="${0.16 * S}" fill="#f4f2e8" stroke="#2a4a8a" stroke-width="1.2"/>`);
+  text(n.x + 0.25, n.z + 0.1, '水仙', 'class="s"');
+  const t = Y2.tricycle;
+  out.push(`<rect x="${f(X(t.x) - 0.66 * S)}" y="${f(Y(t.z) - 1.75 * S)}" width="${f(1.32 * S)}" height="${f(3.45 * S)}" rx="3" fill="#2c5cb0" fill-opacity="0.85" stroke="${C.ink}" stroke-width="0.8"/>`);
+  text(t.x, t.z + 0.1, '三马车', 'class="s" text-anchor="middle" fill="#fff"');
+  const b = Y2.bicycle;
+  line(b.x - 0.6, b.z, b.x + 0.6, b.z, `stroke="#1a1a1a" stroke-width="3"`);
+  text(b.x, b.z + 0.35, '自行车', 'class="s" text-anchor="middle"');
+}
 // 秋千（挂在枣树弯出来的枝干上）
 {
   const t = L.TREES.find((t) => t.kind === 'jujube');

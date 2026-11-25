@@ -11,6 +11,7 @@ import cal1 from './calendars/1993-1.webp?url';
 import cal2 from './calendars/1993-2.webp?url';
 import cal3 from './calendars/1993-3.webp?url';
 import { createOuterRoom } from './northWestOuter.js';
+import { createInnerCabinets } from './innerCabinets.js';
 
 /**
  * 西北屋室内（挂在 interior-anchor-west 上；坐标原点 = 室内西北角、地坪面，+x 东、+z 南）：
@@ -19,6 +20,7 @@ import { createOuterRoom } from './northWestOuter.js';
  * - 里屋北边一铺炕（西顶隔墙、东顶东墙、北顶后墙），铺炕席，炕沿一根木头；东头靠后墙叠着几床八九十年代的缎子被面棉花被和两个枕头
  * - 炕头隔墙上一个拉线开关，拉一下屋顶的灯泡亮（15 瓦上下的白炽灯，昏黄），再拉一下灭；这面墙上挂着三张 1993 年的挂历（用户给的照片）
  * - 外屋的陈设（大木头炕、电视桌和黑白电视、座钟、圆桌、洗脸盆架、缝纫机）在 northWestOuter.js
+ * - 东墙（正对门洞）：豆绿漆大衣柜（梅花喜鹊）+ 碗柜（推拉玻璃、碗盘茶杯、圆闹钟），见 innerCabinets.js（第 17 轮）
  * - 南墙：西南角一口水缸，往东两台做蜡烛的器具（按用户照片），东头煤球炉 + 一锅化开的蜡；南墙上一扇窗；南墙和那片顶棚被烟火熏黑
  */
 const ROOM = { w: R.size.w, d: R.size.d, h: R.size.h };
@@ -612,6 +614,8 @@ export function createNorthWestInterior() {
   const stove = stoveWithPot(mats);
   stove.position.set(IX1 - tc - 0.17, 0, SOUTH - tc - 0.22);
   group.add(stove);
+  // 正对门洞的东墙：豆绿漆大衣柜 + 碗柜（第 17 轮，按用户的图）
+  group.add(createInnerCabinets(IX1 - tc));
   // 地上几滩踩扁的蜡
   {
     const r = rng(41);
