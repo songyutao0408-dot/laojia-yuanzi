@@ -222,12 +222,12 @@ text(ch.x + 0.4, ch.z - 0.35, '烟囱', 'class="s"');
   }
   text(B.slabs[0].x, B.slabs[0].z - 0.45, '青石板', 'class="s" text-anchor="middle"');
 }
-// 第 17 轮：水仙、三马车、二八自行车
+// 第 17 轮：指甲桃（第 19 轮替换水仙）、三马车、二八自行车
 {
   const Y2 = L.YARD_ITEMS;
-  const n = Y2.narcissus;
-  out.push(`<circle cx="${f(X(n.x))}" cy="${f(Y(n.z))}" r="${0.16 * S}" fill="#f4f2e8" stroke="#2a4a8a" stroke-width="1.2"/>`);
-  text(n.x + 0.25, n.z + 0.1, '水仙', 'class="s"');
+  const n = Y2.impatiens;
+  out.push(`<circle cx="${f(X(n.x))}" cy="${f(Y(n.z))}" r="${n.r * S}" fill="#5a8a3a" stroke="#d0182c" stroke-width="1.5"/>`);
+  text(n.x, n.z + 0.62, '指甲桃', 'class="s" text-anchor="middle"');
   const t = Y2.tricycle;
   // 车身约 3.5 m × 1.32 m；rot 把车头（局部 +z）转到哪：90 = 朝东
   out.push(`<rect x="${f(X(t.x) - 0.66 * S)}" y="${f(Y(t.z) - 1.75 * S)}" width="${f(1.32 * S)}" height="${f(3.5 * S)}" rx="3" fill="#2c5cb0" fill-opacity="0.85" stroke="${C.ink}" stroke-width="0.8" transform="rotate(${-t.rot + 180} ${f(X(t.x))} ${f(Y(t.z))})"/>`);

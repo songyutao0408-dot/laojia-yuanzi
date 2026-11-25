@@ -105,8 +105,9 @@ const SHOTS = [
   ['swing-boys-side', 'view=orbit&cam=0.9,1.3,2.3,3.0,0.85,3.6'],
   ['outer-desk', 'view=orbit&cam=-3.9,1.55,-5.9,-3.96,0.95,-8.6'],
   ['outer-net', 'view=orbit&cam=-4.4,1.75,-5.0,-6.5,1.15,-7.0'],
-  // 第 17 轮（二）：水仙、里屋衣柜碗柜、东北屋缸上的红纸、三马车、二八自行车
-  ['narcissus', 'view=orbit&cam=4.0,1.0,0.35,4.33,0.45,-0.72'],
+  // 第 17 轮（二）：水仙（第 19 轮换成指甲桃）、里屋衣柜碗柜、东北屋缸上的红纸、三马车、二八自行车
+  ['impatiens', 'view=orbit&cam=4.6,1.05,-2.2,5.28,0.35,-3.7'], // 第 19 轮：指甲桃（替换水仙）
+  ['impatiens-wide', 'view=orbit&cam=3.0,1.7,-0.6,5.0,0.6,-3.9'],
   ['inner-cabinets', 'view=orbit&cam=-0.95,1.5,-6.2,1.25,1.0,-6.2'],
   ['east-labels', 'view=orbit&cam=4.4,1.7,-5.0,2.1,0.75,-7.5'],
   ['tricycle', 'view=orbit&cam=-0.4,1.9,6.2,-0.8,0.8,2.9'],

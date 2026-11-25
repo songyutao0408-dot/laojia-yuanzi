@@ -196,15 +196,15 @@
 <rect x="487.5" y="845" width="90" height="30" fill="#7d8c96" fill-opacity="0.85" stroke="#2b2b2b" stroke-width="0.8" transform="rotate(-17 532.5 860)"/>
 <rect x="632.5" y="942.5" width="90" height="30" fill="#7d8c96" fill-opacity="0.85" stroke="#2b2b2b" stroke-width="0.8" transform="rotate(-78 677.5 957.5)"/>
 <text x="410" y="820" class="s" text-anchor="middle">青石板</text>
-<circle cx="721" cy="544" r="8" fill="#f4f2e8" stroke="#2a4a8a" stroke-width="1.2"/>
-<text x="733.5" y="549" class="s">水仙</text>
+<circle cx="769" cy="395" r="16" fill="#5a8a3a" stroke="#d0182c" stroke-width="1.5"/>
+<text x="769" y="426" class="s" text-anchor="middle">指甲桃</text>
 <rect x="432" y="637.5" width="66" height="175" rx="3" fill="#2c5cb0" fill-opacity="0.85" stroke="#2b2b2b" stroke-width="0.8" transform="rotate(90 465 725)"/>
 <text x="465" y="730" class="s" text-anchor="middle" fill="#fff">三马车</text>
 <line x1="182.5" y1="747" x2="242.5" y2="747" stroke="#1a1a1a" stroke-width="3"/>
 <text x="212.5" y="764.5" class="s" text-anchor="middle">自行车</text>
 <rect x="760" y="745" width="100" height="115" fill="#5a4a38" fill-opacity="0.5" stroke="#2b2b2b" stroke-width="1.5"/>
 <ellipse cx="816" cy="831" rx="25" ry="12" fill="#1e1c1c" transform="rotate(180 816 831)"/>
-<ellipse cx="832.5" cy="777.5" rx="25" ry="12" fill="#1e1c1c" transform="rotate(-110 832.5 777.5)"/>
+<ellipse cx="827.5" cy="779" rx="25" ry="12" fill="#1e1c1c" transform="rotate(170 827.5 779)"/>
 <text x="810" y="762.5" class="s" text-anchor="middle" fill="#fff">猪圈</text>
 <circle cx="870" cy="640" r="7.000000000000001" fill="#c8201c" stroke="#2b2b2b" stroke-width="0.8"/>
 <text x="857.5" y="645" class="s" text-anchor="end">公鸡</text>
