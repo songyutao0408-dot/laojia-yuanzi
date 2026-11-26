@@ -7,9 +7,9 @@ import { Q } from '../core/quality.js';
 import { wallWithOpenings } from '../buildings/wall.js';
 import { createWaterVat } from '../yard/waterVat.js';
 import { canvasTex, rng, reedMat, quiltTex, pillowTex, calendarTex, plasterTex, cementTex, floorTex } from './common.js';
-import cal1 from './calendars/1993-1.webp?url';
-import cal2 from './calendars/1993-2.webp?url';
-import cal3 from './calendars/1993-3.webp?url';
+import cal1 from './calendars/cal-1.webp?url';
+import cal2 from './calendars/cal-2.webp?url';
+import cal3 from './calendars/cal-3.webp?url';
 import { createOuterRoom } from './northWestOuter.js';
 import { createInnerCabinets } from './innerCabinets.js';
 
@@ -18,7 +18,7 @@ import { createInnerCabinets } from './innerCabinets.js';
  * - 墙刷大白，年深日久发黄发脏；墙根往上 0.55 m 抹水泥；地面铺磨旧的淡红砖
  * - 一道隔墙把屋子分成西边的外屋（六成）和东边的里屋（四成），隔墙上一个小门洞，挂半截白布门帘（织着小红花），人走过去会被撩开
  * - 里屋北边一铺炕（西顶隔墙、东顶东墙、北顶后墙），铺炕席，炕沿一根木头；东头靠后墙叠着几床八九十年代的缎子被面棉花被和两个枕头
- * - 炕头隔墙上一个拉线开关，拉一下屋顶的灯泡亮（15 瓦上下的白炽灯，昏黄），再拉一下灭；这面墙上挂着三张 1993 年的挂历（用户给的照片）
+ * - 炕头隔墙上一个拉线开关，拉一下屋顶的灯泡亮（15 瓦上下的白炽灯，昏黄），再拉一下灭；这面墙上挂着三张九十年代初的明星挂历（用户给的照片，第 20 轮换过一次）
  * - 外屋的陈设（大木头炕、电视桌和黑白电视、座钟、圆桌、洗脸盆架、缝纫机）在 northWestOuter.js
  * - 东墙（正对门洞）：豆绿漆大衣柜（梅花喜鹊）+ 碗柜（推拉玻璃、碗盘茶杯、圆闹钟），见 innerCabinets.js（第 17 轮）
  * - 南墙：西南角一口水缸，往东两台做蜡烛的器具（按用户照片），东头煤球炉 + 一锅化开的蜡；南墙上一扇窗；南墙和那片顶棚被烟火熏黑
@@ -444,7 +444,7 @@ export function createNorthWestInterior() {
   }
 
 
-  // —— 开关这面墙（隔墙东面）上挂着三张 1993 年的挂历（用户给的照片）——
+  // —— 开关这面墙（隔墙东面）上挂着三张九十年代初的明星挂历（用户给的照片；第 20 轮换成新给的三张）——
   // 每张：上沿一根铁皮夹条，一根线挂在墙上的钉子上；纸往外微微翘，下沿离墙远一点
   {
     const urls = [cal1, cal2, cal3];
