@@ -324,7 +324,7 @@ export function floorTex() {
  */
 export function calendarTex(url, seed = 1) {
   const W = 400;
-  const H = 540;
+  const H = 580; // 宽高比 0.69（第 20 轮的三张挂历照片）
   const c = document.createElement('canvas');
   c.width = W;
   c.height = H;

@@ -98,7 +98,7 @@ src/
     northEast.js        东北屋（东西 6 m，仓库；尺寸在 layout.EAST_ROOM）：旧大白 + 水泥墙裙、旧砖地；西墙到北墙一溜石灰大缸（玉米/麦子/绿豆/芝麻/油菜籽/棉花/木盖/麻袋，每口朝屋里贴一条红纸写装的什么 labelTex，第 17 轮）、南窗下的床、墙角蛛网（透明贴图）、墙上爬的壁虎（贴图片，趴一会儿窜一下）
     kitchen.js          厨房室内（第 14 轮，按用户照片；风箱尺寸在 layout.KITCHEN.bellows，世界坐标）：黄泥内墙 + 灶上方熏黑、泥灰灶台 + 带耳大铁锅、灶膛（炭火、火苗、三根柴、橙色点光源，火力 = 0.35 + 推风箱攒的劲）、旧土黄色木风箱；第 16 轮内墙改成洋灰（墙裙 K.inside.dado 以下深灰 cementTex、以上浅灰 cementUpperTex）+ 掉皮露砖（K.inside.peel）；pump() 拉一下（按真实时间走：前 42% 往外拉火变小，后面往里推火变旺）；kitchenThings()（第 15 轮按照片添的杂物：木架子、洋瓷盆、暖水壶、缸子、小坛子、铝锅、面粉袋、玉米筐、蜂窝煤、大釉缸、筛子笊篱、辣椒串、小凳；位置在 layout.KITCHEN.shelf 等）
     innerCabinets.js    西北屋里屋东墙（正对门洞）的豆绿漆大衣柜（梅花喜鹊）+ 碗柜（推拉玻璃、碗盘茶杯、圆闹钟），第 17 轮按用户的图；尺寸在 WEST_ROOM.cabinets
-    northWest.js        西北屋（东西 9 m）：隔墙分外屋（6 m）/里屋（3 m），门洞白布门帘（顶点动画，人走近被撩开）；墙面旧大白 + 墙根 0.55 m 水泥墙裙（finish() 给每面墙贴两层，外屋也用）、磨旧淡红砖地面；里屋的炕（东西两头顶墙，炕席、炕沿；中间试过竹床、木头床，用户都否了）、被子、拉线开关 + 15 瓦灯泡（lamp.pull() 开关，高画质点光源带阴影）、隔墙上三张挂历（用户给的 1993 年挂历照片，calendars/*.webp，calendarTex() 做旧，夹条 + 挂绳 + 钉子）、西南角水缸（复用 yard/waterVat.js）、两台做蜡烛的器具（按用户照片）+ 煤球炉、熏黑的南墙（窗洞处挖空）和顶棚
+    northWest.js        西北屋（东西 9 m）：隔墙分外屋（6 m）/里屋（3 m），门洞白布门帘（顶点动画，人走近被撩开）；墙面旧大白 + 墙根 0.55 m 水泥墙裙（finish() 给每面墙贴两层，外屋也用）、磨旧淡红砖地面；里屋的炕（东西两头顶墙，炕席、炕沿；中间试过竹床、木头床，用户都否了）、被子、拉线开关 + 15 瓦灯泡（lamp.pull() 开关，高画质点光源带阴影）、隔墙上三张挂历（用户给的明星挂历照片，第 20 轮换成新的三张 calendars/cal-1..3.webp，宽高比 0.69；calendarTex() 做旧，夹条 + 挂绳 + 钉子）、西南角水缸（复用 yard/waterVat.js）、两台做蜡烛的器具（按用户照片）+ 煤球炉、熏黑的南墙（窗洞处挖空）和顶棚
   ui/                   样式；timeSlider.js 时间滑块；hud.js 提示/操作说明/兜里计数/准星；compass.js 指北针；musicButton.js 音乐开关（指北针左边，偏好存在 localStorage 'laojia-bgm-v2'）
 scripts/
   gen-plan.mjs          由 layout.js 生成 docs/plan.svg
@@ -148,6 +148,8 @@ docs/
 七步全部完成。之后追加：背景音乐（src/audio/，用户第一次点击/按键后开始循环，♪按钮开关并记住选择）。最初是代码合成的原创小曲，后按用户要求换成用户提供的 MP3（合成版在 git 历史 PR 9 里）。音乐默认开：加载完先直接试播，被浏览器自动播放策略拦下就显示“进入院子 ♪”遮罩（#enter），点一下开始。注意：无头 Chromium 不拦自动播放，而且 navigator.userActivation 一开始就是 true，测拦截路径要自己在 init script 里按 isTrusted 的输入事件模拟。
 
 之后的迭代（各屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
+
+第 20 轮：西北屋里屋隔墙上的三张挂历换成用户新给的三张（src/interiors/calendars/cal-1..3.webp；用户要求把前两张底下的“公众号·追忆光影梦”水印抹掉了，用同一行旁边干净的纸面/蓝底盖住）；同步改完整 prompt（md + pdf）。
 
 第 19 轮：东梧桐下的水仙换成指甲桃（凤仙花，yard/impatiens.js），种在东北屋门口台阶东边、窗户底下往西一点；同步改 docs/老家院子-完整prompt.md / .pdf。
 
