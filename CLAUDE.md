@@ -149,7 +149,7 @@ docs/
 
 之后的迭代（各屋室内）：先改 docs/scene-spec.md，室内放 src/interiors/，挂到 interior-anchor-* 上；每次改完照旧截图自检、开 PR。
 
-第 20 轮：西北屋里屋隔墙上的三张挂历换成用户新给的三张（src/interiors/calendars/cal-1..3.webp）；同步改完整 prompt（md + pdf）。
+第 20 轮：西北屋里屋隔墙上的三张挂历换成用户新给的三张（src/interiors/calendars/cal-1..3.webp；用户要求把前两张底下的“公众号·追忆光影梦”水印抹掉了，用同一行旁边干净的纸面/蓝底盖住）；同步改完整 prompt（md + pdf）。
 
 第 19 轮：东梧桐下的水仙换成指甲桃（凤仙花，yard/impatiens.js），种在东北屋门口台阶东边、窗户底下往西一点；同步改 docs/老家院子-完整prompt.md / .pdf。
 
